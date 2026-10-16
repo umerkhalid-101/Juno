@@ -1,0 +1,644 @@
+@import "tailwindcss";
+
+/* ------------------------------------------------------------ tokens */
+:root {
+  --bg: #07090d;
+  --surface: #0e1218;
+  --surface-2: #151a22;
+  --border: rgba(255, 255, 255, 0.08);
+  --border-strong: rgba(255, 255, 255, 0.14);
+  --text: #f4f6f8;
+  --text-muted: #9aa6b8;
+  --text-subtle: #6b7789; /* decorative only, never body */
+  --blue: #324cff;
+  --blue-text: #7a8fff;
+  --cyan: #50e5ff;
+  --violet: #8f7cff;
+  --success: #3dd68c;
+  --warning: #ffb547;
+  --danger: #ff6568;
+  --glow: radial-gradient(closest-side, #009cff, #324cff 45%, #8f7cff 75%, transparent);
+  --focus: #009cff;
+
+  /* status text colors (re-tuned inside .theme-light) */
+  --st-muted: #9aa6b8;
+  --st-warn: #ffb547;
+  --st-blue: #7a8fff;
+  --st-ok: #3dd68c;
+  --st-bad: #ff6568;
+
+  --ease-snap: cubic-bezier(0.3, 0, 0, 1);
+  --ease-base: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --ease-calm: cubic-bezier(0.16, 1, 0.3, 1);
+  --shadow-frame: 0 40px 120px rgba(0, 0, 0, 0.5);
+
+  color-scheme: dark;
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-line: var(--border);
+  --color-line-strong: var(--border-strong);
+  --color-text: var(--text);
+  --color-muted: var(--text-muted);
+  --color-subtle: var(--text-subtle);
+  --color-blue: var(--blue);
+  --color-blue-text: var(--blue-text);
+  --color-cyan: var(--cyan);
+  --color-violet: var(--violet);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-danger: var(--danger);
+
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 20px;
+  --radius-xl: 28px;
+
+  --ease-snap: cubic-bezier(0.3, 0, 0, 1);
+  --ease-base: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --ease-calm: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* ------------------------------------------------------------ base */
+@layer base {
+  html {
+    background: var(--bg);
+    overflow-x: clip;
+    -webkit-text-size-adjust: 100%;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-sans);
+    font-size: 16px;
+    line-height: 26px;
+    overflow-x: clip;
+  }
+  ::selection {
+    background: rgba(50, 76, 255, 0.45);
+    color: var(--text);
+  }
+  :focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 2px;
+  }
+  button {
+    cursor: pointer;
+  }
+}
+
+/* ------------------------------------------------------------ type */
+@layer components {
+  .t-display-xl {
+    font-size: clamp(3rem, 1.6rem + 4.4vw, 5.5rem);
+    line-height: 1.02;
+    font-weight: 500;
+    letter-spacing: -0.04em;
+  }
+  .t-display-l {
+    font-size: clamp(2.5rem, 1.6rem + 2.8vw, 4rem);
+    line-height: 1.07;
+    font-weight: 500;
+    letter-spacing: -0.035em;
+  }
+  .t-h2 {
+    font-size: clamp(1.75rem, 1.45rem + 1vw, 2.25rem);
+    line-height: 1.12;
+    font-weight: 500;
+    letter-spacing: -0.025em;
+  }
+  .t-h3 {
+    font-size: 20px;
+    line-height: 26px;
+    font-weight: 500;
+    letter-spacing: -0.015em;
+  }
+  .t-body-l {
+    font-size: 18px;
+    line-height: 28px;
+    font-weight: 400;
+    letter-spacing: -0.005em;
+  }
+  .t-body {
+    font-size: 16px;
+    line-height: 26px;
+  }
+  .t-small {
+    font-size: 14px;
+    line-height: 22px;
+  }
+  .t-button {
+    font-size: 15px;
+    line-height: 20px;
+    font-weight: 600;
+  }
+  .t-eyebrow {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    line-height: 16px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  @media (min-width: 768px) {
+    .t-h3 {
+      font-size: 24px;
+      line-height: 30px;
+    }
+    .t-body-l {
+      font-size: 20px;
+      line-height: 30px;
+    }
+  }
+
+  .container-page {
+    width: 100%;
+    max-width: calc(1200px + 2 * 20px);
+    margin-inline: auto;
+    padding-inline: 20px;
+  }
+  @media (min-width: 768px) {
+    .container-page {
+      max-width: calc(1200px + 2 * 32px);
+      padding-inline: 32px;
+    }
+  }
+  @media (min-width: 1024px) {
+    .container-page {
+      max-width: calc(1200px + 2 * 48px);
+      padding-inline: 48px;
+    }
+  }
+
+  /* 96px between chapters on mobile, 160px on desktop */
+  /* generous air between chapters: 160px on phones, 280px on desktop */
+  .chapter {
+    position: relative;
+    isolation: isolate;
+    padding-block: 80px;
+  }
+  @media (min-width: 768px) {
+    .chapter {
+      padding-block: 140px;
+    }
+  }
+
+  .frame-shadow {
+    box-shadow: var(--shadow-frame);
+  }
+
+  .hairline-top {
+    background: linear-gradient(90deg, transparent, var(--border-strong), transparent);
+    height: 1px;
+  }
+
+  /* Faint dot grid for product canvases */
+  .canvas-grid {
+    background-image: radial-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+    background-size: 20px 20px;
+  }
+}
+
+/* ------------------------------------------------------------ reveal
+   Default reveal: fade in + rise 32px at 20% in view, children staggered 60ms.
+   Only active when JS is running (html.js), so no-JS renders final state. */
+.js [data-reveal] > * {
+  opacity: 0;
+  transform: translate3d(0, 32px, 0);
+  transition:
+    opacity 0.6s var(--ease-base),
+    transform 0.6s var(--ease-base);
+  transition-delay: calc(var(--i, 0) * 60ms);
+}
+.js [data-reveal].is-in > * {
+  opacity: 1;
+  transform: none;
+}
+
+/* Hero intro starting states (set before paint, cleared by the intro timeline). */
+.js .intro-hide {
+  opacity: 0;
+}
+.js .intro-word {
+  opacity: 0;
+  transform: translate3d(0, 0.35em, 0);
+  filter: blur(6px);
+}
+
+/* Integration tile lit state, flipped by the mascot glance. */
+.js [data-lit="false"] .tile-logo {
+  color: var(--text-subtle) !important;
+  opacity: 0.45;
+}
+.js [data-lit="false"] {
+  border-color: var(--border);
+}
+
+/* Thinking shimmer for status text */
+.shimmer-text {
+  background: linear-gradient(
+    90deg,
+    var(--text-muted) 0%,
+    var(--text-muted) 40%,
+    var(--text) 50%,
+    var(--text-muted) 60%,
+    var(--text-muted) 100%
+  );
+  background-size: 250% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: shimmer 1.6s linear infinite;
+}
+@keyframes shimmer {
+  from {
+    background-position: 100% 0;
+  }
+  to {
+    background-position: -150% 0;
+  }
+}
+
+/* The one continuously looping animation: the hero glow, 6s. */
+@keyframes breathe {
+  0%,
+  100% {
+    transform: translate(-50%, -50%) scale(0.96);
+    opacity: 0.22;
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(1.02);
+    opacity: 0.32;
+  }
+}
+.hero-glow {
+  animation: breathe 6s ease-in-out infinite;
+}
+
+@keyframes caret {
+  0%,
+  49% {
+    opacity: 1;
+  }
+  50%,
+  100% {
+    opacity: 0;
+  }
+}
+.caret {
+  animation: caret 1s steps(1) infinite;
+}
+
+/* ------------------------------------------------------------ reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+  }
+  .js [data-reveal] > * {
+    transform: none;
+    transition: opacity 0.3s linear;
+    transition-delay: 0ms;
+  }
+  .js .intro-hide,
+  .js .intro-word {
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+  .js [data-lit="false"] .tile-logo {
+    color: inherit !important;
+    opacity: 1;
+  }
+  .hero-glow {
+    animation: none;
+    opacity: 0.6;
+    transform: translate(-50%, -50%);
+  }
+}
+
+/* ------------------------------------------------------------ texture */
+/* film grain over everything */
+.grain {
+  position: fixed;
+  inset: -50%;
+  z-index: 60;
+  pointer-events: none;
+  opacity: 0.035;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* marquee */
+@keyframes marquee {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+.marquee-track {
+  animation: marquee var(--dur, 60s) linear infinite;
+}
+.marquee-track[data-reverse="true"] {
+  animation-direction: reverse;
+}
+.marquee:hover .marquee-track {
+  animation-play-state: paused;
+}
+
+/* card cursor spotlight */
+.spotlight {
+  background: radial-gradient(420px circle at var(--mx, 50%) var(--my, 50%), var(--spot, rgba(122, 143, 255, 0.14)), transparent 45%);
+}
+
+@keyframes mascot-float {
+  0%,
+  100% {
+    translate: 0 0;
+  }
+  50% {
+    translate: 0 -8px;
+  }
+}
+.mascot-float {
+  animation: mascot-float 4.2s ease-in-out infinite;
+}
+
+
+@media (prefers-reduced-motion: reduce) {
+  .marquee-track {
+    animation: none;
+  }
+  .mascot-float {
+    animation: none;
+  }
+}
+
+/* ------------------------------------------------------------ light product screens
+   Product mockups render in light mode on the dark page. Scoped token swap. */
+.theme-light {
+  --bg: #f4f6fa;
+  --surface: #ffffff;
+  --surface-2: #eef1f6;
+  --border: rgba(12, 18, 40, 0.08);
+  --border-strong: rgba(12, 18, 40, 0.14);
+  --text: #0b0f1a;
+  --text-muted: #556073;
+  --text-subtle: #8a94a6;
+  --blue-text: #3346e0;
+  --st-muted: #5b6678;
+  --st-warn: #a35f00;
+  --st-blue: #3346e0;
+  --st-ok: #11845a;
+  --st-bad: #cf3438;
+  color-scheme: light;
+  color: var(--text);
+  background-color: var(--bg);
+}
+.theme-light .canvas-grid {
+  background-image: radial-gradient(rgba(12, 18, 40, 0.08) 1px, transparent 1px);
+}
+.theme-light ::selection {
+  background: rgba(50, 76, 255, 0.2);
+}
+/* light frames on the dark page: crisp edge + soft lift */
+.screen-light {
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.5),
+    0 40px 120px -20px rgba(0, 0, 0, 0.65),
+    0 0 80px -20px rgba(80, 120, 255, 0.25);
+}
+
+/* ------------------------------------------------------------ brand accent
+   One gradient from the mascot's palette, used for the second beat of headlines
+   and the primary action. Sections sit in soft pools of blue and violet light. */
+:root {
+  --accent: #a6bbff;
+  --accent-grad: linear-gradient(180deg, #cdd7ff 0%, #a6bbff 70%, #9fb2ff 100%);
+}
+.accent-text {
+  background-image: var(--accent-grad);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.chapter::before {
+  content: "";
+  position: absolute;
+  inset: 0 -20%;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(50% 50% at 85% 25%, rgba(60, 90, 220, 0.09), transparent 75%),
+    radial-gradient(45% 45% at 10% 80%, rgba(110, 100, 230, 0.06), transparent 75%);
+}
+.chapter:nth-of-type(even)::before {
+  background:
+    radial-gradient(50% 50% at 14% 25%, rgba(50, 110, 220, 0.08), transparent 75%),
+    radial-gradient(45% 45% at 88% 80%, rgba(110, 100, 230, 0.06), transparent 75%);
+}
+
+/* Ask: story-style timer on the active task */
+@keyframes ask-timer {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+.ask-timer {
+  animation: ask-timer linear forwards;
+}
+
+/* Brand serif for the apps Juno builds */
+.mock-serif {
+  font-family: var(--font-instrument), ui-serif, Georgia, serif;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+}
+
+/* calculator sliders inside the built app */
+.calc-range {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 6px;
+  border-radius: 999px;
+  outline-offset: 6px;
+}
+.calc-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 999px;
+  background: #fff;
+  border: 5px solid #5b5bd6;
+  box-shadow: 0 4px 12px rgba(27, 26, 58, 0.25);
+  cursor: pointer;
+}
+.calc-range::-moz-range-thumb {
+  width: 12px;
+  height: 12px;
+  border-radius: 999px;
+  background: #fff;
+  border: 5px solid #5b5bd6;
+  cursor: pointer;
+}
+
+/* a delivery lands on the "now" line */
+@keyframes pill-pop {
+  0% {
+    box-shadow: 0 0 0 0 rgba(166, 187, 255, 0.55);
+    transform: scale(1.08);
+  }
+  100% {
+    box-shadow: 0 0 0 12px rgba(166, 187, 255, 0);
+    transform: scale(1);
+  }
+}
+
+/* ---------- Close: FAQ console + CTA portal ---------- */
+@property --spin {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+@keyframes spin-angle {
+  to {
+    --spin: 360deg;
+  }
+}
+@keyframes spin-turn {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes floor-run {
+  to {
+    background-position: 0 72px, 0 0;
+  }
+}
+@keyframes live-blink {
+  50% {
+    opacity: 0.25;
+  }
+}
+
+.faq-panel {
+  background: conic-gradient(
+    from var(--spin),
+    rgba(166, 187, 255, 0.06) 0deg,
+    rgba(166, 187, 255, 0.6) 50deg,
+    rgba(143, 124, 255, 0.3) 110deg,
+    rgba(166, 187, 255, 0.06) 170deg,
+    rgba(166, 187, 255, 0.06) 360deg
+  );
+  animation: spin-angle 9s linear infinite;
+  box-shadow: 0 60px 120px -60px rgba(60, 80, 255, 0.45);
+}
+.faq-live {
+  animation: live-blink 1.6s ease-in-out infinite;
+}
+
+.ring-arc {
+  padding: 1px;
+  background: conic-gradient(from var(--spin), transparent 0 62%, rgba(166, 187, 255, 0.85) 88%, transparent 100%);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  animation: spin-angle 9s linear infinite;
+}
+.ring-dot {
+  animation: spin-turn 14s linear infinite;
+}
+
+.close-floor {
+  background-image: linear-gradient(rgba(166, 187, 255, 0.32) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(166, 187, 255, 0.32) 1px, transparent 1px);
+  background-size: 72px 72px;
+  transform: rotateX(74deg);
+  transform-origin: bottom;
+  animation: floor-run 2.4s linear infinite;
+  mask-image: linear-gradient(to top, #000 0%, rgba(0, 0, 0, 0.6) 30%, transparent 75%);
+}
+
+.cta-halo::before {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  z-index: -1;
+  border-radius: 9999px;
+  background: conic-gradient(from var(--spin), #a6bbff, #8f7cff, #009cff, #cdd7ff, #a6bbff);
+  filter: blur(12px);
+  opacity: 0.75;
+  animation: spin-angle 4s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .faq-panel,
+  .faq-live,
+  .ring-arc,
+  .ring-dot,
+  .close-floor,
+  .cta-halo::before {
+    animation: none;
+  }
+}
+
+/* CTA portal: floor ripples and hover power-up */
+@keyframes floor-ripple {
+  from {
+    transform: translate(-50%, 50%) scale(0.15);
+    opacity: 0.9;
+  }
+  to {
+    transform: translate(-50%, 50%) scale(3.2);
+    opacity: 0;
+  }
+}
+.floor-ripple {
+  position: absolute;
+  left: 50%;
+  bottom: 38%;
+  width: 360px;
+  height: 360px;
+  border-radius: 9999px;
+  border: 1.5px solid rgba(166, 187, 255, 0.55);
+  box-shadow: 0 0 24px rgba(120, 140, 255, 0.35), inset 0 0 24px rgba(120, 140, 255, 0.25);
+  animation: floor-ripple 4s cubic-bezier(0.2, 0.6, 0.3, 1) infinite;
+}
+.close-boost {
+  opacity: 0;
+  transition: opacity 600ms var(--ease-base, ease);
+}
+.close-stage[data-hot] .close-boost {
+  opacity: 1;
+}
+.ring-arc {
+  transition: filter 500ms ease;
+}
+.close-stage[data-hot] .ring-arc {
+  filter: brightness(1.9) drop-shadow(0 0 6px rgba(166, 187, 255, 0.9));
+}
+.close-stage[data-hot] .floor-ripple {
+  animation-duration: 2s;
+}
+@media (prefers-reduced-motion: reduce) {
+  .floor-ripple {
+    animation: none;
+    opacity: 0;
+  }
+}
