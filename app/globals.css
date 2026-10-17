@@ -1090,3 +1090,39 @@
     transform: scaleX(1);
   }
 }
+
+/* footer links: the letters roll up one after another and a bright copy rises in */
+.roll {
+  position: relative;
+  display: inline-flex;
+  overflow: hidden;
+  vertical-align: bottom;
+}
+.roll-a,
+.roll-b {
+  display: inline-flex;
+}
+.roll-a {
+  color: var(--text-muted);
+}
+.roll-b {
+  position: absolute;
+  left: 0;
+  top: 100%;
+  color: var(--text);
+}
+.roll-c {
+  display: inline-block;
+  white-space: pre;
+  transition: transform 0.55s cubic-bezier(0.2, 0.8, 0.2, 1);
+  transition-delay: calc(var(--i) * 16ms);
+}
+.group:hover .roll-c,
+.group:focus-visible .roll-c {
+  transform: translateY(-100%);
+}
+@media (prefers-reduced-motion: reduce) {
+  .roll-c {
+    transition: none;
+  }
+}
