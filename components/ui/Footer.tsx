@@ -6,9 +6,9 @@ import { ArrowUp } from "lucide-react";
 import { FooterMark } from "./FooterMark";
 
 const links = [
-  { label: "Product", href: "#brain" },
-  { label: "Jobs", href: "#work" },
-  { label: "Apps", href: "#apps" },
+  { label: "Product", href: "/#brain" },
+  { label: "Automations", href: "/jobs" },
+  { label: "Apps", href: "/#apps" },
   { label: "Download", href: "#" },
   { label: "Sign in", href: "#" },
   { label: "Contact", href: "#" },

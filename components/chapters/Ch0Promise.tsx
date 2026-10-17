@@ -6,6 +6,7 @@ import { Mascot, type MascotApi } from "@/components/mascot/Mascot";
 import { Button } from "@/components/ui/Button";
 import { HeroOrbit } from "@/components/demo/HeroOrbit";
 import { gsap, useGSAP, MQ } from "@/lib/gsap";
+import { CTA_HREF, CTA_LABEL } from "@/lib/site";
 
 const line1 = ["Knows", "your", "company."];
 const line2 = ["Gets", "things", "done."];
@@ -152,10 +153,10 @@ export function Ch0Promise() {
           <Button
             size="xl"
             variant="white"
-            href="#close"
+            href={CTA_HREF}
             trailing={<ArrowUpRight size={17} strokeWidth={2} aria-hidden />}
           >
-            Get Juno
+            {CTA_LABEL}
           </Button>
           <Button
             size="xl"

@@ -14,10 +14,11 @@ import { Mascot, MascotMark, type MascotApi } from "@/components/mascot/Mascot";
 import { gsap, useGSAP, ScrollTrigger, MQ } from "@/lib/gsap";
 import { faqs } from "@/lib/story";
 import { PortalParticles } from "@/components/demo/PortalParticles";
+import { CTA_HREF, CTA_LABEL } from "@/lib/site";
 
 const ease = [0.2, 0.8, 0.2, 1] as const;
 const PORTAL: [number, number] = [0.5, 0.24];
-const SIGNUP = "https://www.runjuno.ai/signup";
+const SIGNUP = CTA_HREF;
 /** How far the charge builds while you hover (particle boost). */
 const FULL = 2.4;
 
@@ -471,7 +472,7 @@ export function Ch7Close() {
                 href={SIGNUP}
                 trailing={<ArrowUpRight size={18} strokeWidth={1.75} aria-hidden />}
               >
-                Request access
+                {CTA_LABEL}
               </Button>
             </span>
           </div>
