@@ -82,7 +82,8 @@ export function Statement() {
           name0 + 0.55,
         );
 
-        tl.progress(0).pause();
+        // render the starting state now: a fresh timeline already sits at 0, so progress(0) alone would not apply the sets
+        tl.progress(0.001, true).progress(0, true).pause();
         // plays when it comes into view; resets only once it is fully off screen below,
         // so scrolling back up never makes it vanish in front of you
         const play = ScrollTrigger.create({
@@ -113,9 +114,11 @@ export function Statement() {
         <div className="st-stage st-shake mx-auto flex max-w-[1040px] flex-col items-center py-16 text-center md:py-28">
           <p className="st-q text-[44px] font-medium leading-[48px] tracking-[-0.04em] text-balance [perspective:800px] md:text-[68px] md:leading-[72px] lg:text-[80px] lg:leading-[84px]">
             {question.map((w, i) => (
-              <span key={i} className="st-word inline-block will-change-transform">
-                {w}
-                {i < question.length - 1 && " "}
+              <span key={i} className="-mb-[0.12em] inline-block overflow-hidden pb-[0.12em] align-top">
+                <span className="st-word-in inline-block origin-bottom-left will-change-transform">
+                  {w}
+                  {i < question.length - 1 && "\u00A0"}
+                </span>
               </span>
             ))}
           </p>
