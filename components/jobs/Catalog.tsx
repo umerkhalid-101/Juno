@@ -14,16 +14,17 @@ import { JobPanel } from "./JobPanel";
  * off the card's edge.
  */
 
-/** Bento placement per group, on the 12-column grid (desktop). */
+/** Bento placement per group, on a 12-column grid inside the cards column (desktop).
+ *  Every group pairs a large card with two stacked ones, mirrored for rhythm. */
 const layout: Record<GroupId, { cls: string; card: string[] }> = {
-  // wide card + two stacked
   grow: {
     cls: "lg:grid-rows-[300px_300px]",
     card: ["lg:col-span-7 lg:row-span-2", "lg:col-span-5", "lg:col-span-5"],
   },
-  // three equal, tall
-  keep: { cls: "lg:grid-rows-[460px]", card: ["lg:col-span-4", "lg:col-span-4", "lg:col-span-4"] },
-  // two stacked + wide card (the wide one is the middle job)
+  keep: {
+    cls: "lg:grid-rows-[300px_300px]",
+    card: ["lg:col-span-6 lg:row-span-2", "lg:col-span-6", "lg:col-span-6"],
+  },
   move: {
     cls: "lg:grid-rows-[300px_300px]",
     card: [
@@ -32,7 +33,14 @@ const layout: Record<GroupId, { cls: string; card: string[] }> = {
       "lg:col-span-5 lg:col-start-1 lg:row-start-2",
     ],
   },
-  ahead: { cls: "lg:grid-rows-[460px]", card: ["lg:col-span-4", "lg:col-span-4", "lg:col-span-4"] },
+  ahead: {
+    cls: "lg:grid-rows-[300px_300px]",
+    card: [
+      "lg:col-span-6 lg:col-start-1 lg:row-start-1",
+      "lg:col-span-6 lg:col-start-1 lg:row-start-2",
+      "lg:col-span-6 lg:col-start-7 lg:row-span-2 lg:row-start-1",
+    ],
+  },
 };
 
 function JobCard({
@@ -48,7 +56,7 @@ function JobCard({
 }) {
   const [live, setLive] = useState(false);
   const reduce = useReducedMotion();
-  const wide = cls.includes("col-span-7");
+  const wide = cls.includes("row-span-2");
   return (
     <motion.button
       layoutId={reduce ? undefined : `job-${job.slug}`}
@@ -76,7 +84,7 @@ function JobCard({
       {/* the product moment, cropped by the card */}
       <span
         aria-hidden
-        className={`pointer-events-none absolute ${wide ? "left-7 top-[112px] md:left-8 lg:left-14 lg:top-[140px] lg:origin-top-left lg:scale-[1.3]" : "left-7 top-[112px] md:left-8"}`}
+        className={`pointer-events-none absolute ${wide ? "left-7 top-[112px] md:left-8 lg:left-10 lg:top-[132px] lg:origin-top-left lg:scale-[1.15]" : "left-7 top-[112px] md:left-8 lg:origin-top-left lg:scale-[0.88]"}`}
       >
         <JobVisual slug={job.slug} live={live} />
       </span>
@@ -88,7 +96,7 @@ export function Catalog() {
   const reduce = useReducedMotion();
   const [open, setOpen] = useState<string | null>(null);
   const [from, setFrom] = useState<string | null>(null);
-  const [active, setActive] = useState<GroupId>("grow");
+  const [topic, setTopic] = useState<GroupId>("grow");
   const returnFocus = useRef<HTMLElement | null>(null);
   const pushed = useRef(false);
 
@@ -158,18 +166,15 @@ export function Catalog() {
     };
   }, [openJob, close]);
 
-  // scroll-spy for the goal bar
+  // which topic's cards are in the middle of the screen
   useEffect(() => {
-    const els = groups
-      .map((g) => document.getElementById(`goal-${g.id}`))
-      .filter(Boolean) as HTMLElement[];
+    const els = Array.from(document.querySelectorAll<HTMLElement>("[data-goal]"));
     const io = new IntersectionObserver(
-      (entries) => {
+      (entries) =>
         entries.forEach(
-          (e) => e.isIntersecting && setActive(e.target.id.replace("goal-", "") as GroupId),
-        );
-      },
-      { rootMargin: "-40% 0px -55% 0px" },
+          (e) => e.isIntersecting && setTopic((e.target as HTMLElement).dataset.goal as GroupId),
+        ),
+      { rootMargin: "-45% 0px -50% 0px" },
     );
     els.forEach((el) => io.observe(el));
     return () => io.disconnect();
@@ -203,69 +208,63 @@ export function Catalog() {
         </p>
       </Reveal>
 
-      {/* sticky goal bar */}
-      <div className="sticky top-[72px] z-30 mt-14 border-y border-white/[0.06] bg-[#07090D]/80 backdrop-blur-xl md:mt-20">
-        <nav
-          aria-label="Goals"
-          className="container-page flex gap-1 overflow-x-auto py-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-        >
-          {groups.map((g) => (
-            <a
-              key={g.id}
-              href={`#goal-${g.id}`}
-              aria-current={active === g.id ? "true" : undefined}
-              onClick={(e) => {
-                e.preventDefault();
-                document
-                  .getElementById(`goal-${g.id}`)
-                  ?.scrollIntoView({ behavior: reduce ? "auto" : "smooth" });
-              }}
-              className={`t-eyebrow inline-flex min-h-11 shrink-0 items-center rounded-full border px-4 transition-colors duration-200 ${
-                active === g.id
-                  ? "border-white/[0.14] bg-[#151A22] text-text"
-                  : "border-transparent text-muted hover:text-text"
-              }`}
-            >
-              {g.tab}
-            </a>
-          ))}
-        </nav>
-      </div>
-
       {/* the four goals */}
       <LayoutGroup>
         <motion.div
-          className="container-page"
+          className="container-page mt-14 md:mt-20 lg:grid lg:grid-cols-12 lg:gap-5"
           animate={{ scale: open && !reduce ? 0.98 : 1 }}
           transition={{ duration: 0.45, ease: [0.2, 0.8, 0.2, 1] }}
         >
-          {groups.map((g) => {
-            const list = jobs.filter((j) => j.group === g.id);
-            const l = layout[g.id];
-            return (
-              <div key={g.id} id={`goal-${g.id}`} className="scroll-mt-40 pt-20 md:pt-28">
-                <Reveal>
-                  <h2 className="t-display-l max-w-[18ch] !text-[clamp(2rem,1.4rem+1.8vw,3rem)]">
-                    {g.title}
-                  </h2>
-                  <p className="t-body-l mt-3 max-w-[48ch] text-muted">{g.sub}</p>
-                </Reveal>
-                <div
-                  className={`mt-10 grid gap-5 md:mt-16 md:grid-cols-2 lg:grid-cols-12 ${l.cls}`}
+          {/* one topic, pinned beside the cards; it changes with the cards in view */}
+          <div className="hidden lg:col-span-3 lg:block">
+            <div className="sticky top-[136px] pr-6" aria-live="polite">
+              <AnimatePresence mode="wait" initial={false}>
+                <motion.div
+                  key={topic}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.35, ease: [0.2, 0.8, 0.2, 1] }}
                 >
-                  {list.map((j, k) => (
-                    <JobCard
-                      key={j.slug}
-                      job={j}
-                      cls={l.card[k]}
-                      onOpen={openJob}
-                      hidden={!reduce && from === j.slug && open !== null}
-                    />
-                  ))}
+                  <h2 className="t-h2 max-w-[13ch] text-balance">
+                    {groups.find((g) => g.id === topic)!.title}
+                  </h2>
+                  <p className="mt-3 max-w-[30ch] text-[16px] leading-[25px] text-muted">
+                    {groups.find((g) => g.id === topic)!.sub}
+                  </p>
+                </motion.div>
+              </AnimatePresence>
+            </div>
+          </div>
+
+          <div className="space-y-20 lg:col-span-9 lg:space-y-5">
+            {groups.map((g) => {
+              const list = jobs.filter((j) => j.group === g.id);
+              const l = layout[g.id];
+              return (
+                <div key={g.id} id={`goal-${g.id}`} data-goal={g.id} className="scroll-mt-28">
+                  {/* phones and tablets: the topic sits above its cards */}
+                  <div className="mb-8 lg:hidden">
+                    <h2 className="t-h2 max-w-[18ch] text-balance">{g.title}</h2>
+                    <p className="mt-3 max-w-[40ch] text-[16px] leading-[25px] text-muted">
+                      {g.sub}
+                    </p>
+                  </div>
+                  <div className={`grid gap-5 md:grid-cols-2 lg:grid-cols-12 ${l.cls}`}>
+                    {list.map((j, k) => (
+                      <JobCard
+                        key={j.slug}
+                        job={j}
+                        cls={l.card[k]}
+                        onOpen={openJob}
+                        hidden={!reduce && from === j.slug && open !== null}
+                      />
+                    ))}
+                  </div>
                 </div>
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
         </motion.div>
 
         <AnimatePresence onExitComplete={() => setFrom(null)}>
