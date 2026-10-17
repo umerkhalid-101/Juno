@@ -24,6 +24,45 @@ const scenarios: Scenario[] = [appstore, reconcile, offsite, prices];
 const finalT = (s: Scenario) => s.askAt + 0.6;
 const FADE = 0.45;
 
+/**
+ * Pacing: every job takes about 10 seconds of work, with a short beat after each step so you can
+ * read what just happened, then the question for you stays up for a moment before the next job.
+ */
+const WORK = 10;
+const ASK_REAL = 2.5;
+const HOLD = 0.35;
+const holds = new Map(
+  scenarios.map((sc) => [
+    sc.id,
+    sc.cursor.map((k, i) => {
+      const next = sc.cursor[i + 1];
+      const nextMove = next ? Math.max(k.at + 0.15, next.at - 0.75) : Infinity;
+      return { at: Math.min(k.at + 0.45, nextMove, sc.askAt), h: HOLD };
+    }),
+  ]),
+);
+/** Scene seconds of work (including the beats) squeezed or stretched into WORK real seconds. */
+const workLen = (sc: Scenario) => sc.askAt + holds.get(sc.id)!.reduce((n, x) => n + x.h, 0);
+const realDuration = () => WORK + ASK_REAL;
+/** Real elapsed seconds to scene time. */
+const warp = (sc: Scenario, rt: number) => {
+  if (rt >= WORK) return Math.min(sc.duration, sc.askAt + ((rt - WORK) / ASK_REAL) * (sc.duration - sc.askAt));
+  const w = (rt / WORK) * workLen(sc);
+  let acc = 0;
+  for (const x of holds.get(sc.id)!) {
+    if (w < x.at + acc) return w - acc;
+    if (w < x.at + acc + x.h) return x.at;
+    acc += x.h;
+  }
+  return Math.min(sc.askAt, w - acc);
+};
+/** Scene time back to real elapsed seconds (for jumps and seeks). */
+const unwarp = (sc: Scenario, t: number) => {
+  if (t >= sc.askAt) return WORK + ((t - sc.askAt) / (sc.duration - sc.askAt)) * ASK_REAL;
+  const w = t + holds.get(sc.id)!.filter((x) => x.at < t).reduce((n, x) => n + x.h, 0);
+  return (w / workLen(sc)) * WORK;
+};
+
 export function ChComputer() {
   const reduce = useReducedMotion();
   const section = useRef<HTMLElement>(null);
@@ -34,13 +73,14 @@ export function ChComputer() {
 
   const [si, setSi] = useState(0);
   const [t, setT] = useState(finalT(scenarios[0]));
+  const [rt, setRt] = useState(unwarp(scenarios[0], finalT(scenarios[0])));
   const [scale, setScale] = useState(1);
   const [inView, setInView] = useState(false);
   const [hover, setHover] = useState(false);
   const [userPaused, setUserPaused] = useState(false);
   const [hidden, setHidden] = useState(false);
   const started = useRef(false);
-  const clockRef = useRef({ si: 0, t: finalT(scenarios[0]) });
+  const clockRef = useRef({ si: 0, rt: unwarp(scenarios[0], finalT(scenarios[0])) });
 
   const s = scenarios[si];
   const running = inView && !hover && !userPaused && !hidden && !reduce;
@@ -74,25 +114,31 @@ export function ChComputer() {
     if (!started.current) {
       // first time on screen: start the first job from the top
       started.current = true;
-      clockRef.current = { si: clockRef.current.si, t: 0 };
+      clockRef.current = { si: clockRef.current.si, rt: 0 };
     }
     let raf = 0;
     let last = performance.now();
     let lastPaint = -1;
+    let lastRt = -1;
     const tick = (now: number) => {
       const dt = Math.min(0.1, (now - last) / 1000);
       last = now;
       const c = clockRef.current;
-      c.t += dt;
-      if (c.t >= scenarios[c.si].duration) {
+      c.rt += dt;
+      if (c.rt >= realDuration()) {
         c.si = (c.si + 1) % scenarios.length;
-        c.t = 0;
+        c.rt = 0;
         setSi(c.si);
       }
-      const q = Math.round(c.t * 30) / 30;
+      const q = Math.round(warp(scenarios[c.si], c.rt) * 30) / 30;
       if (q !== lastPaint) {
         lastPaint = q;
         setT(q);
+      }
+      const qr = Math.round(c.rt * 30) / 30;
+      if (qr !== lastRt) {
+        lastRt = qr;
+        setRt(qr);
       }
       raf = requestAnimationFrame(tick);
     };
@@ -105,10 +151,11 @@ export function ChComputer() {
     if (process.env.NODE_ENV === "production") return;
     Object.assign(window, {
       __seekComputer: (i: number, at: number) => {
-        clockRef.current = { si: i, t: at };
+        clockRef.current = { si: i, rt: unwarp(scenarios[i], at) };
         started.current = true;
         setSi(i);
         setT(at);
+        setRt(clockRef.current.rt);
       },
     });
   }, []);
@@ -116,9 +163,10 @@ export function ChComputer() {
   const jump = (i: number) => {
     const next = reduce ? finalT(scenarios[i]) : 0;
     started.current = true;
-    clockRef.current = { si: i, t: next };
+    clockRef.current = { si: i, rt: unwarp(scenarios[i], next) };
     setSi(i);
     setT(next);
+    setRt(clockRef.current.rt);
   };
 
   // Juno's cursor: eased curves between targets, a ripple on each click. Derived from t.
@@ -205,7 +253,7 @@ export function ChComputer() {
                     {sc.tab}
                     {on && (
                       <span aria-hidden className="absolute inset-x-4 bottom-1.5 h-px overflow-hidden rounded-full bg-white/10">
-                        <span className="block h-full origin-left bg-[#F4F6F8]" style={{ transform: `scaleX(${reduce ? 1 : Math.min(1, t / sc.duration)})` }} />
+                        <span className="block h-full origin-left bg-[#F4F6F8]" style={{ transform: `scaleX(${reduce ? 1 : Math.min(1, rt / realDuration())})` }} />
                       </span>
                     )}
                   </button>

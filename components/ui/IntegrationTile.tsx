@@ -2,6 +2,7 @@
 
 import { forwardRef, useState } from "react";
 import { tools, type ToolId } from "@/lib/story";
+import { ToolLogo } from "@/components/ui/ToolLogo";
 
 type Props = {
   id: ToolId;
@@ -50,9 +51,7 @@ export const IntegrationTile = forwardRef<HTMLDivElement, Props>(function Integr
           : {}),
       }}
     >
-      <svg viewBox="0 0 24 24" width={24} height={24} aria-hidden className="tile-logo transition-[color,opacity] duration-[120ms]" style={{ color: t.hex, transitionTimingFunction: "var(--ease-snap)" }} fill="currentColor">
-        <path d={t.path} />
-      </svg>
+      <ToolLogo id={id} size={24} className="tile-logo text-text" />
     </div>
   );
 });

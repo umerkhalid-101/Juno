@@ -1,29 +1,30 @@
 import { tools, type ToolId } from "@/lib/story";
+import { BrandMark } from "@/components/ui/BrandIcon";
 
+/**
+ * A tool's real logo in its official colors, everywhere on the site.
+ * Notion and GitHub use their official one-color marks and follow the text color,
+ * so they read black on light cards and white on dark ones.
+ */
 export function ToolLogo({
   id,
   size = 20,
-  brand = false,
   className = "",
 }: {
   id: ToolId;
   size?: number;
+  /** @deprecated logos are always shown in their real colors now */
   brand?: boolean;
   className?: string;
 }) {
-  const t = tools[id];
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      width={size}
-      height={size}
-      fill={brand && t.hex.toUpperCase() !== "#FFFFFF" ? t.hex : "currentColor"}
-      className={className}
-      aria-hidden
-    >
-      <path d={t.path} />
-    </svg>
-  );
+  if (id === "notion" || id === "github") {
+    return (
+      <svg viewBox="0 0 24 24" width={size} height={size} fill="currentColor" className={className} aria-hidden>
+        <path d={tools[id].path} />
+      </svg>
+    );
+  }
+  return <BrandMark id={id} size={size} className={className} />;
 }
 
 /** Rounded app-icon badge: tool logo in brand color on a dark tile. */

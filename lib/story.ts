@@ -52,16 +52,16 @@ const slackPath =
 
 export const tools: Record<ToolId, Tool> = {
   slack: { id: "slack", name: "Slack", path: slackPath, hex: "#E01E5A" },
-  gmail: { id: "gmail", name: "Gmail", path: siGmail.path, hex: `#${siGmail.hex}` },
-  drive: { id: "drive", name: "Google Drive", path: siGoogledrive.path, hex: `#${siGoogledrive.hex}` },
+  gmail: { id: "gmail", name: "Gmail", path: siGmail.path, hex: "#EA4335" },
+  drive: { id: "drive", name: "Google Drive", path: siGoogledrive.path, hex: "#1FA463" },
   notion: { id: "notion", name: "Notion", path: siNotion.path, hex: "#FFFFFF" },
-  hubspot: { id: "hubspot", name: "HubSpot", path: siHubspot.path, hex: `#${siHubspot.hex}` },
-  linear: { id: "linear", name: "Linear", path: siLinear.path, hex: `#${siLinear.hex}` },
-  jira: { id: "jira", name: "Jira", path: siJira.path, hex: "#2684FF" },
-  intercom: { id: "intercom", name: "Intercom", path: siIntercom.path, hex: `#${siIntercom.hex}` },
+  hubspot: { id: "hubspot", name: "HubSpot", path: siHubspot.path, hex: "#FF7A59" },
+  linear: { id: "linear", name: "Linear", path: siLinear.path, hex: "#5E6AD2" },
+  jira: { id: "jira", name: "Jira", path: siJira.path, hex: "#0052CC" },
+  intercom: { id: "intercom", name: "Intercom", path: siIntercom.path, hex: "#1F8DED" },
   github: { id: "github", name: "GitHub", path: siGithub.path, hex: "#FFFFFF" },
-  figma: { id: "figma", name: "Figma", path: siFigma.path, hex: `#${siFigma.hex}` },
-  calendar: { id: "calendar", name: "Calendar", path: siGooglecalendar.path, hex: `#${siGooglecalendar.hex}` },
+  figma: { id: "figma", name: "Figma", path: siFigma.path, hex: "#F24E1E" },
+  calendar: { id: "calendar", name: "Calendar", path: siGooglecalendar.path, hex: "#4285F4" },
 };
 
 /** The 10 connected tools, in hero and brain-ring order. */
