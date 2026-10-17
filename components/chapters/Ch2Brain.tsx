@@ -6,14 +6,16 @@ import { Mascot } from "@/components/mascot/Mascot";
 import { Reveal } from "@/components/ui/Reveal";
 import { gsap, useGSAP, ScrollTrigger, MQ } from "@/lib/gsap";
 import { tools, type ToolId } from "@/lib/story";
+import { BrandMark } from "@/components/ui/BrandIcon";
 
 /** Tools grouped by what they know. Neighbors on the ring share an area. */
 const groups: { id: string; label: string; tools: ToolId[] }[] = [
-  { id: "team", label: "Team", tools: ["slack", "gmail"] },
-  { id: "customers", label: "Customers", tools: ["hubspot", "intercom"] },
+  { id: "customers", label: "Customers", tools: ["gmail", "slack"] },
+  { id: "sales", label: "Sales", tools: ["hubspot"] },
+  { id: "support", label: "Support", tools: ["intercom"] },
   { id: "product", label: "Product", tools: ["linear", "jira", "github"] },
   { id: "brand", label: "Brand", tools: ["figma"] },
-  { id: "knowledge", label: "Knowledge", tools: ["notion", "drive"] },
+  { id: "market", label: "Market", tools: ["notion", "drive"] },
 ];
 const ring = groups.flatMap((g) => g.tools);
 const STEP = 360 / ring.length;
@@ -86,34 +88,56 @@ export function Ch2Brain() {
           );
         let lastRipple = 0;
 
-        // the steady pulse
-        const pulses = gsap.timeline({ paused: true });
-        (q(".b-pulse") as unknown as SVGCircleElement[]).forEach((p, i) => {
+        // random pulses: any spoke, irregular gaps, sometimes two at once
+        const dots = q(".b-pulse") as unknown as SVGCircleElement[];
+        const busy = new Set<number>();
+        let running = false;
+        let next: gsap.core.Tween | null = null;
+        let last = -1;
+        const fire = () => {
+          const free = nodes.map((_, i) => i).filter((i) => !busy.has(i) && i !== last);
+          if (!free.length) return;
+          const i = free[Math.floor(Math.random() * free.length)];
+          last = i;
+          busy.add(i);
           const n = nodes[i];
-          pulses.add(
-            gsap.fromTo(
-              p,
-              { attr: { cx: n.line.x1, cy: n.line.y1 }, opacity: 0 },
-              {
-                keyframes: [
-                  { opacity: 1, duration: 0.2 },
-                  { attr: { cx: n.line.x2, cy: n.line.y2 }, duration: 1.3, ease: "power1.in" },
-                  { opacity: 0, duration: 0.15 },
-                ],
-                repeat: -1,
-                repeatDelay: 0.3 + ((i * 7) % 10) * 0.12,
-                onRepeat: () => {
-                  const now = performance.now();
-                  if (now - lastRipple > 700) {
-                    lastRipple = now;
-                    ripple();
-                  }
-                },
+          gsap.fromTo(
+            dots[i],
+            { attr: { cx: n.line.x1, cy: n.line.y1 }, opacity: 0 },
+            {
+              keyframes: [
+                { opacity: 1, duration: 0.5 },
+                { attr: { cx: n.line.x2, cy: n.line.y2 }, duration: gsap.utils.random(2.2, 3.4), ease: "sine.inOut" },
+                { opacity: 0, duration: 0.4 },
+              ],
+              onComplete: () => {
+                busy.delete(i);
+                const now = performance.now();
+                if (now - lastRipple > 1200) {
+                  lastRipple = now;
+                  ripple();
+                }
               },
-            ),
-            ((i * 3) % 10) * 0.2,
+            },
           );
-        });
+        };
+        const loop = () => {
+          if (!running) return;
+          fire();
+          if (Math.random() < 0.15) gsap.delayedCall(gsap.utils.random(0.4, 0.9), fire);
+          next = gsap.delayedCall(gsap.utils.random(0.8, 2.0), loop);
+        };
+        const pulses = {
+          play: () => {
+            if (running) return;
+            running = true;
+            loop();
+          },
+          pause: () => {
+            running = false;
+            next?.kill();
+          },
+        };
 
         const build = gsap.timeline({ paused: true, defaults: { ease: "power3.out" } });
         build
@@ -155,7 +179,7 @@ export function Ch2Brain() {
             viewBox="-40 0 800 720"
             className="absolute inset-0 h-full w-full overflow-visible"
             role="img"
-            aria-label="Juno at the center of ten connected tools grouped into team, customers, product, brand, and knowledge. Information pulses from every tool into Juno."
+            aria-label="Juno at the center of ten connected tools grouped into customers, sales, support, product, brand, and market. Information pulses from every tool into Juno."
           >
             <defs>
               <filter id="pulseGlow" x="-200%" y="-200%" width="500%" height="500%">
@@ -191,7 +215,6 @@ export function Ch2Brain() {
             {nodes.map((n) => {
               const t = tools[n.id];
               const on = active === n.id;
-              const fill = t.hex.toUpperCase() === "#FFFFFF" ? "#F4F6F8" : t.hex;
               return (
                 <g key={n.id} transform={`translate(${n.x} ${n.y})`}>
                   <g
@@ -212,8 +235,8 @@ export function Ch2Brain() {
                       strokeWidth={on ? 1.5 : 1}
                       style={{ transition: "stroke 150ms" }}
                     />
-                    <g transform="translate(-10 -10) scale(0.8333)">
-                      <path d={t.path} fill={fill} />
+                    <g transform="translate(-11 -11)">
+                      <BrandMark id={n.id} size={22} dark />
                     </g>
                   </g>
                 </g>
@@ -266,9 +289,7 @@ export function Ch2Brain() {
               <div className="flex flex-wrap gap-2">
                 {k.tools.map((id) => (
                   <span key={id} className="inline-flex h-8 items-center gap-2 rounded-full border border-line bg-surface-2 px-3 text-[13px] text-text">
-                    <svg viewBox="0 0 24 24" width="13" height="13" fill={tools[id].hex.toUpperCase() === "#FFFFFF" ? "currentColor" : tools[id].hex} aria-hidden>
-                      <path d={tools[id].path} />
-                    </svg>
+                    <BrandMark id={id} size={14} dark />
                     {tools[id].name}
                   </span>
                 ))}
