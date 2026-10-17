@@ -2,11 +2,9 @@
 
 import { useRef } from "react";
 import { Mascot, type MascotApi } from "@/components/mascot/Mascot";
-import { gsap, useGSAP, MQ } from "@/lib/gsap";
+import { gsap, useGSAP, ScrollTrigger, MQ } from "@/lib/gsap";
 
 const question = "What if someone took this off your plate?".split(" ");
-const lead = "That's".split("");
-const name = "Juno.".split("");
 const SPARKS = 16;
 
 /** The turn in the story: the question, then Juno arrives as the answer, with a bang. */
@@ -23,9 +21,9 @@ export function Statement() {
 
         const tl = gsap.timeline({ paused: true });
         // set every starting state inside the timeline, so resetting replays it cleanly
-        tl.set(q(".st-word"), { opacity: 0, scale: 2.2, y: 60, rotateX: -40, filter: "blur(18px)" }, 0)
+        tl.set(q(".st-word-in"), { yPercent: 115, rotate: 4, opacity: 0 }, 0)
           .set(q(".st-q"), { opacity: 1 }, 0)
-          .set(q(".st-char"), { opacity: 0, scale: 2.6, y: -20, filter: "blur(14px)" }, 0)
+          .set(q(".st-reveal"), { maskPosition: "100% 0%", webkitMaskPosition: "100% 0%", letterSpacing: "0.02em", filter: "blur(8px)" }, 0)
           .set(q(".st-mascot"), { opacity: 1, y: 170, scale: 0.9 }, 0)
           .set(q(".st-emerge"), { clipPath: "inset(-400px -400px 0px -400px)" }, 0)
           .set(q(".st-portal"), { opacity: 0, scaleX: 0, scaleY: 0.6 }, 0)
@@ -36,8 +34,8 @@ export function Statement() {
           .set(sparks, { opacity: 0, x: 0, y: 0, scale: 1 }, 0)
           .set(q(".st-shake"), { x: 0, y: 0 }, 0);
 
-        // 1. the question flies in from depth, word by word, then steps back
-        tl.to(q(".st-word"), { opacity: 1, scale: 1, y: 0, rotateX: 0, filter: "blur(0px)", duration: 1.1, stagger: 0.07, ease: "expo.out" }, 0.05).to(
+        // 1. the question rises into place word by word, then steps back
+        tl.to(q(".st-word-in"), { yPercent: 0, rotate: 0, opacity: 1, duration: 1.1, stagger: 0.045, ease: "expo.out" }, 0.05).to(
           q(".st-q"),
           { opacity: 0.4, duration: 0.8, ease: "power2.out" },
           1.25,
@@ -76,32 +74,30 @@ export function Statement() {
           .to(q(".st-halo"), { opacity: (_: number, el: Element) => (el.classList.contains("juno-halo") ? 0.32 : 1), scale: 1, duration: 1.2, ease: "expo.out" }, hit + 0.1)
           .call(() => mascot.current?.cheer(), [], hit + 0.35);
 
-        // 3. the name slams in letter by letter; the last letter shakes the line, then the name flashes
-        const name0 = hit + 0.45;
-        tl.to(q(".st-char"), { opacity: 1, scale: 1, y: 0, filter: "blur(0px)", duration: 0.45, stagger: 0.06, ease: "back.out(2.2)" }, name0)
-          .to(q(".st-line"), { keyframes: { x: [0, -6, 5, -3, 0] }, duration: 0.3, ease: "none" }, name0 + 0.06 * (lead.length + name.length) + 0.1)
-          .to(
-            q(".st-name"),
-            {
-              keyframes: [
-                { filter: "brightness(2.1) drop-shadow(0 0 22px rgba(122,143,255,1))", duration: 0.18 },
-                { filter: "brightness(1) drop-shadow(0 0 0px rgba(122,143,255,0))", duration: 1 },
-              ],
-              stagger: 0.05,
-            },
-            name0 + 0.6,
-          );
+        // 3. the name is revealed by a soft light edge sweeping across, tracking in and sharpening
+        const name0 = hit + 0.35;
+        tl.to(q(".st-reveal"), { maskPosition: "0% 0%", webkitMaskPosition: "0% 0%", letterSpacing: "-0.04em", filter: "blur(0px)", duration: 1.3, ease: "expo.out" }, name0).to(
+          q(".st-name"),
+          { keyframes: [{ filter: "brightness(1.5)", duration: 0.25 }, { filter: "brightness(1)", duration: 0.9 }] },
+          name0 + 0.55,
+        );
 
         tl.progress(0).pause();
-        // plays when it comes into view; resets above it so it plays again next time
-        const trigger = gsap.timeline({
-          scrollTrigger: {
-            trigger: q(".st-stage")[0],
-            start: "top 65%",
-            onEnter: () => tl.play(0),
-            onLeaveBack: () => tl.progress(0).pause(),
+        // plays when it comes into view; resets only once it is fully off screen below,
+        // so scrolling back up never makes it vanish in front of you
+        const play = ScrollTrigger.create({
+          trigger: q(".st-stage")[0],
+          start: "top 65%",
+          onEnter: () => {
+            if (tl.progress() === 0) tl.play(0);
           },
         });
+        const reset = ScrollTrigger.create({
+          trigger: q(".st-stage")[0],
+          start: "top bottom",
+          onLeaveBack: () => tl.progress(0).pause(),
+        });
+        const trigger = { kill: () => (play.kill(), reset.kill()) };
         return () => {
           trigger.kill();
           tl.kill();
@@ -152,18 +148,10 @@ export function Statement() {
 
             <p className="st-line text-[44px] font-medium leading-[48px] tracking-[-0.04em] md:text-[68px] md:leading-[72px] lg:text-[80px] lg:leading-[84px]">
               <span className="sr-only">That&apos;s Juno.</span>
-              <span aria-hidden>
-                {lead.map((c, i) => (
-                  <span key={`l${i}`} className="st-char inline-block will-change-transform">
-                    {c}
-                  </span>
-                ))}
-                {" "}
-                {name.map((c, i) => (
-                  <span key={`n${i}`} className="st-char st-name accent-text inline-block will-change-transform">
-                    {c}
-                  </span>
-                ))}
+              <span aria-hidden className="st-reveal inline-block">
+                {"That's"}
+                {"\u00A0"}
+                <span className="st-name accent-text inline-block">Juno.</span>
               </span>
             </p>
           </div>
