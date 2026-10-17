@@ -3,6 +3,7 @@
 import type { CSSProperties, ReactNode } from "react";
 import { Check, Globe, Search } from "lucide-react";
 import { ToolLogo } from "@/components/ui/ToolLogo";
+import { DotField, type DotMode } from "./DotField";
 import type { ToolId } from "@/lib/story";
 
 /**
@@ -14,21 +15,36 @@ import type { ToolId } from "@/lib/story";
 const INK = "#14161f";
 const MUTED = "#6b7080";
 
-type World = { a: string; b: string; at?: string };
+type World = { a: string; b: string; at?: string; dots?: DotMode };
 // a colour field per job, glowing up from the bottom of the card
 export const worlds: Record<string, World> = {
-  "find-our-next-customers": { a: "255,122,89", b: "255,77,141" },
-  "turn-search-into-signups": { a: "56,189,248", b: "52,211,153", at: "30% 115%" },
+  "find-our-next-customers": { a: "255,122,89", b: "255,77,141", dots: "globe" },
+  "turn-search-into-signups": { a: "56,189,248", b: "52,211,153", at: "30% 115%", dots: "wave" },
   "make-every-ad-dollar-count": { a: "168,85,247", b: "236,72,153" },
-  "catch-customers-before-they-leave": { a: "251,146,60", b: "239,68,68", at: "30% 115%" },
-  "get-new-customers-to-their-first-win": { a: "52,211,153", b: "34,197,94" },
-  "close-the-loop-with-customers": { a: "99,102,241", b: "56,189,248", at: "70% 115%" },
-  "keep-every-promise-moving": { a: "192,38,211", b: "124,58,237" },
-  "keep-our-launches-on-track": { a: "79,70,229", b: "34,211,238", at: "65% 115%" },
-  "walk-into-every-call-prepared": { a: "234,67,53", b: "251,188,4" },
-  "show-me-whats-driving-growth": { a: "132,204,22", b: "16,185,129", at: "35% 115%" },
-  "keep-us-ahead-of-competitors": { a: "14,165,233", b: "99,102,241" },
-  "keep-investors-in-the-loop": { a: "245,158,11", b: "234,88,12", at: "60% 115%" },
+  "catch-customers-before-they-leave": {
+    a: "251,146,60",
+    b: "239,68,68",
+    at: "30% 115%",
+    dots: "wave",
+  },
+  "get-new-customers-to-their-first-win": { a: "52,211,153", b: "34,197,94", dots: "rise" },
+  "close-the-loop-with-customers": {
+    a: "99,102,241",
+    b: "56,189,248",
+    at: "70% 115%",
+    dots: "globe",
+  },
+  "keep-every-promise-moving": { a: "192,38,211", b: "124,58,237", dots: "ripple" },
+  "keep-our-launches-on-track": { a: "79,70,229", b: "34,211,238", at: "65% 115%", dots: "rise" },
+  "walk-into-every-call-prepared": { a: "234,67,53", b: "251,188,4", dots: "ripple" },
+  "show-me-whats-driving-growth": {
+    a: "132,204,22",
+    b: "16,185,129",
+    at: "35% 115%",
+    dots: "rise",
+  },
+  "keep-us-ahead-of-competitors": { a: "14,165,233", b: "99,102,241", dots: "radar" },
+  "keep-investors-in-the-loop": { a: "245,158,11", b: "234,88,12", at: "60% 115%", dots: "globe" },
 };
 
 const card =
@@ -142,63 +158,6 @@ function Prospects() {
   );
 }
 
-function SearchPage() {
-  return (
-    <>
-      <div className={card} style={S({ left: 28, top: 26, width: 400 })}>
-        <div className="p-4">
-          <div
-            className="flex h-10 items-center gap-2 rounded-full bg-[#F1F3F4] px-4"
-            style={{ color: INK }}
-          >
-            <Search size={14} style={{ color: MUTED }} aria-hidden />
-            <span className="scene-type overflow-hidden whitespace-nowrap">
-              best client reporting tools
-            </span>
-          </div>
-          <div className="mt-4 space-y-3">
-            {[70, 88, 60].map((w, k) => (
-              <div key={k}>
-                <span className="block h-2 rounded bg-[#1a0dab]/50" style={{ width: `${w}%` }} />
-                <span
-                  className="mt-1.5 block h-1.5 rounded bg-black/10"
-                  style={{ width: `${w + 8}%` }}
-                />
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-      <div
-        className={`${card} scene-rise overflow-hidden`}
-        style={S({ left: 200, top: 168, width: 300 })}
-      >
-        <div
-          className="flex items-center gap-1.5 border-b border-black/[0.06] bg-[#F7F7F5] px-3 py-2 font-mono text-[11px]"
-          style={{ color: MUTED }}
-        >
-          <Globe size={11} aria-hidden />
-          /compare/reporting-tools
-        </div>
-        <div className="p-4">
-          <p className="font-mono text-[10px] uppercase tracking-[0.08em]" style={{ color: MUTED }}>
-            Your next comparison page
-          </p>
-          <p
-            className="mt-1.5 text-[18px] font-semibold leading-[1.1] tracking-[-0.03em]"
-            style={{ color: INK }}
-          >
-            The search. The answer. Your company.
-          </p>
-          <Chip tone="ok" className="mt-3">
-            Draft ready
-          </Chip>
-        </div>
-      </div>
-    </>
-  );
-}
-
 function Ads() {
   return (
     <>
@@ -223,7 +182,7 @@ function Ads() {
         className={`${card} scene-win overflow-hidden`}
         style={S({ left: 238, top: 14, width: 210 })}
       >
-        <div className="h-[100px] bg-[linear-gradient(135deg,#fbcfe8,#f0abfc_55%,#a78bfa)]" />
+        <div className="scene-holo relative h-[100px] overflow-hidden bg-[linear-gradient(135deg,#fbcfe8,#f0abfc_55%,#a78bfa)]" />
         <div className="p-3">
           <p
             className="text-[14px] font-semibold leading-[17px] tracking-[-0.02em]"
@@ -412,54 +371,10 @@ function Shipped() {
   );
 }
 
-function Commitments() {
-  return (
-    <>
-      <div className={`${card} p-4`} style={S({ left: 28, top: 26, width: 330 })}>
-        <div className="flex items-center gap-2 text-[11.5px]" style={{ color: MUTED }}>
-          <Logo id="drive" size={13} />
-          Monday sync · notes
-        </div>
-        <ul className="mt-3 space-y-2 text-[12.5px]" style={{ color: MUTED }}>
-          <li>Pricing page goes live Friday</li>
-          <li className="relative w-fit">
-            <span
-              aria-hidden
-              className="scene-mark absolute -inset-x-1 inset-y-0 rounded bg-[#FDE68A]"
-            />
-            <span className="relative" style={{ color: INK }}>
-              Sam to approve launch copy by Thursday
-            </span>
-          </li>
-          <li>Leo shares the help docs</li>
-        </ul>
-      </div>
-      <div className={`${card} scene-rise p-3.5`} style={S({ left: 140, top: 160, width: 290 })}>
-        <div className="flex items-center gap-2 text-[11.5px]" style={{ color: MUTED }}>
-          <Logo id="slack" size={13} />
-          Direct message · Sam Rivera
-        </div>
-        <p className="mt-2 text-[13px] leading-[19px]" style={{ color: INK }}>
-          Sam, anything you need to unblock this?
-        </p>
-        <span className="scene-typing mt-2 flex gap-1" aria-hidden>
-          {[0, 1, 2].map((d) => (
-            <span
-              key={d}
-              className="size-1.5 rounded-full bg-black/30"
-              style={{ animationDelay: `${d * 0.15}s` }}
-            />
-          ))}
-        </span>
-      </div>
-    </>
-  );
-}
-
 function Launch() {
   return (
     <>
-      <div className={`${card} p-5`} style={S({ left: 36, top: 40, width: 360 })}>
+      <div className={`${card} p-5`} style={S({ left: 0, top: 10, width: 340 })}>
         <div className="flex items-center justify-between">
           <span className="font-medium" style={{ color: INK }}>
             Friday&apos;s launch
@@ -486,7 +401,7 @@ function Launch() {
           </li>
         </ul>
       </div>
-      <div className={`${card} scene-rise p-5`} style={S({ left: 210, top: 210, width: 360 })}>
+      <div className={`${card} scene-rise p-5`} style={S({ left: 370, top: 40, width: 360 })}>
         <div className="flex items-center gap-2 text-[11.5px]" style={{ color: MUTED }}>
           <Logo id="notion" size={13} />
           Help center · Draft
@@ -511,27 +426,184 @@ function Launch() {
   );
 }
 
+/* ------------------------------------------------------------------ frames: the objects people recognise */
+
+/** A light browser window: traffic lights and an address bar. */
+function Browser({
+  url,
+  children,
+  style,
+  className = "",
+}: {
+  url: string;
+  children: ReactNode;
+  style: CSSProperties;
+  className?: string;
+}) {
+  return (
+    <div className={`${card} overflow-hidden ${className}`} style={style}>
+      <div className="flex items-center gap-3 border-b border-black/[0.06] bg-[#F3F3F1] px-3 py-2">
+        <span className="flex gap-1.5" aria-hidden>
+          <span className="size-2.5 rounded-full bg-[#FF5F57]" />
+          <span className="size-2.5 rounded-full bg-[#FEBC2E]" />
+          <span className="size-2.5 rounded-full bg-[#28C840]" />
+        </span>
+        <span
+          className="flex h-6 flex-1 items-center gap-1.5 truncate rounded-md bg-white px-2 font-mono text-[10.5px] ring-1 ring-black/[0.05]"
+          style={{ color: MUTED }}
+        >
+          <Globe size={10} aria-hidden />
+          {url}
+        </span>
+      </div>
+      {children}
+    </div>
+  );
+}
+
+/** A phone, front on: dark bezel, rounded screen, a dynamic island. */
+function Phone({
+  children,
+  style,
+  screen = "#F2F2F7",
+}: {
+  children: ReactNode;
+  style: CSSProperties;
+  screen?: string;
+}) {
+  return (
+    <div
+      className="absolute rounded-[38px] bg-[#111318] p-[9px] shadow-[0_40px_80px_-30px_rgba(0,0,0,0.9),inset_0_0_0_1px_rgba(255,255,255,0.12)]"
+      style={style}
+    >
+      <div
+        className="relative h-full overflow-hidden rounded-[30px]"
+        style={{ background: screen }}
+      >
+        <span className="absolute left-1/2 top-2 h-[22px] w-[78px] -translate-x-1/2 rounded-full bg-[#111318]" />
+        {children}
+      </div>
+    </div>
+  );
+}
+
+function SearchPage() {
+  return (
+    <>
+      <Browser url="google.com/search" style={S({ left: 28, top: 26, width: 420 })}>
+        <div className="p-4">
+          <div
+            className="flex h-10 items-center gap-2 rounded-full bg-white px-4 shadow-[0_1px_6px_rgba(32,33,36,0.18)]"
+            style={{ color: INK }}
+          >
+            <Search size={14} style={{ color: MUTED }} aria-hidden />
+            <span className="scene-type overflow-hidden whitespace-nowrap">
+              best client reporting tools
+            </span>
+          </div>
+          <div className="mt-4 space-y-3.5">
+            {[
+              ["G2 · Reporting software", 72],
+              ["The 9 best client reporting tools", 86],
+              ["Reddit · What do agencies use?", 64],
+            ].map(([t, w]) => (
+              <div key={t as string}>
+                <p className="text-[13px] text-[#1a0dab]">{t}</p>
+                <span
+                  className="mt-1.5 block h-1.5 rounded bg-black/10"
+                  style={{ width: `${w}%` }}
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+      </Browser>
+      <div className={`${card} scene-rise p-4`} style={S({ left: 230, top: 196, width: 300 })}>
+        <p className="font-mono text-[10px] uppercase tracking-[0.08em]" style={{ color: MUTED }}>
+          /compare/reporting-tools
+        </p>
+        <p
+          className="mt-1.5 text-[18px] font-semibold leading-[1.1] tracking-[-0.03em]"
+          style={{ color: INK }}
+        >
+          The search. The answer. Your company.
+        </p>
+        <Chip tone="ok" className="mt-3">
+          Draft ready
+        </Chip>
+      </div>
+    </>
+  );
+}
+
+function Commitments() {
+  return (
+    <>
+      <div className={`${card} p-4`} style={S({ left: 28, top: 40, width: 300 })}>
+        <div className="flex items-center gap-2 text-[11.5px]" style={{ color: MUTED }}>
+          <Logo id="drive" size={13} />
+          Monday sync · notes
+        </div>
+        <ul className="mt-3 space-y-2 text-[12.5px]" style={{ color: MUTED }}>
+          <li>Pricing page goes live Friday</li>
+          <li className="relative w-fit">
+            <span
+              aria-hidden
+              className="scene-mark absolute -inset-x-1 inset-y-0 rounded bg-[#FDE68A]"
+            />
+            <span className="relative" style={{ color: INK }}>
+              Sam to approve launch copy by Thursday
+            </span>
+          </li>
+          <li>Leo shares the help docs</li>
+        </ul>
+      </div>
+      {/* Sam's phone lights up */}
+      <Phone
+        style={S({ left: 300, top: 14, width: 210, height: 380 })}
+        screen="linear-gradient(180deg,#3b1d4a,#1a1030)"
+      >
+        <p className="mt-12 text-center text-[40px] font-light leading-none text-white/90">9:41</p>
+        <div className="scene-rise mx-2.5 mt-6 rounded-[18px] bg-white/85 p-3 backdrop-blur">
+          <div className="flex items-center gap-2 text-[11px]" style={{ color: MUTED }}>
+            <Logo id="slack" size={12} />
+            Slack · now
+          </div>
+          <p className="mt-1.5 text-[12px] font-semibold" style={{ color: INK }}>
+            Juno
+          </p>
+          <p className="text-[12px] leading-[16px]" style={{ color: INK }}>
+            Sam, anything you need to unblock this?
+          </p>
+        </div>
+      </Phone>
+    </>
+  );
+}
+
 function CallPrep() {
   return (
     <>
-      <div className={`${card} overflow-hidden`} style={S({ left: 28, top: 26, width: 280 })}>
-        <div className="flex">
-          <span className="w-1.5 bg-[#4285F4]" />
-          <div className="p-3.5">
-            <p className="font-medium" style={{ color: INK }}>
-              Call with Maya
-            </p>
-            <p className="text-[12px]" style={{ color: MUTED }}>
-              10:00 to 10:30 · Google Meet
-            </p>
-            <p className="mt-2 flex items-center gap-1.5 font-mono text-[11px] text-[#3346e0]">
-              <Dot c="#3346e0" />
-              Starts in 20 min
-            </p>
+      <Phone
+        style={S({ left: 36, top: 18, width: 210, height: 390 })}
+        screen="linear-gradient(180deg,#1e293b,#0f172a)"
+      >
+        <p className="mt-12 text-center text-[13px] text-white/70">Tuesday, Nov 18</p>
+        <p className="text-center text-[44px] font-light leading-none text-white/90">9:40</p>
+        <div className="scene-drop mx-2.5 mt-6 rounded-[18px] bg-white/85 p-3 backdrop-blur">
+          <div className="flex items-center gap-2 text-[11px]" style={{ color: MUTED }}>
+            <Logo id="calendar" size={12} />
+            Calendar · in 20 min
           </div>
+          <p className="mt-1.5 text-[12.5px] font-semibold" style={{ color: INK }}>
+            Call with Maya
+          </p>
+          <p className="text-[11.5px]" style={{ color: MUTED }}>
+            Juno prepared your brief
+          </p>
         </div>
-      </div>
-      <div className={`${card} scene-rise p-4`} style={S({ left: 110, top: 128, width: 320 })}>
+      </Phone>
+      <div className={`${card} scene-rise p-4`} style={S({ left: 210, top: 150, width: 310 })}>
         <p className="font-mono text-[10px] uppercase tracking-[0.08em]" style={{ color: MUTED }}>
           Before your 10:00 with Maya
         </p>
@@ -559,43 +631,37 @@ function CallPrep() {
 }
 
 function Growth() {
+  const bars = [18, 22, 20, 26, 24, 31, 29, 36, 34, 42, 40, 49, 47, 55, 58, 64];
   return (
     <>
-      <div className={`${card} p-4`} style={S({ left: 28, top: 26, width: 360 })}>
+      <div className={`${card} p-4`} style={S({ left: 28, top: 26, width: 380 })}>
         <div className="flex items-center justify-between">
-          <span className="font-medium" style={{ color: INK }}>
-            Activated teams by source
+          <span className="leading-tight">
+            <span className="block text-[12px]" style={{ color: MUTED }}>
+              Activated teams from comparison pages
+            </span>
+            <span
+              className="block text-[20px] font-semibold tabular-nums tracking-[-0.02em]"
+              style={{ color: INK }}
+            >
+              1,284
+            </span>
           </span>
-          <span className="font-mono text-[11px] text-[#16a34a]">+38%</span>
+          <Chip tone="ok">+38%</Chip>
         </div>
-        <svg viewBox="0 0 320 110" className="mt-3 h-[110px] w-full" aria-hidden>
-          <defs>
-            <linearGradient id="sg" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0" stopColor="#16a34a" stopOpacity="0.22" />
-              <stop offset="1" stopColor="#16a34a" stopOpacity="0" />
-            </linearGradient>
-          </defs>
-          {[28, 56, 84].map((y) => (
-            <line key={y} x1="0" x2="320" y1={y} y2={y} stroke="#000" strokeOpacity="0.05" />
+        <div className="mt-4 flex h-[110px] items-end gap-[5px]">
+          {bars.map((h, k) => (
+            <span
+              key={k}
+              className="scene-bar flex-1 origin-bottom rounded-t-[3px] bg-[linear-gradient(180deg,#22c55e,#16a34a)]"
+              style={{ height: `${h + 30}%`, animationDelay: `${k * 0.06}s` }}
+            />
           ))}
-          <path
-            d="M0 96 L40 90 L80 92 L120 78 L160 70 L200 56 L240 44 L280 30 L320 18 L320 110 L0 110 Z"
-            fill="url(#sg)"
-          />
-          <path
-            className="scene-draw"
-            d="M0 96 L40 90 L80 92 L120 78 L160 70 L200 56 L240 44 L280 30 L320 18"
-            fill="none"
-            stroke="#16a34a"
-            strokeWidth="2.5"
-            strokeLinejoin="round"
-            pathLength={1}
-          />
-        </svg>
+        </div>
       </div>
       <div
         className={`${card} scene-rise flex items-center gap-2 px-3.5 py-2.5`}
-        style={S({ left: 150, top: 200 })}
+        style={S({ left: 420, top: 70 })}
       >
         <span className="rounded-md bg-[#F1F3F6] px-2 py-1 text-[12px]" style={{ color: INK }}>
           Comparison pages
@@ -605,12 +671,6 @@ function Growth() {
           Activated teams
         </span>
       </div>
-      <div
-        className={`${card} scene-rise px-3.5 py-2.5 text-[12px]`}
-        style={S({ left: 60, top: 262, color: INK })}
-      >
-        Your next page brief is ready.
-      </div>
     </>
   );
 }
@@ -618,22 +678,15 @@ function Growth() {
 function Competitors() {
   return (
     <>
-      <div className={`${card} overflow-hidden`} style={S({ left: 28, top: 26, width: 320 })}>
-        <div
-          className="flex items-center gap-1.5 border-b border-black/[0.06] bg-[#F7F7F5] px-3 py-2 font-mono text-[11px]"
-          style={{ color: MUTED }}
-        >
-          <Globe size={11} aria-hidden />
-          rivalreports.example/pricing
-        </div>
+      <Browser url="rivalreports.example/pricing" style={S({ left: 28, top: 26, width: 380 })}>
         <div className="grid grid-cols-2 gap-2 p-3">
           {["Team", "Business"].map((p) => (
-            <div key={p} className="rounded-lg bg-[#F7F7F5] p-2.5">
+            <div key={p} className="rounded-lg bg-[#F7F7F5] p-3">
               <p className="text-[12px]" style={{ color: MUTED }}>
                 {p}
               </p>
               <p
-                className="relative mt-1 h-5 overflow-hidden text-[15px] font-semibold"
+                className="relative mt-1 h-6 overflow-hidden text-[17px] font-semibold"
                 style={{ color: INK }}
               >
                 <span className="scene-flip-a block">{p === "Team" ? "$49 / mo" : "$99 / mo"}</span>
@@ -641,11 +694,12 @@ function Competitors() {
                   {p === "Team" ? "$468 / yr" : "$948 / yr"}
                 </span>
               </p>
+              <span className="mt-2 block h-6 rounded-md bg-[#14161f]" />
             </div>
           ))}
         </div>
-      </div>
-      <div className={`${card} scene-rise p-3.5`} style={S({ left: 140, top: 168, width: 290 })}>
+      </Browser>
+      <div className={`${card} scene-rise p-3.5`} style={S({ left: 420, top: 40, width: 280 })}>
         <div className="flex items-center gap-2 text-[11.5px]" style={{ color: MUTED }}>
           <Logo id="notion" size={13} />
           Sales comparison
@@ -672,53 +726,71 @@ function Investors() {
   ];
   return (
     <>
-      <div className={`${card} p-5`} style={S({ left: 36, top: 40, width: 400 })}>
-        <div className="flex items-center gap-2 text-[12px]" style={{ color: MUTED }}>
-          <Logo id="gmail" size={13} />
-          To investors · October update
-        </div>
-        <p
-          className="mt-3 text-[22px] font-semibold leading-[1.05] tracking-[-0.035em]"
-          style={{ color: INK }}
+      {/* the update, open in a mail window */}
+      <div className={`${card} overflow-hidden`} style={S({ left: 30, top: 30, width: 420 })}>
+        <div
+          className="flex items-center gap-2 border-b border-black/[0.06] bg-[#F6F8FC] px-4 py-2.5 text-[12px]"
+          style={{ color: MUTED }}
         >
-          The month. Already written.
-        </p>
-        <div className="mt-4 grid grid-cols-3 gap-2">
-          {kpi.map(([k, v, d]) => (
-            <div key={k} className="rounded-lg bg-[#F7F7F5] p-2.5">
-              <p className="text-[11px]" style={{ color: MUTED }}>
-                {k}
-              </p>
-              <p
-                className="scene-count mt-0.5 text-[16px] font-semibold tabular-nums"
-                style={{ color: INK }}
+          <Logo id="gmail" size={13} />
+          <span className="font-medium" style={{ color: INK }}>
+            October update
+          </span>
+          <span className="ml-auto">To 14 investors</span>
+        </div>
+        <div className="p-5">
+          <p
+            className="text-[22px] font-semibold leading-[1.05] tracking-[-0.035em]"
+            style={{ color: INK }}
+          >
+            The month. Already written.
+          </p>
+          <div className="mt-4 grid grid-cols-3 gap-2">
+            {kpi.map(([k, v, d]) => (
+              <div key={k} className="rounded-lg bg-[#F7F7F5] p-2.5">
+                <p className="text-[11px]" style={{ color: MUTED }}>
+                  {k}
+                </p>
+                <p
+                  className="scene-count mt-0.5 text-[16px] font-semibold tabular-nums"
+                  style={{ color: INK }}
+                >
+                  {v}
+                </p>
+                {d && <p className="text-[11px] text-[#16a34a]">{d}</p>}
+              </div>
+            ))}
+          </div>
+          <dl className="mt-4 space-y-2 text-[12.5px]">
+            {[
+              ["The win", "Team plans launched."],
+              ["The focus", "Faster first-time setup."],
+              ["The ask", "Introductions to agencies."],
+            ].map(([k, v], n) => (
+              <div
+                key={k}
+                className="scene-row flex gap-3"
+                style={{ animationDelay: `${n * 0.35}s` }}
               >
-                {v}
-              </p>
-              {d && <p className="text-[11px] text-[#16a34a]">{d}</p>}
-            </div>
-          ))}
+                <dt className="w-[70px] shrink-0 font-medium" style={{ color: INK }}>
+                  {k}
+                </dt>
+                <dd style={{ color: MUTED }}>{v}</dd>
+              </div>
+            ))}
+          </dl>
         </div>
       </div>
-      <div className={`${card} scene-rise p-4`} style={S({ left: 230, top: 250, width: 320 })}>
-        <dl className="space-y-2 text-[12.5px]">
-          {[
-            ["The win", "Team plans launched."],
-            ["The focus", "Faster first-time setup."],
-            ["The ask", "Introductions to agencies."],
-          ].map(([k, v], n) => (
-            <div
-              key={k}
-              className="scene-row flex gap-3"
-              style={{ animationDelay: `${n * 0.35}s` }}
-            >
-              <dt className="w-[70px] shrink-0 font-medium" style={{ color: INK }}>
-                {k}
-              </dt>
-              <dd style={{ color: MUTED }}>{v}</dd>
-            </div>
-          ))}
-        </dl>
+      <div
+        className={`${card} scene-rise flex items-center gap-2.5 px-3.5 py-2.5`}
+        style={S({ left: 250, top: 372 })}
+      >
+        <span className="inline-flex h-7 items-center rounded-full bg-[#14161f] px-3 text-[12px] font-medium text-white">
+          Review and send
+        </span>
+        <span className="text-[12px]" style={{ color: MUTED }}>
+          Waits for your yes
+        </span>
       </div>
     </>
   );
@@ -740,35 +812,62 @@ const scenes: Record<string, () => ReactNode> = {
 };
 
 /** The colour world plus the layered scene. Fills its parent; the card crops it. */
+export type SceneFit = "big" | "wide" | "landscape" | "tall" | "small";
+
+// how the 600 × 420 scene sits in each card shape
+const fits: Record<SceneFit, { scale: string; left: string; top: number }> = {
+  big: { scale: "scale-[1.08] md:scale-[1.14]", left: "0px", top: 150 },
+  wide: { scale: "scale-[1] md:scale-[1.08]", left: "max(0px, calc(50% - 330px))", top: 96 },
+  landscape: { scale: "md:scale-[0.92]", left: "0px", top: 92 },
+  tall: { scale: "scale-[0.95]", left: "0px", top: 130 },
+  small: { scale: "md:scale-[0.9]", left: "0px", top: 92 },
+};
+
+/** The colour world plus the layered scene. Fills its parent; the card crops it. */
 export function JobScene({
   slug,
   play = true,
-  big = false,
-  offset = 0,
+  fit = "small",
+  ribbon = false,
 }: {
   slug: string;
   play?: boolean;
-  big?: boolean;
-  /** Where the product starts inside the scene, so the colour can run behind the title. */
-  offset?: number;
+  fit?: SceneFit;
+  ribbon?: boolean;
 }) {
   const w = worlds[slug];
   const Scene = scenes[slug];
+  const f = fits[fit];
   return (
     <div data-play={play ? "true" : "false"} className="scene absolute inset-0 overflow-hidden">
-      {/* the colour world, glowing up from the bottom edge */}
+      {/* the colour world: a sweep that deepens toward the bottom, like Stripe's */}
       <div
         aria-hidden
         className="absolute inset-0"
         style={{
-          background: `radial-gradient(100% 75% at ${w.at ?? "50% 112%"}, rgba(${w.a},0.85), rgba(${w.b},0.4) 42%, transparent 78%), radial-gradient(70% 55% at 100% 100%, rgba(${w.b},0.45), transparent 70%)`,
+          background: `linear-gradient(180deg, transparent 22%, rgba(${w.a},0.32) 58%, rgba(${w.b},0.7) 100%), radial-gradient(90% 60% at ${w.at ?? "50% 112%"}, rgba(${w.a},0.75), transparent 70%)`,
         }}
       />
-      <div
-        className={`absolute left-0 origin-top-left ${big ? "scale-[1.08] md:scale-[1.14]" : "md:scale-[0.9]"}`}
-        style={{ top: offset, width: 600, height: 420 }}
-      >
-        {Scene && <Scene />}
+      {/* larger cards get a soft ribbon of colour behind the product */}
+      {ribbon && (
+        <div
+          aria-hidden
+          className="absolute -left-[20%] top-[46%] h-[180px] w-[140%] -rotate-[9deg] rounded-[50%] opacity-70 blur-[46px]"
+          style={{
+            background: `linear-gradient(90deg, rgba(${w.b},0), rgba(${w.a},0.9) 35%, rgba(${w.b},0.85) 70%, rgba(${w.a},0))`,
+          }}
+        />
+      )}
+      {/* a living dot graphic that tells the job's story */}
+      {w.dots && <DotField mode={w.dots} rgb={w.a} rgb2={w.b} play={play} />}
+      {/* the product leans in a touch when you hover the card */}
+      <div className="absolute inset-0 transition-transform duration-700 [transition-timing-function:cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.025]">
+        <div
+          className={`absolute origin-top-left ${f.scale}`}
+          style={{ left: f.left, top: f.top, width: 600, height: 420 }}
+        >
+          {Scene && <Scene />}
+        </div>
       </div>
     </div>
   );

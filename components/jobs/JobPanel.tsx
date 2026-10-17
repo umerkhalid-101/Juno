@@ -419,7 +419,7 @@ export function JobPanel({
                 }}
               >
                 <div className="relative h-[440px] overflow-hidden rounded-[20px] md:h-[560px]">
-                  <JobScene key={slug} slug={job.slug} big />
+                  <JobScene key={slug} slug={job.slug} fit="big" ribbon />
                 </div>
                 <div className="h-[560px] rounded-[20px] border border-white/[0.06] bg-[#0B0E14]/90 p-5 backdrop-blur">
                   <StoryPlayer key={slug} job={job} />

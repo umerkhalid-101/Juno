@@ -14,31 +14,28 @@ import { JobPanel } from "./JobPanel";
  * off the card's edge.
  */
 
-/** Bento placement per group, on a 12-column grid inside the cards column (desktop).
- *  Every group pairs a large card with two stacked ones, mirrored for rhythm. */
+/** Bento placement per group (desktop). Each group has its own shape so the page never repeats:
+ *  big + two stacked, three tall, one full-width + two halves, tall + two wide. */
 const layout: Record<GroupId, { cls: string; card: string[] }> = {
   grow: {
     cls: "lg:grid-rows-[300px_300px]",
     card: ["lg:col-span-7 lg:row-span-2", "lg:col-span-5", "lg:col-span-5"],
   },
-  keep: {
-    cls: "lg:grid-rows-[300px_300px]",
-    card: ["lg:col-span-6 lg:row-span-2", "lg:col-span-6", "lg:col-span-6"],
-  },
+  keep: { cls: "lg:grid-rows-[480px]", card: ["lg:col-span-4", "lg:col-span-4", "lg:col-span-4"] },
   move: {
-    cls: "lg:grid-rows-[300px_300px]",
+    cls: "lg:grid-rows-[380px_320px]",
     card: [
-      "lg:col-span-5 lg:col-start-1 lg:row-start-1",
-      "lg:col-span-7 lg:col-start-6 lg:row-span-2 lg:row-start-1",
-      "lg:col-span-5 lg:col-start-1 lg:row-start-2",
+      "lg:col-span-6 lg:col-start-1 lg:row-start-2",
+      "lg:col-span-12 lg:row-start-1",
+      "lg:col-span-6 lg:col-start-7 lg:row-start-2",
     ],
   },
   ahead: {
     cls: "lg:grid-rows-[300px_300px]",
     card: [
-      "lg:col-span-6 lg:col-start-1 lg:row-start-1",
-      "lg:col-span-6 lg:col-start-1 lg:row-start-2",
-      "lg:col-span-6 lg:col-start-7 lg:row-span-2 lg:row-start-1",
+      "lg:col-span-8 lg:col-start-5 lg:row-start-1",
+      "lg:col-span-8 lg:col-start-5 lg:row-start-2",
+      "lg:col-span-4 lg:col-start-1 lg:row-span-2 lg:row-start-1",
     ],
   },
 };
@@ -57,7 +54,18 @@ function JobCard({
   const reduce = useReducedMotion();
   const ref = useRef<HTMLButtonElement>(null);
   const seen = useInView(ref, { amount: 0.25 });
-  const big = cls.includes("row-span-2");
+  // which shape this card is, so its scene is framed to fit
+  const fit = cls.includes("col-span-12")
+    ? "wide"
+    : cls.includes("row-span-2")
+      ? cls.includes("col-span-4")
+        ? "tall"
+        : "big"
+      : cls.includes("col-span-8")
+        ? "landscape"
+        : cls.includes("col-span-4")
+          ? "tall"
+          : "small";
   return (
     <motion.button
       ref={ref}
@@ -72,7 +80,7 @@ function JobCard({
     >
       {/* the job's own world: colour, product, motion */}
       <span aria-hidden className="pointer-events-none absolute inset-0">
-        <JobScene slug={job.slug} play={seen} big={big} offset={big ? 150 : 92} />
+        <JobScene slug={job.slug} play={seen} fit={fit} ribbon={fit === "big" || fit === "wide"} />
       </span>
       <span className="relative z-10 flex items-start justify-between gap-4 p-7 md:p-8">
         <span className="t-h3 max-w-[17ch] text-text">{job.title}</span>
