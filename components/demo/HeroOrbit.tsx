@@ -107,10 +107,9 @@ export function HeroOrbit({
         const k = (depth + 1) / 2;
         // Juno works the chip as it comes round the front: it leans in, fills, then flips to Done.
         const work = s.done ? 0 : Math.max(0, (depth - 0.6) / 0.37);
-        const pull = 1 - Math.min(1, work) * 0.08;
         const half = node.offsetWidth / 2 + 8;
-        const x = Math.min(w - half, Math.max(half, cx + Math.cos(s.a) * r.rx * pull + p.x * depthPx[i]));
-        const y = cy + Math.sin(s.a) * r.ry * pull + p.y * depthPx[i] - Math.min(1, work) * 6;
+        const x = Math.min(w - half, Math.max(half, cx + Math.cos(s.a) * r.rx + p.x * depthPx[i]));
+        const y = cy + Math.sin(s.a) * r.ry + p.y * depthPx[i];
         if (!s.done && depth > 0.97) {
           s.done = true;
           node.dataset.done = "true";

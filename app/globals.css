@@ -867,13 +867,6 @@
   mask-composite: exclude;
   transition: background 200ms ease-out;
 }
-.orbit-chip[data-working="true"] .chip-edge {
-  background: linear-gradient(180deg, rgba(80, 229, 255, calc(0.2 + var(--work, 0) * 0.5)), rgba(122, 143, 255, 0.25));
-}
-.orbit-chip[data-working="true"] > div {
-  box-shadow: 0 0 0 1px rgba(80, 229, 255, 0.04), 0 0 calc(var(--work, 0) * 28px) rgba(80, 140, 255, calc(var(--work, 0) * 0.35)),
-    0 18px 40px -18px rgba(0, 0, 0, 0.9);
-}
 .orbit-chip > div {
   box-shadow: 0 14px 34px -18px rgba(0, 0, 0, 0.9);
 }
