@@ -5,9 +5,7 @@ import {
   useRef,
   useState,
   type KeyboardEvent,
-  type MouseEvent as ReactMouseEvent,
 } from "react";
-import { createPortal } from "react-dom";
 import { motion, useReducedMotion } from "motion/react";
 import { ArrowRight, ArrowUpRight } from "lucide-react";
 import { Button } from "@/components/ui/Button";
@@ -195,14 +193,11 @@ export function Ch7Close() {
   const cta = useRef<HTMLDivElement>(null);
   const boost = useRef(0);
   const [hot, setHot] = useState(false);
-  const [launch, setLaunch] = useState<{ x: number; y: number; d: number } | null>(null);
-  const reduce = useReducedMotion();
   const charging = useRef<gsap.core.Tween | gsap.core.Timeline | null>(null);
   const pulses = useRef<gsap.core.Timeline | null>(null);
 
   // Hovering the CTA charges Juno: the longer you hold, the stronger it gets.
   const power = (on: boolean) => {
-    if (launch) return;
     setHot(on);
     charging.current?.kill();
     // on hover the dots start shooting at once, then the charge keeps building while you hold
@@ -217,40 +212,10 @@ export function Ch7Close() {
     if (!on) gsap.to(".charge-ring", { opacity: 0, duration: 0.4, overwrite: true });
   };
 
-  // Request access: a quick wave bursts from the button and the signup page opens as it fills the screen.
-  const requestAccess = (e: ReactMouseEvent) => {
-    if (reduce || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return; // plain link behaviour
-    e.preventDefault();
-    const r = (e.currentTarget as HTMLElement).getBoundingClientRect();
-    const x = r.left + r.width / 2;
-    const y = r.top + r.height / 2;
-    const d =
-      2 * Math.hypot(Math.max(x, window.innerWidth - x), Math.max(y, window.innerHeight - y));
-    charging.current?.kill();
-    gsap.to(boost, { current: 5, duration: 0.5, ease: "power2.in" });
-    mascot.current?.cheer();
-    setLaunch({ x, y, d });
-    window.setTimeout(() => window.location.assign(SIGNUP), 380);
-  };
-
-  // dev only: play the burst without leaving the page
-  useEffect(() => {
-    if (process.env.NODE_ENV === "production") return;
-    Object.assign(window, {
-      __previewLaunch: () =>
-        setLaunch({
-          x: window.innerWidth / 2,
-          y: window.innerHeight * 0.7,
-          d: 2 * Math.hypot(window.innerWidth, window.innerHeight),
-        }),
-    });
-  }, []);
-
-  // coming back with the browser's back button: clear the overlay
+  // coming back with the browser's back button: start uncharged
   useEffect(() => {
     const onShow = (e: PageTransitionEvent) => {
       if (!e.persisted) return;
-      setLaunch(null);
       setHot(false);
       boost.current = 0;
     };
@@ -499,12 +464,11 @@ export function Ch7Close() {
             className="mt-9 flex flex-wrap items-center justify-center gap-3 md:mt-11"
           >
             <span
-              className={`cta-halo relative isolate inline-flex rounded-full transition-transform duration-500 [transition-timing-function:cubic-bezier(0.16,1,0.3,1)] ${launch ? "scale-125" : hot ? "scale-[1.04]" : ""}`}
+              className={`cta-halo relative isolate inline-flex rounded-full transition-transform duration-500 [transition-timing-function:cubic-bezier(0.16,1,0.3,1)] ${hot ? "scale-[1.04]" : ""}`}
             >
               <Button
                 size="xl"
                 href={SIGNUP}
-                onClick={requestAccess}
                 trailing={<ArrowUpRight size={18} strokeWidth={1.75} aria-hidden />}
               >
                 Request access
@@ -514,25 +478,6 @@ export function Ch7Close() {
         </div>
       </div>
 
-      {/* the burst that carries you to the signup page */}
-      {launch &&
-        createPortal(
-          <div className="fixed inset-0 z-[200]" aria-hidden>
-            <motion.span
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{ duration: 0.42, ease: [0.55, 0, 0.25, 1] }}
-              className="absolute rounded-full bg-[radial-gradient(closest-side,#EAF0FF,#A6BBFF_25%,#5B6DFF_55%,#1A1F4D_80%,#07090D)]"
-              style={{
-                left: launch.x - launch.d / 2,
-                top: launch.y - launch.d / 2,
-                width: launch.d,
-                height: launch.d,
-              }}
-            />
-          </div>,
-          document.body,
-        )}
     </section>
   );
 }
