@@ -1,5 +1,8 @@
 import type { Metadata } from "next";
 import { JobsHero } from "@/components/jobs/JobsHero";
+import { Catalog } from "@/components/jobs/Catalog";
+import { HowItWorks } from "@/components/jobs/HowItWorks";
+import { JobsCta, JobsFaq } from "@/components/jobs/JobsClose";
 
 const title = "AI Automations for Founders & Teams | Juno";
 const description =
@@ -17,8 +20,10 @@ export default function JobsPage() {
   return (
     <main id="main">
       <JobsHero />
-      {/* the catalog lands here next */}
-      <div id="jobs-catalog" className="h-[60vh]" />
+      <Catalog />
+      <HowItWorks />
+      <JobsFaq />
+      <JobsCta />
     </main>
   );
 }
