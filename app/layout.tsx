@@ -12,14 +12,16 @@ import "./globals.css";
 const serif = Instrument_Serif({ subsets: ["latin"], weight: "400", style: ["normal", "italic"], variable: "--font-instrument", display: "swap" });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://runjuno.ai"),
+  // Share images resolve against the live Vercel domain until the site moves to runjuno.ai.
+  metadataBase: new URL(
+    process.env.VERCEL_PROJECT_PRODUCTION_URL ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}` : "http://localhost:3000",
+  ),
   title: "Juno: your AI chief of staff",
   description:
     "Juno learns how your company works, then handles the busywork across Slack, Gmail, Notion, Linear, and more. Nothing goes out without your yes.",
   openGraph: {
     title: "Juno runs the work. You run the company.",
     description: "An AI chief of staff that learns your company and does real work across your apps, always asking for a yes first.",
-    url: "https://runjuno.ai",
     siteName: "Juno",
     type: "website",
   },
