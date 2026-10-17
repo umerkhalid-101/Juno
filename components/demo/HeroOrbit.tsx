@@ -123,7 +123,7 @@ export function HeroOrbit({
         node.dataset.working = wk > 0.02 ? "true" : "false";
         node.style.setProperty("--work", String(wk));
         if (wk > best.work) best = { work: wk, x, y, top: y - node.offsetHeight / 2 };
-        node.style.transform = `translate3d(${x}px, ${y}px, 0) translate(-50%, -50%) scale(${0.78 + k * 0.22 + wk * 0.03})`;
+        node.style.transform = `translate3d(${x}px, ${y}px, 0) translate(-50%, -50%) scale(${0.78 + k * 0.22})`;
         node.style.opacity = startedRef.current ? String(0.16 + k * 0.84) : "0";
         node.style.zIndex = depth > 0 ? "30" : "5";
         node.style.filter = depth < -0.1 ? `blur(${(-depth - 0.1) * 2.2}px)` : "none";
