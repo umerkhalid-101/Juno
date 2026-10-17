@@ -10,15 +10,16 @@ import { clock, easeInOut, prog, type Scenario } from "@/components/computer/kit
 import { reconcile } from "@/components/computer/sites/CloudHost";
 import { offsite } from "@/components/computer/sites/Retreatly";
 import { prices } from "@/components/computer/sites/Shopfront";
+import { appstore } from "@/components/computer/sites/AppHarbor";
 
 /**
  * "And a computer of its own to handle the rest."
- * A live loop of Juno's own screen: three jobs on sites with no integration, each ending on a
+ * A live loop of Juno's own screen: four jobs on sites with no integration, each ending on a
  * question for you. Everything on screen is a pure function of one clock, so pausing, jumping
  * between jobs and reduced motion all come for free. Juno never approves anything itself.
  */
 
-const scenarios: Scenario[] = [reconcile, offsite, prices];
+const scenarios: Scenario[] = [appstore, reconcile, offsite, prices];
 /** The frame we show without JS or with reduced motion: work done, question asked. */
 const finalT = (s: Scenario) => s.askAt + 0.6;
 const FADE = 0.45;
@@ -160,7 +161,7 @@ export function ChComputer() {
     const rp = click ? prog(t, click.at, click.at + 0.45) : 1;
     if (ripple.current) {
       ripple.current.style.transform = `scale(${0.3 + rp * 2.2})`;
-      ripple.current.style.opacity = String(rp < 1 ? 0.5 * (1 - rp) : 0);
+      ripple.current.style.opacity = String(rp < 1 ? 0.7 * (1 - rp) : 0);
     }
   }, [t, si, s, scale]);
 
@@ -248,9 +249,10 @@ export function ChComputer() {
 
                     {/* Juno's cursor */}
                     <div ref={cursor} className="pointer-events-none absolute left-0 top-0 z-30" style={{ opacity: 0 }}>
-                      <span ref={ripple} className="absolute -left-4 -top-4 size-8 rounded-full bg-[#8F7CFF]" style={{ opacity: 0 }} />
-                      <MousePointer2 size={22} strokeWidth={1.5} className="relative -translate-x-[3px] -translate-y-[2px] fill-[#8F7CFF] text-white drop-shadow-[0_3px_8px_rgba(0,0,0,0.35)]" />
-                      <span className="absolute left-4 top-5 whitespace-nowrap rounded-full bg-[#8F7CFF] px-2 py-0.5 text-[11px] font-semibold text-white shadow-[0_6px_16px_-6px_rgba(0,0,0,0.5)]">
+                      <span ref={ripple} className="absolute -left-3 -top-3 size-6 rounded-full border-2 border-[#8F7CFF]" style={{ opacity: 0 }} />
+                      <MousePointer2 size={26} strokeWidth={1.5} className="relative -translate-x-[3px] -translate-y-[2px] fill-[#5b74ff] text-white drop-shadow-[0_3px_8px_rgba(0,0,0,0.35)]" />
+                      <span className="absolute left-5 top-6 inline-flex items-center gap-2 whitespace-nowrap rounded-full bg-[#1b2134] py-1 pl-1 pr-3.5 text-[14px] font-medium text-white shadow-[0_10px_24px_-8px_rgba(0,0,0,0.7)] ring-1 ring-white/10">
+                        <MascotMark size={26} />
                         Juno
                       </span>
                     </div>

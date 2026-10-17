@@ -7,7 +7,6 @@ Each one is tagged in code with `data-placeholder="true"` and/or a `// PLACEHOLD
 | --- | --- | --- |
 | FAQ 5: Is our data secure? | `lib/story.ts` (`faqs`) | Answer pending. |
 | FAQ 6: How much does it cost? | `lib/story.ts` (`faqs`) | Answer pending. |
-| Free plan or trial line | `components/chapters/Ch7Close.tsx` | Line under the final CTA. |
 | Link targets (`#get`, `#download`, `#signin`, footer links) | `components/ui/Nav.tsx`, `Footer.tsx`, chapters | Point at real routes when available. |
 | Vendor portal in "A computer of its own" (`billing.cloudhost.example`) | `components/chapters/ChComputer.tsx` | Fictional vendor, kept generic on purpose. |
 | Demo story world (Orbit, Maya Chen, customers, numbers) | `lib/story.ts` | Fictional by design; keep consistent. |
