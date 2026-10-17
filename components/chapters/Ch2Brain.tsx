@@ -18,7 +18,6 @@ const groups: { id: string; label: string; tools: ToolId[]; dot: string }[] = [
   { id: "market", label: "Market", tools: ["analytics", "notion"], dot: "#F9AB00" },
 ];
 const groupOf = (id: ToolId) => groups.find((g) => g.tools.includes(id))!;
-const areaAngle = (i: number) => -90 + (i * 360) / groups.length;
 
 /** The packet's color as it leaves each tool. */
 const pulseColor: Record<ToolId, string> = {
@@ -39,8 +38,8 @@ const pulseColor: Record<ToolId, string> = {
 
 /** Same diagram on every screen; mobile uses roomier proportions so it stays legible. */
 const GEO = {
-  desktop: { C: 360, R: 228, NODE: 28, AR: 302, CORE: 66, font: 17, spread: 24, logo: 22, dash: 46, vb: [-40, 0, 800, 720], mascot: 112, label: 7.4 },
-  mobile: { C: 200, R: 124, NODE: 23, AR: 182, CORE: 50, font: 16, spread: 28, logo: 20, dash: 30, vb: [-60, -22, 520, 444], mascot: 80, label: 8.7 },
+  desktop: { C: 360, R: 228, NODE: 28, AR: 302, CORE: 66, font: 17, logo: 22, dash: 46, vb: [-40, 0, 800, 720], mascot: 112, label: 7.4 },
+  mobile: { C: 200, R: 124, NODE: 23, AR: 182, CORE: 50, font: 16, logo: 20, dash: 30, vb: [-60, -22, 520, 444], mascot: 80, label: 8.7 },
 };
 
 const rad = (d: number) => (d * Math.PI) / 180;
@@ -63,18 +62,21 @@ const useMobile = () =>
 function geometry(mobile: boolean) {
   const g = mobile ? GEO.mobile : GEO.desktop;
   const pt = (r: number, deg: number) => ({ x: r2(g.C + Math.cos(rad(deg)) * r), y: r2(g.C + Math.sin(rad(deg)) * r) });
-  // each area's tools are spread around that area's angle
-  const nodes = groups.flatMap((k, gi) =>
-    k.tools.map((id, ti) => {
-      const deg = areaAngle(gi) + (ti - (k.tools.length - 1) / 2) * g.spread;
-      const p = pt(g.R, deg);
-      const s = pt(g.R - g.NODE - 6, deg);
-      const e = pt(g.CORE, deg);
-      return { id, deg, ...p, line: { x1: s.x, y1: s.y, x2: e.x, y2: e.y }, len: r2(Math.hypot(e.x - s.x, e.y - s.y)) };
-    }),
-  );
-  const labels = groups.map((k, i) => {
-    const deg = areaAngle(i);
+  // every tool sits the same distance apart around the ring, in area order, Customers on top
+  const all = groups.flatMap((k) => k.tools);
+  const step = 360 / all.length;
+  const first = -90 - ((groups[0].tools.length - 1) / 2) * step;
+  const angle = (id: ToolId) => first + all.indexOf(id) * step;
+  const nodes = all.map((id) => {
+    const deg = angle(id);
+    const p = pt(g.R, deg);
+    const s = pt(g.R - g.NODE - 6, deg);
+    const e = pt(g.CORE, deg);
+    return { id, deg, ...p, line: { x1: s.x, y1: s.y, x2: e.x, y2: e.y }, len: r2(Math.hypot(e.x - s.x, e.y - s.y)) };
+  });
+  // each area's name is centered on its group of tools
+  const labels = groups.map((k) => {
+    const deg = (angle(k.tools[0]) + angle(k.tools[k.tools.length - 1])) / 2;
     return { ...k, deg, pos: pt(g.AR, deg) };
   });
   return { g, nodes, labels };
