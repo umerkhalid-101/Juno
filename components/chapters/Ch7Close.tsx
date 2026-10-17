@@ -376,7 +376,7 @@ export function Ch7Close() {
       >
         <div
           aria-hidden
-          className="pointer-events-none absolute inset-0 [mask-image:linear-gradient(to_bottom,transparent,#000_22%)]"
+          className="pointer-events-none absolute inset-0 [mask-image:linear-gradient(to_bottom,transparent,#000_22%,#000_78%,transparent)]"
         >
           <div
             className="close-glow absolute left-1/2 top-[30%] size-[420px] -translate-x-1/2 -translate-y-1/2 rounded-full blur-[80px] md:size-[620px]"

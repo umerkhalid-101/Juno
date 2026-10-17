@@ -92,11 +92,6 @@ export function Ch0Promise() {
       onPointerEnter={() => tracking && mascot.current?.look(0, 0)}
       onPointerLeave={() => mascot.current?.look(0, 0)}
     >
-      {/* soft fade into the next section */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-x-0 bottom-0 z-[1] h-24 bg-gradient-to-b from-transparent to-bg"
-      />
 
       <div className="container-page relative z-[2] flex min-h-[calc(100svh-96px)] flex-col items-center justify-center pb-6 text-center">
         <HeroOrbit

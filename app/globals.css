@@ -371,7 +371,7 @@
   height: 62vmax;
   left: -18vmax;
   top: -22vmax;
-  background: radial-gradient(closest-side, rgba(52, 86, 255, 0.16), transparent);
+  background: radial-gradient(closest-side, rgba(52, 86, 255, 0.055), transparent);
   animation: drift-a 46s ease-in-out infinite alternate;
 }
 .ambient-b {
@@ -379,7 +379,7 @@
   height: 56vmax;
   right: -20vmax;
   top: 20vh;
-  background: radial-gradient(closest-side, rgba(120, 84, 255, 0.12), transparent);
+  background: radial-gradient(closest-side, rgba(120, 84, 255, 0.04), transparent);
   animation: drift-b 58s ease-in-out infinite alternate;
 }
 .ambient-c {
@@ -387,7 +387,7 @@
   height: 50vmax;
   left: 20vw;
   bottom: -30vmax;
-  background: radial-gradient(closest-side, rgba(40, 170, 210, 0.08), transparent);
+  background: radial-gradient(closest-side, rgba(40, 170, 210, 0.025), transparent);
   animation: drift-c 64s ease-in-out infinite alternate;
 }
 @keyframes drift-a {
