@@ -91,7 +91,7 @@ export function HeroOrbit({
       const w = el.clientWidth;
       const h = el.clientHeight;
       const mobile = w < 640;
-      const r = mobile ? { rx: w * 0.2, ry: h * 0.4 } : { rx: Math.min(430, w * 0.38), ry: h * 0.38 };
+      const r = mobile ? { rx: w * 0.32, ry: h * 0.4 } : { rx: Math.min(430, w * 0.38), ry: h * 0.38 };
       const cx = w / 2;
       const cy = h / 2;
       let best = { work: 0, x: 0, y: 0, top: 0 };
@@ -100,7 +100,8 @@ export function HeroOrbit({
         if (!node) return;
         // every chip keeps its place on the orbit, even while hidden, so they never bunch up
         if (startedRef.current && !reduce) s.a = (s.a + dt * speed.current * 0.13) % TAU;
-        if (mobile && i % 2 === 1) {
+        // phones show two chips on opposite sides of the orbit, so they can never collide
+        if (mobile && i % 3 !== 0) {
           node.style.opacity = "0";
           return;
         }
@@ -123,7 +124,7 @@ export function HeroOrbit({
         node.dataset.working = wk > 0.02 ? "true" : "false";
         node.style.setProperty("--work", String(wk));
         if (wk > best.work) best = { work: wk, x, y, top: y - node.offsetHeight / 2 };
-        node.style.transform = `translate3d(${x}px, ${y}px, 0) translate(-50%, -50%) scale(${0.78 + k * 0.22})`;
+        node.style.transform = `translate3d(${x}px, ${y}px, 0) translate(-50%, -50%) scale(${(0.78 + k * 0.22) * (mobile ? 0.86 : 1)})`;
         node.style.opacity = startedRef.current ? String(0.16 + k * 0.84) : "0";
         node.style.zIndex = depth > 0 ? "30" : "5";
         node.style.filter = depth < -0.1 ? `blur(${(-depth - 0.1) * 2.2}px)` : "none";

@@ -14,20 +14,62 @@ const links = [
   { label: "Contact", href: "#" },
 ];
 
-/** The close of the page: one line, a handful of links, then the wordmark Juno peeks over. */
+/** What you get back while Juno runs the work. */
+const beats = [
+  "You run the company.",
+  "You close the round.",
+  "You ship the launch.",
+  "You take the weekend.",
+];
+
+/** The close of the page: the promise, a row of links, then the wordmark Juno peeks over. */
 export function Footer() {
+  const reduce = useReducedMotion();
+  const [i, setI] = useState(0);
+  useEffect(() => {
+    if (reduce) return;
+    const id = window.setInterval(() => setI((n) => (n + 1) % beats.length), 3200);
+    return () => window.clearInterval(id);
+  }, [reduce]);
+  const beat = beats[i];
+
   return (
     <footer className="relative">
-      <div className="container-page flex flex-col gap-10 pt-20 md:flex-row md:items-end md:justify-between md:pt-28">
-        <p className="text-[30px] font-semibold leading-[1.05] tracking-[-0.035em] text-text md:text-[44px]">
+      {/* one centred composition that leads straight into the wordmark */}
+      <div className="container-page flex flex-col items-center pt-24 text-center md:pt-36">
+        <p className="text-[30px] font-semibold leading-[1.04] tracking-[-0.04em] text-text sm:text-[48px] md:text-[64px]">
           Juno runs the work.
-          <Rotating />
+          <span className="relative block h-[1.1em] overflow-hidden">
+            <AnimatePresence mode="popLayout" initial={false}>
+              <motion.span key={i} className="block whitespace-nowrap text-[#B4C2FF]">
+                {beat.split(" ").map((w, k, all) => (
+                  <motion.span
+                    key={k}
+                    className="inline-block"
+                    initial={{ y: "110%", opacity: 0, filter: "blur(10px)" }}
+                    animate={{ y: "0%", opacity: 1, filter: "blur(0px)" }}
+                    exit={{
+                      y: "-110%",
+                      opacity: 0,
+                      filter: "blur(10px)",
+                      transition: { duration: 0.4, delay: k * 0.03, ease: [0.4, 0, 1, 1] },
+                    }}
+                    transition={{ duration: 0.7, delay: 0.15 + k * 0.07, ease: [0.16, 1, 0.3, 1] }}
+                  >
+                    {w}
+                    {k < all.length - 1 ? "\u00A0" : ""}
+                  </motion.span>
+                ))}
+              </motion.span>
+            </AnimatePresence>
+          </span>
         </p>
-        <nav aria-label="Footer">
-          <ul className="grid grid-cols-3 gap-x-10 gap-y-3 md:gap-x-12">
+
+        <nav aria-label="Footer" className="mt-10 md:mt-12">
+          <ul className="flex flex-wrap items-center justify-center gap-x-8 gap-y-3 text-[15px] md:gap-x-10 md:text-[16px]">
             {links.map((l) => (
               <li key={l.label}>
-                <a href={l.href} className="group inline-block py-1 text-[15px] md:text-[16px]">
+                <a href={l.href} className="group inline-block py-1">
                   <Roll text={l.label} />
                 </a>
               </li>
@@ -61,40 +103,6 @@ export function Footer() {
         </span>
       </div>
     </footer>
-  );
-}
-
-/** What you get back while Juno runs the work, one at a time. */
-const lines = [
-  "You run the company.",
-  "You close the round.",
-  "You ship the launch.",
-  "You take the weekend.",
-];
-
-function Rotating() {
-  const reduce = useReducedMotion();
-  const [i, setI] = useState(0);
-  useEffect(() => {
-    if (reduce) return;
-    const id = window.setInterval(() => setI((n) => (n + 1) % lines.length), 2800);
-    return () => window.clearInterval(id);
-  }, [reduce]);
-  return (
-    <span className="relative block h-[1.12em] overflow-hidden">
-      <AnimatePresence mode="popLayout" initial={false}>
-        <motion.span
-          key={i}
-          className="accent-text block whitespace-nowrap pb-[0.06em]"
-          initial={{ y: "100%", opacity: 0, filter: "blur(6px)" }}
-          animate={{ y: "0%", opacity: 1, filter: "blur(0px)" }}
-          exit={{ y: "-100%", opacity: 0, filter: "blur(6px)" }}
-          transition={{ duration: 0.6, ease: [0.2, 0.8, 0.2, 1] }}
-        >
-          {lines[i]}
-        </motion.span>
-      </AnimatePresence>
-    </span>
   );
 }
 
