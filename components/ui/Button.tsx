@@ -5,8 +5,9 @@ import { motion, useMotionValue, useSpring, useReducedMotion } from "motion/reac
 
 type Props = {
   href?: string;
-  variant?: "primary" | "secondary";
-  size?: "sm" | "md" | "lg";
+  /** "white" is the brief's primary pill (hero and computer sections). */
+  variant?: "primary" | "secondary" | "white";
+  size?: "sm" | "md" | "lg" | "xl";
   magnetic?: boolean;
   icon?: ReactNode;
   trailing?: ReactNode;
@@ -20,6 +21,7 @@ const sizes = {
   sm: "h-10 px-4",
   md: "h-12 px-6",
   lg: "h-[52px] px-6",
+  xl: "h-14 px-7",
 };
 
 /** Primary: white pill, magnetic (drifts up to 6px toward cursor), lifts 1px with a 30% blue ring. */
@@ -27,7 +29,7 @@ export function Button({
   href = "#",
   variant = "primary",
   size = "md",
-  magnetic = variant === "primary",
+  magnetic = variant !== "secondary",
   icon,
   trailing,
   children,
@@ -61,9 +63,11 @@ export function Button({
   const base =
     "relative inline-flex select-none items-center justify-center gap-2 rounded-full t-button whitespace-nowrap transition-[background-color,box-shadow,border-color,color] duration-200 ease-out";
   const look =
-    variant === "primary"
-      ? "bg-[#A6BBFF] text-[#07111F] hover:bg-[#BCCBFF] hover:shadow-[0_0_0_4px_rgba(166,187,255,0.22)]"
-      : "border border-white/10 bg-white/[0.06] text-text hover:bg-white/[0.1]";
+    variant === "white"
+      ? "bg-[#F4F6F8] text-[#07090D] hover:shadow-[0_0_0_4px_rgba(50,76,255,0.3),0_10px_30px_-8px_rgba(50,76,255,0.45)]"
+      : variant === "primary"
+        ? "bg-[#A6BBFF] text-[#07111F] hover:bg-[#BCCBFF] hover:shadow-[0_0_0_4px_rgba(166,187,255,0.22)]"
+        : "border border-white/10 bg-white/[0.06] text-text hover:bg-white/[0.1]";
 
   return (
     <motion.a

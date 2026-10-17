@@ -39,6 +39,8 @@ type Props = {
   trackCursor?: boolean;
   /** Max eye travel in CSS px for look() and lookAt(). Cursor tracking caps at 4px. */
   travel?: number;
+  /** Max eye travel in CSS px while following the cursor. */
+  trackTravel?: number;
   halo?: boolean;
   autoBlink?: boolean;
   className?: string;
@@ -72,6 +74,7 @@ export function Mascot({
   state: initialState = "idle",
   trackCursor = false,
   travel,
+  trackTravel,
   halo = true,
   autoBlink = true,
   className = "",
@@ -90,7 +93,7 @@ export function Mascot({
 
   const pxToVb = VB / size;
   const lookTravel = (travel ?? Math.max(4, size * 0.05)) * pxToVb;
-  const cursorTravel = Math.min(9, Math.max(4, size * 0.055)) * pxToVb;
+  const cursorTravel = (trackTravel ?? Math.min(9, Math.max(4, size * 0.055))) * pxToVb;
 
   const eyeXRaw = useMotionValue(0);
   const eyeYRaw = useMotionValue(0);
