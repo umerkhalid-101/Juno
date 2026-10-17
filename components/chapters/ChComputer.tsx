@@ -70,10 +70,10 @@ export function ChComputer() {
   const canvas = useRef<HTMLDivElement>(null);
   const cursor = useRef<HTMLDivElement>(null);
   const ripple = useRef<HTMLSpanElement>(null);
+  const bar = useRef<HTMLSpanElement>(null);
 
   const [si, setSi] = useState(0);
   const [t, setT] = useState(finalT(scenarios[0]));
-  const [rt, setRt] = useState(unwarp(scenarios[0], finalT(scenarios[0])));
   const [scale, setScale] = useState(1);
   const [inView, setInView] = useState(false);
   const [hover, setHover] = useState(false);
@@ -108,6 +108,57 @@ export function ChComputer() {
     };
   }, []);
 
+  // Juno's cursor: eased curves between targets, a ripple on each click. Drawn every frame from the
+  // exact clock, straight to the DOM, so it glides at full frame rate without re-rendering the scene.
+  const place = (sc: Scenario, t: number, rt: number) => {
+    if (bar.current) bar.current.style.transform = `scaleX(${Math.min(1, rt / realDuration())})`;
+    const cv = canvas.current;
+    const cur = cursor.current;
+    if (!cv || !cur) return;
+    const box = cv.getBoundingClientRect();
+    const k = box.width / CANVAS.w || 1;
+    const at = (target: string, fallback: { x: number; y: number }) => {
+      const el = cv.querySelector<HTMLElement>(`[data-c="${target}"]`);
+      if (!el) return fallback;
+      const r = el.getBoundingClientRect();
+      return { x: (r.left - box.left + Math.min(r.width * 0.5, 60)) / k, y: (r.top - box.top + r.height * 0.6) / k };
+    };
+    const keys = sc.cursor;
+    let pos = { x: 420, y: 330 };
+    let prevAt = 0;
+    for (let i = 0; i < keys.length; i++) {
+      const kf = keys[i];
+      if (t >= kf.at) {
+        // only measure targets we have reached or are heading to
+        if (i === keys.length - 1 || t < keys[i + 1].at - 0.75) pos = at(kf.target, pos);
+        prevAt = kf.at;
+        continue;
+      }
+      const target = at(kf.target, pos);
+      const start = Math.max(prevAt + 0.15, kf.at - 0.75);
+      const p = easeInOut(prog(t, start, kf.at));
+      const dx = target.x - pos.x;
+      const dy = target.y - pos.y;
+      const bend = Math.sin(Math.PI * p) * Math.min(48, Math.hypot(dx, dy) * 0.16);
+      const len = Math.hypot(dx, dy) || 1;
+      pos = { x: pos.x + dx * p + (-dy / len) * bend, y: pos.y + dy * p + (dx / len) * bend };
+      break;
+    }
+    const fade = Math.min(prog(t, 0.2, 0.5), 1 - prog(t, sc.duration - FADE, sc.duration));
+    cur.style.transform = `translate3d(${pos.x}px, ${pos.y}px, 0)`;
+    cur.style.opacity = String(fade);
+    const click = [...keys].reverse().find((kf) => kf.click && t >= kf.at);
+    const rp = click ? prog(t, click.at, click.at + 0.45) : 1;
+    if (ripple.current) {
+      ripple.current.style.transform = `scale(${0.3 + rp * 2.2})`;
+      ripple.current.style.opacity = String(rp < 1 ? 0.7 * (1 - rp) : 0);
+    }
+  };
+  const placeRef = useRef(place);
+  useLayoutEffect(() => {
+    placeRef.current = place;
+  });
+
   // the clock
   useEffect(() => {
     if (!running) return;
@@ -119,7 +170,6 @@ export function ChComputer() {
     let raf = 0;
     let last = performance.now();
     let lastPaint = -1;
-    let lastRt = -1;
     const tick = (now: number) => {
       const dt = Math.min(0.1, (now - last) / 1000);
       last = now;
@@ -130,16 +180,15 @@ export function ChComputer() {
         c.rt = 0;
         setSi(c.si);
       }
-      const q = Math.round(warp(scenarios[c.si], c.rt) * 30) / 30;
+      const sc = scenarios[c.si];
+      const exact = warp(sc, c.rt);
+      // the scene itself only needs about 20 updates a second (typing, rows, checks)
+      const q = Math.round(exact * 20) / 20;
       if (q !== lastPaint) {
         lastPaint = q;
         setT(q);
       }
-      const qr = Math.round(c.rt * 30) / 30;
-      if (qr !== lastRt) {
-        lastRt = qr;
-        setRt(qr);
-      }
+      placeRef.current(sc, exact, c.rt);
       raf = requestAnimationFrame(tick);
     };
     raf = requestAnimationFrame(tick);
@@ -155,7 +204,6 @@ export function ChComputer() {
         started.current = true;
         setSi(i);
         setT(at);
-        setRt(clockRef.current.rt);
       },
     });
   }, []);
@@ -166,52 +214,14 @@ export function ChComputer() {
     clockRef.current = { si: i, rt: unwarp(scenarios[i], next) };
     setSi(i);
     setT(next);
-    setRt(clockRef.current.rt);
   };
 
-  // Juno's cursor: eased curves between targets, a ripple on each click. Derived from t.
+  // when paused, seeking or resizing, draw the cursor and progress for the current frame
   useLayoutEffect(() => {
-    const cv = canvas.current;
-    const cur = cursor.current;
-    if (!cv || !cur) return;
-    const box = cv.getBoundingClientRect();
-    const k = box.width / CANVAS.w || 1;
-    const at = (target: string, fallback: { x: number; y: number }) => {
-      const el = cv.querySelector<HTMLElement>(`[data-c="${target}"]`);
-      if (!el) return fallback;
-      const r = el.getBoundingClientRect();
-      return { x: (r.left - box.left + Math.min(r.width * 0.5, 60)) / k, y: (r.top - box.top + r.height * 0.6) / k };
-    };
-    const keys = s.cursor;
-    let pos = { x: 420, y: 330 };
-    let prevAt = 0;
-    for (let i = 0; i < keys.length; i++) {
-      const kf = keys[i];
-      const target = at(kf.target, pos);
-      if (t >= kf.at) {
-        pos = target;
-        prevAt = kf.at;
-        continue;
-      }
-      const start = Math.max(prevAt + 0.15, kf.at - 0.75);
-      const p = easeInOut(prog(t, start, kf.at));
-      const dx = target.x - pos.x;
-      const dy = target.y - pos.y;
-      const bend = Math.sin(Math.PI * p) * Math.min(48, Math.hypot(dx, dy) * 0.16);
-      const len = Math.hypot(dx, dy) || 1;
-      pos = { x: pos.x + dx * p + (-dy / len) * bend, y: pos.y + dy * p + (dx / len) * bend };
-      break;
-    }
-    const fade = Math.min(prog(t, 0.2, 0.5), 1 - prog(t, s.duration - FADE, s.duration));
-    cur.style.transform = `translate3d(${pos.x}px, ${pos.y}px, 0)`;
-    cur.style.opacity = String(fade);
-    const click = [...keys].reverse().find((kf) => kf.click && t >= kf.at);
-    const rp = click ? prog(t, click.at, click.at + 0.45) : 1;
-    if (ripple.current) {
-      ripple.current.style.transform = `scale(${0.3 + rp * 2.2})`;
-      ripple.current.style.opacity = String(rp < 1 ? 0.7 * (1 - rp) : 0);
-    }
-  }, [t, si, s, scale]);
+    if (running) return;
+    place(s, t, clockRef.current.rt);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [t, si, scale, running]);
 
   const asking = t >= s.askAt;
   const fadeOut = 1 - prog(t, s.duration - FADE, s.duration);
@@ -253,7 +263,7 @@ export function ChComputer() {
                     {sc.tab}
                     {on && (
                       <span aria-hidden className="absolute inset-x-4 bottom-1.5 h-px overflow-hidden rounded-full bg-white/10">
-                        <span className="block h-full origin-left bg-[#F4F6F8]" style={{ transform: `scaleX(${reduce ? 1 : Math.min(1, rt / realDuration())})` }} />
+                        <span ref={bar} className="block h-full origin-left bg-[#F4F6F8]" style={{ transform: reduce ? "scaleX(1)" : "scaleX(0)" }} />
                       </span>
                     )}
                   </button>
