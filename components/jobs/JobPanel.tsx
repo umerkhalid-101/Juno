@@ -20,6 +20,7 @@ import { ToolLogo } from "@/components/ui/ToolLogo";
 import { CTA_HREF, CTA_LABEL } from "@/lib/site";
 import { groups, jobs, type Job, type Source } from "@/lib/jobs";
 import { GoLink, JobVisual } from "./visuals";
+import { JobScene, worlds } from "./scenes";
 
 const WEEK = ["M", "T", "W", "T", "F"];
 const BEATS = ["Ask", "Rhythm", "Juno works", "Your call"] as const;
@@ -255,82 +256,6 @@ function StoryPlayer({ job }: { job: Job }) {
   );
 }
 
-/* ------------------------------------------------------------------ the job itself, as a setting */
-
-function JobSettings({ job }: { job: Job }) {
-  const reduce = useReducedMotion();
-  const [on, setOn] = useState(!!reduce);
-  useEffect(() => {
-    if (reduce) return;
-    const id = window.setTimeout(() => setOn(true), 500);
-    return () => window.clearTimeout(id);
-  }, [reduce]);
-  return (
-    <div className="flex h-full flex-col gap-4 text-[13px]">
-      <div className="flex items-center justify-between">
-        <span className="flex items-center gap-2 text-[14px] font-medium text-text">
-          <MascotMark size={20} />
-          Job
-        </span>
-        <span className="t-eyebrow inline-flex h-6 items-center gap-1.5 rounded-md bg-[#3DD68C]/10 px-2 !text-[10px] text-[#3DD68C]">
-          <span className="size-1.5 rounded-full bg-[#3DD68C]" />
-          Active
-        </span>
-      </div>
-      <div>
-        <p className="t-eyebrow mb-1.5 !text-[10px] text-subtle">Instruction</p>
-        <p className="rounded-xl bg-white/[0.04] p-3 leading-[19px] text-text ring-1 ring-white/[0.08]">
-          {job.ask}
-        </p>
-      </div>
-      <div>
-        <p className="t-eyebrow mb-1.5 !text-[10px] text-subtle">Schedule</p>
-        {job.days.length > 0 ? (
-          <div className="flex gap-1.5">
-            {WEEK.map((d, k) => (
-              <span
-                key={k}
-                className={`t-eyebrow grid h-8 flex-1 place-items-center rounded-md border !text-[10.5px] transition-colors duration-[120ms] ${
-                  on && job.days.includes(k)
-                    ? "border-[#7A8FFF]/40 bg-[#324CFF]/15 text-[#A6BBFF]"
-                    : "border-white/[0.08] text-subtle"
-                }`}
-                style={{ transitionDelay: `${job.days.indexOf(k) * 60}ms` }}
-              >
-                {d}
-              </span>
-            ))}
-          </div>
-        ) : null}
-        <p className="mt-2 text-muted">{job.when}</p>
-      </div>
-      <div>
-        <p className="t-eyebrow mb-1.5 !text-[10px] text-subtle">Connected</p>
-        <ul className="divide-y divide-white/[0.06] rounded-xl ring-1 ring-white/[0.08]">
-          {job.connects.map((s, k) => (
-            <li key={s} className="flex items-center gap-2.5 px-3 py-2.5">
-              <span className="grid size-6 place-items-center rounded-md bg-white">
-                <SourceMark src={s} size={13} />
-              </span>
-              <span className="flex-1 text-text">{toolLabel(s)}</span>
-              <span
-                aria-label={on ? "On" : "Off"}
-                className={`relative h-5 w-9 rounded-full transition-colors duration-[120ms] ${on ? "bg-[#324CFF]" : "bg-white/10"}`}
-                style={{ transitionDelay: `${k * 80}ms` }}
-              >
-                <span
-                  className={`absolute top-0.5 size-4 rounded-full bg-white transition-transform duration-[120ms] [transition-timing-function:cubic-bezier(0.3,0,0,1)] ${on ? "translate-x-[18px]" : "translate-x-0.5"}`}
-                  style={{ transitionDelay: `${k * 80}ms` }}
-                />
-              </span>
-            </li>
-          ))}
-        </ul>
-      </div>
-    </div>
-  );
-}
-
 /* ------------------------------------------------------------------ the opened card */
 
 export function JobPanel({
@@ -353,6 +278,7 @@ export function JobPanel({
   const i = jobs.findIndex((j) => j.slug === slug);
   const job = jobs[i];
   const group = groups.find((g) => g.id === job.group)!;
+  const tint = worlds[job.slug];
   const gi = groups.indexOf(group);
   const nextGroup = groups[(gi + 1) % groups.length];
   const related = [
@@ -435,7 +361,9 @@ export function JobPanel({
               {/* A. header */}
               <div className="grid gap-10 px-5 pb-12 pt-16 md:grid-cols-12 md:px-12 md:pt-12">
                 <div className="md:col-span-7">
-                  <p className="t-eyebrow text-muted">{group.tab}</p>
+                  <p className="t-eyebrow" style={{ color: `rgb(${tint.a})` }}>
+                    {group.tab}
+                  </p>
                   <h2
                     id="job-title"
                     className="t-h2 mt-4 max-w-[18ch] text-balance md:text-[44px] md:leading-[48px]"
@@ -470,7 +398,10 @@ export function JobPanel({
                   <ul className="mt-4 space-y-3">
                     {job.handles.map((h) => (
                       <li key={h} className="flex items-start gap-3 text-[15px] text-text">
-                        <span className="mt-0.5 grid size-5 shrink-0 place-items-center rounded-full bg-[#3DD68C]/12 text-[#3DD68C]">
+                        <span
+                          className="mt-0.5 grid size-5 shrink-0 place-items-center rounded-full"
+                          style={{ background: `rgba(${tint.a},0.16)`, color: `rgb(${tint.a})` }}
+                        >
                           <Check size={12} strokeWidth={3} aria-hidden />
                         </span>
                         {h}
@@ -480,13 +411,18 @@ export function JobPanel({
                 </div>
               </div>
 
-              {/* B. the handoff */}
-              <div className="mx-5 grid gap-4 rounded-[28px] border border-white/[0.08] bg-[#151A22] p-4 md:mx-12 md:grid-cols-[minmax(0,1.55fr)_minmax(0,1fr)] md:p-5">
-                <div className="h-[560px] rounded-[20px] border border-white/[0.06] bg-[#0B0E14] p-5">
-                  <StoryPlayer key={slug} job={job} />
+              {/* B. the handoff: the job's own world, its product, and the conversation */}
+              <div
+                className="relative mx-5 grid gap-4 overflow-hidden rounded-[28px] border border-white/[0.08] p-4 md:mx-12 md:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)] md:p-5"
+                style={{
+                  background: `radial-gradient(80% 90% at 30% 110%, rgba(${tint.a},0.38), rgba(${tint.b},0.14) 50%, transparent 80%), #11151d`,
+                }}
+              >
+                <div className="relative h-[440px] overflow-hidden rounded-[20px] md:h-[560px]">
+                  <JobScene key={slug} slug={job.slug} big />
                 </div>
-                <div className="rounded-[20px] border border-white/[0.06] bg-[#0B0E14] p-5">
-                  <JobSettings key={slug} job={job} />
+                <div className="h-[560px] rounded-[20px] border border-white/[0.06] bg-[#0B0E14]/90 p-5 backdrop-blur">
+                  <StoryPlayer key={slug} job={job} />
                 </div>
               </div>
 
@@ -518,9 +454,12 @@ export function JobPanel({
                       onClick={() => onGo(r.slug)}
                       className="group overflow-hidden rounded-[20px] border border-white/[0.08] bg-[#0B0E14] text-left transition-colors hover:border-white/[0.16]"
                     >
-                      <span className="relative block h-[180px] overflow-hidden">
-                        <span className="absolute left-5 top-5 block origin-top-left scale-[0.62]">
-                          <JobVisual slug={r.slug} />
+                      <span className="relative block h-[200px] overflow-hidden">
+                        <span
+                          className="absolute inset-0 origin-top-left scale-[0.72]"
+                          style={{ width: "139%", height: "139%" }}
+                        >
+                          <JobScene slug={r.slug} />
                         </span>
                       </span>
                       <span className="block border-t border-white/[0.06] p-5">

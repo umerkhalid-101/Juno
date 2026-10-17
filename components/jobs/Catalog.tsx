@@ -1,11 +1,11 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { AnimatePresence, LayoutGroup, motion, useReducedMotion } from "motion/react";
+import { AnimatePresence, LayoutGroup, motion, useInView, useReducedMotion } from "motion/react";
 import { Maximize2 } from "lucide-react";
 import { Reveal } from "@/components/ui/Reveal";
 import { groups, jobs, type GroupId, type Job } from "@/lib/jobs";
-import { JobVisual } from "./visuals";
+import { JobScene } from "./scenes";
 import { JobPanel } from "./JobPanel";
 
 /**
@@ -54,26 +54,28 @@ function JobCard({
   onOpen: (slug: string, el: HTMLElement) => void;
   hidden: boolean;
 }) {
-  const [live, setLive] = useState(false);
   const reduce = useReducedMotion();
-  const wide = cls.includes("row-span-2");
+  const ref = useRef<HTMLButtonElement>(null);
+  const seen = useInView(ref, { amount: 0.25 });
+  const big = cls.includes("row-span-2");
   return (
     <motion.button
+      ref={ref}
       layoutId={reduce ? undefined : `job-${job.slug}`}
       type="button"
       data-job={job.slug}
       onClick={(e) => onOpen(job.slug, e.currentTarget)}
-      onPointerEnter={(e) => e.pointerType === "mouse" && setLive(true)}
-      onPointerLeave={() => setLive(false)}
-      onFocus={() => setLive(true)}
-      onBlur={() => setLive(false)}
       whileHover={reduce ? undefined : { scale: 1.01 }}
       transition={{ duration: 0.45, ease: [0.2, 0.8, 0.2, 1] }}
-      className={`group relative flex h-[420px] flex-col items-stretch justify-start overflow-hidden rounded-[20px] border border-white/[0.08] bg-[#0E1218] text-left transition-[border-color] duration-200 hover:border-white/[0.16] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#009CFF] focus-visible:ring-offset-2 focus-visible:ring-offset-[#07090D] md:h-[440px] lg:h-auto ${cls} ${hidden ? "opacity-0" : ""}`}
+      className={`group relative isolate flex h-[420px] flex-col items-stretch justify-start overflow-hidden rounded-[20px] border border-white/[0.08] bg-[#0E1218] text-left transition-[border-color] duration-200 hover:border-white/[0.18] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#009CFF] focus-visible:ring-offset-2 focus-visible:ring-offset-[#07090D] md:h-[440px] lg:h-auto ${cls} ${hidden ? "opacity-0" : ""}`}
       title="See the handoff"
     >
+      {/* the job's own world: colour, product, motion */}
+      <span aria-hidden className="pointer-events-none absolute inset-0">
+        <JobScene slug={job.slug} play={seen} big={big} offset={big ? 150 : 92} />
+      </span>
       <span className="relative z-10 flex items-start justify-between gap-4 p-7 md:p-8">
-        <span className="t-h3 line-clamp-2 max-w-[17ch] text-text">{job.title}</span>
+        <span className="t-h3 max-w-[17ch] text-text">{job.title}</span>
         <span className="grid size-11 shrink-0 place-items-center">
           <span className="grid size-9 place-items-center rounded-[10px] border border-white/[0.14] bg-[#151A22] text-text transition-colors duration-200 group-hover:border-[#324CFF] group-hover:bg-[#324CFF]">
             <Maximize2 size={15} strokeWidth={1.75} aria-hidden />
@@ -81,13 +83,6 @@ function JobCard({
         </span>
       </span>
       <span className="sr-only">See the handoff: {job.title}</span>
-      {/* the product moment, cropped by the card */}
-      <span
-        aria-hidden
-        className={`pointer-events-none absolute ${wide ? "left-7 top-[112px] md:left-8 lg:left-10 lg:top-[132px] lg:origin-top-left lg:scale-[1.15]" : "left-7 top-[112px] md:left-8 lg:origin-top-left lg:scale-[0.88]"}`}
-      >
-        <JobVisual slug={job.slug} live={live} />
-      </span>
     </motion.button>
   );
 }
@@ -96,7 +91,6 @@ export function Catalog() {
   const reduce = useReducedMotion();
   const [open, setOpen] = useState<string | null>(null);
   const [from, setFrom] = useState<string | null>(null);
-  const [topic, setTopic] = useState<GroupId>("grow");
   const returnFocus = useRef<HTMLElement | null>(null);
   const pushed = useRef(false);
 
@@ -166,20 +160,6 @@ export function Catalog() {
     };
   }, [openJob, close]);
 
-  // which topic's cards are in the middle of the screen
-  useEffect(() => {
-    const els = Array.from(document.querySelectorAll<HTMLElement>("[data-goal]"));
-    const io = new IntersectionObserver(
-      (entries) =>
-        entries.forEach(
-          (e) => e.isIntersecting && setTopic((e.target as HTMLElement).dataset.goal as GroupId),
-        ),
-      { rootMargin: "-45% 0px -50% 0px" },
-    );
-    els.forEach((el) => io.observe(el));
-    return () => io.disconnect();
-  }, []);
-
   const makeOwn = () => {
     close();
     window.setTimeout(
@@ -211,44 +191,22 @@ export function Catalog() {
       {/* the four goals */}
       <LayoutGroup>
         <motion.div
-          className="container-page mt-14 md:mt-20 lg:grid lg:grid-cols-12 lg:gap-5"
+          className="container-page mt-6 md:mt-10"
           animate={{ scale: open && !reduce ? 0.98 : 1 }}
           transition={{ duration: 0.45, ease: [0.2, 0.8, 0.2, 1] }}
         >
-          {/* one topic, pinned beside the cards; it changes with the cards in view */}
-          <div className="hidden lg:col-span-3 lg:block">
-            <div className="sticky top-[136px] pr-6" aria-live="polite">
-              <AnimatePresence mode="wait" initial={false}>
-                <motion.div
-                  key={topic}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  transition={{ duration: 0.35, ease: [0.2, 0.8, 0.2, 1] }}
-                >
-                  <h2 className="t-h2 max-w-[13ch] text-balance">
-                    {groups.find((g) => g.id === topic)!.title}
-                  </h2>
-                  <p className="mt-3 max-w-[30ch] text-[16px] leading-[25px] text-muted">
-                    {groups.find((g) => g.id === topic)!.sub}
-                  </p>
-                </motion.div>
-              </AnimatePresence>
-            </div>
-          </div>
-
-          <div className="space-y-20 lg:col-span-9 lg:space-y-5">
+          <div>
             {groups.map((g) => {
               const list = jobs.filter((j) => j.group === g.id);
               const l = layout[g.id];
               return (
                 <div key={g.id} id={`goal-${g.id}`} data-goal={g.id} className="scroll-mt-28">
-                  {/* phones and tablets: the topic sits above its cards */}
-                  <div className="mb-8 lg:hidden">
-                    <h2 className="t-h2 max-w-[18ch] text-balance">{g.title}</h2>
-                    <p className="mt-3 max-w-[40ch] text-[16px] leading-[25px] text-muted">
-                      {g.sub}
-                    </p>
+                  {/* a quiet section break: the topic, small, with its line beside it */}
+                  <div className="flex flex-col gap-1.5 pb-6 pt-16 md:flex-row md:items-baseline md:justify-between md:gap-8 md:pb-7 md:pt-24">
+                    <h2 className="text-[24px] font-medium leading-[1.15] tracking-[-0.025em] text-text md:text-[32px]">
+                      {g.title}
+                    </h2>
+                    <p className="text-[15px] leading-[23px] text-muted md:text-right">{g.sub}</p>
                   </div>
                   <div className={`grid gap-5 md:grid-cols-2 lg:grid-cols-12 ${l.cls}`}>
                     {list.map((j, k) => (

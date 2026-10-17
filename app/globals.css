@@ -1126,3 +1126,134 @@
     transition: none;
   }
 }
+
+/* ------------------------------------------------------------ automations: card scenes
+   One motion per card that shows the work happening. Paused unless the card is on screen. */
+.scene[data-play="false"] * {
+  animation-play-state: paused !important;
+}
+@keyframes scene-scan {
+  0%, 12% { transform: translateY(0); }
+  25%, 37% { transform: translateY(52px); }
+  50%, 62% { transform: translateY(104px); }
+  75%, 87% { transform: translateY(156px); }
+  100% { transform: translateY(0); }
+}
+.scene-scan { animation: scene-scan 6s cubic-bezier(0.3, 0, 0, 1) infinite; }
+@keyframes scene-pop {
+  0%, 18% { opacity: 0; transform: scale(1.1); }
+  24%, 88% { opacity: 1; transform: scale(1); }
+  100% { opacity: 0; transform: scale(1); }
+}
+.scene-pop { animation: scene-pop 6s cubic-bezier(0.3, 0, 0, 1) infinite; }
+@keyframes scene-type {
+  0% { max-width: 0; }
+  45%, 90% { max-width: 240px; }
+  100% { max-width: 0; }
+}
+.scene-type { animation: scene-type 6s steps(28, end) infinite; max-width: 240px; }
+@keyframes scene-rise-loop {
+  0%, 30% { opacity: 0; transform: translateY(14px); }
+  42%, 92% { opacity: 1; transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(0); }
+}
+@keyframes scene-rise-in {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.scene-rise { animation: scene-rise-in 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.25s both; }
+@keyframes scene-win {
+  0%, 30% { transform: translateY(0); box-shadow: 0 30px 60px -24px rgba(0, 0, 0, 0.75), 0 0 0 1px rgba(0, 0, 0, 0.04); }
+  45%, 90% { transform: translateY(-6px); box-shadow: 0 34px 60px -24px rgba(0, 0, 0, 0.8), 0 0 0 2px #22c55e; }
+  100% { transform: translateY(0); }
+}
+.scene-win { animation: scene-win 6s cubic-bezier(0.2, 0.8, 0.2, 1) infinite; }
+@keyframes scene-draw {
+  0%, 10% { stroke-dashoffset: 1; }
+  55%, 92% { stroke-dashoffset: 0; }
+  100% { stroke-dashoffset: 1; }
+}
+.scene-draw { stroke-dasharray: 1; animation: scene-draw 6s cubic-bezier(0.2, 0.8, 0.2, 1) infinite; }
+@keyframes scene-health {
+  0%, 15% { width: 72%; }
+  50%, 90% { width: 34%; }
+  100% { width: 72%; }
+}
+.scene-health { animation: scene-health 6s cubic-bezier(0.2, 0.8, 0.2, 1) infinite; }
+@keyframes scene-out {
+  0%, 50% { opacity: 1; }
+  56%, 94% { opacity: 0; }
+  100% { opacity: 1; }
+}
+@keyframes scene-in {
+  0%, 52% { opacity: 0; transform: scale(1.1); }
+  58%, 94% { opacity: 1; transform: scale(1); }
+  100% { opacity: 0; }
+}
+.scene-out { animation: scene-out 6s linear infinite; }
+.scene-in { animation: scene-in 6s cubic-bezier(0.3, 0, 0, 1) infinite; }
+@keyframes scene-fill {
+  0%, 10% { transform: scaleX(0.5); }
+  45%, 92% { transform: scaleX(1); }
+  100% { transform: scaleX(0.5); }
+}
+.scene-fill { transform-origin: left; animation: scene-fill 6s cubic-bezier(0.2, 0.8, 0.2, 1) infinite; }
+@keyframes scene-ring {
+  0%, 40% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); }
+  50%, 90% { box-shadow: 0 0 0 6px rgba(245, 158, 11, 0.22); }
+  100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); }
+}
+.scene-ring { animation: scene-ring 6s ease-in-out infinite; }
+@keyframes scene-drop {
+  0%, 8% { opacity: 0; transform: translateY(-14px); }
+  20%, 92% { opacity: 1; transform: translateY(0); }
+  100% { opacity: 0; }
+}
+@keyframes scene-drop-in {
+  from { opacity: 0; transform: translateY(-14px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.scene-drop { animation: scene-drop-in 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.2s both; }
+@keyframes scene-mark {
+  0%, 15% { transform: scaleX(0); }
+  40%, 92% { transform: scaleX(1); }
+  100% { transform: scaleX(0); }
+}
+.scene-mark { transform-origin: left; animation: scene-mark 6s cubic-bezier(0.2, 0.8, 0.2, 1) infinite; }
+.scene-typing span { animation: think 1.2s ease-in-out infinite; }
+@keyframes scene-line {
+  0% { transform: scaleX(0); }
+  30%, 92% { transform: scaleX(1); }
+  100% { transform: scaleX(0); }
+}
+.scene-line { transform-origin: left; animation: scene-line 6s cubic-bezier(0.2, 0.8, 0.2, 1) infinite; }
+@keyframes scene-row {
+  0%, 20% { opacity: 0.25; transform: translateX(-4px); }
+  35%, 92% { opacity: 1; transform: translateX(0); }
+  100% { opacity: 0.25; }
+}
+.scene-row { animation: scene-row 6s cubic-bezier(0.2, 0.8, 0.2, 1) infinite; }
+@keyframes scene-flip-a {
+  0%, 40% { transform: translateY(0); }
+  50%, 90% { transform: translateY(-100%); }
+  100% { transform: translateY(0); }
+}
+@keyframes scene-flip-b {
+  0%, 40% { transform: translateY(100%); }
+  50%, 90% { transform: translateY(0); }
+  100% { transform: translateY(100%); }
+}
+.scene-flip-a { animation: scene-flip-a 6s cubic-bezier(0.3, 0, 0, 1) infinite; }
+.scene-flip-b { animation: scene-flip-b 6s cubic-bezier(0.3, 0, 0, 1) infinite; }
+@keyframes scene-count {
+  0%, 10% { opacity: 0.2; }
+  30%, 92% { opacity: 1; }
+  100% { opacity: 0.2; }
+}
+.scene-count { animation: scene-count 6s ease-out infinite; }
+@media (prefers-reduced-motion: reduce) {
+  .scene * { animation: none !important; }
+  .scene-type { max-width: 240px; }
+  .scene-flip-b { transform: none; }
+  .scene-flip-a { opacity: 0; }
+}
