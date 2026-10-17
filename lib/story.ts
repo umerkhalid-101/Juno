@@ -150,7 +150,7 @@ export const notifications: Notification[] = [
   {
     id: "n5",
     tool: "calendar",
-    source: "Calendar",
+    source: "Northwind check-in",
     title: "Customer call in 10 min, no prep",
     time: "now",
     mobile: false,

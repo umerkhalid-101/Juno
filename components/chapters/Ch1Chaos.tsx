@@ -43,7 +43,7 @@ export function Ch1Chaos() {
       const all = q(".stack-card") as HTMLElement[];
       const list = all.filter((c) => !isMobile || c.dataset.mobile === "true");
       const veils = list.map((c) => c.querySelector<HTMLElement>(".stack-veil")!);
-      const lift = isMobile ? 18 : 24;
+      const lift = isMobile ? 18 : 28;
       const lay = (d: number) => ({ ...layer(d), y: -d * lift });
       const proxy = { v: 0 };
       let last = -1;
@@ -51,26 +51,26 @@ export function Ch1Chaos() {
         const v = Math.round(proxy.v);
         if (v !== last) setLanded((last = v));
       };
-      const tl = gsap.timeline({ defaults: { ease: "power3.out", duration: 0.45 } });
+      const tl = gsap.timeline({ defaults: { ease: "power2.out", duration: 0.8 } });
 
       tl.set(list, { y: 90, scale: 1, opacity: 0, x: 0, rotate: 0 }, 0)
         .set(veils, { opacity: 0 }, 0)
         .set(proxy, { v: 0, onComplete: sync }, 0);
 
       list.forEach((card, k) => {
-        const at = 0.2 + k * 0.5;
+        const at = 0.2 + k * 0.7;
         // a tiny jitter as each one lands
         const tilt = (k % 2 ? 1 : -1) * (isMobile ? 0.6 : 1.4);
         tl.fromTo(card, { y: 90, opacity: 0, scale: 1.04, rotate: tilt * 2 }, { ...lay(0), rotate: tilt }, at);
         list.slice(0, k).forEach((older, j) => tl.to(older, { ...lay(k - j), rotate: 0 }, at));
-        if (k > 0) tl.to(veils[k - 1], { opacity: 1, duration: 0.25 }, at);
-        tl.to(proxy, { v: k + 1, duration: 0.2, onUpdate: sync }, at + 0.1);
+        if (k > 0) tl.to(veils[k - 1], { opacity: 1, duration: 0.5 }, at);
+        tl.to(proxy, { v: k + 1, duration: 0.3, onUpdate: sync }, at + 0.2);
       });
 
       tl.to({}, { duration: 0.4 });
       return tl;
     },
-    { pin: false, start: "top 75%", end: "center 35%", mobileEnd: "center 40%" },
+    { pin: false, start: "top 85%", end: "bottom 30%", mobileEnd: "bottom 45%" },
   );
 
   return (
@@ -98,7 +98,7 @@ export function Ch1Chaos() {
             </div>
 
             {/* the pile */}
-            <div className="relative h-[330px] md:col-span-6 md:col-start-7 md:h-[420px]" role="list" aria-label="Work waiting on you">
+            <div className="relative h-[360px] md:col-span-6 md:col-start-7 md:h-[480px]" role="list" aria-label="Work waiting on you">
               <div className="absolute inset-x-0 bottom-8 flex justify-center md:bottom-14">
                 {notifications.map((n, k) => {
                   const d = layer(N - 1 - k);
@@ -123,7 +123,7 @@ export function Ch1Chaos() {
                       <NotificationCard n={n} />
                       <span
                         aria-hidden
-                        className="stack-veil stack-veil-pos pointer-events-none absolute inset-0 rounded-[18px] border border-white/[0.08] bg-[#10141c]"
+                        className="stack-veil stack-veil-pos pointer-events-none absolute inset-0 rounded-[20px] border border-white/[0.08] bg-[#10141c]"
                         style={{ ["--vo-d" as string]: k === N - 1 ? 0 : 1, ["--vo-m" as string]: mi === NM - 1 ? 0 : 1 }}
                       />
                     </div>
