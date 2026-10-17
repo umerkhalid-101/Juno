@@ -7,12 +7,14 @@ import {
   siGithub,
   siGmail,
   siGoogledrive,
+  siGoogleanalytics,
   siGooglecalendar,
   siHubspot,
   siIntercom,
   siJira,
   siLinear,
   siNotion,
+  siZendesk,
 } from "simple-icons";
 
 export const company = {
@@ -42,7 +44,9 @@ export type ToolId =
   | "intercom"
   | "github"
   | "figma"
-  | "calendar";
+  | "calendar"
+  | "zendesk"
+  | "analytics";
 
 export type Tool = { id: ToolId; name: string; path: string; hex: string };
 
@@ -62,6 +66,8 @@ export const tools: Record<ToolId, Tool> = {
   github: { id: "github", name: "GitHub", path: siGithub.path, hex: "#FFFFFF" },
   figma: { id: "figma", name: "Figma", path: siFigma.path, hex: "#F24E1E" },
   calendar: { id: "calendar", name: "Calendar", path: siGooglecalendar.path, hex: "#4285F4" },
+  zendesk: { id: "zendesk", name: "Zendesk", path: siZendesk.path, hex: "#03363D" },
+  analytics: { id: "analytics", name: "Google Analytics", path: siGoogleanalytics.path, hex: "#E37400" },
 };
 
 /** The 10 connected tools, in hero and brain-ring order. */

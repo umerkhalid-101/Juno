@@ -8,20 +8,17 @@ import { BrandMark } from "@/components/ui/BrandIcon";
 import { gsap, useGSAP, ScrollTrigger, MQ } from "@/lib/gsap";
 import { tools, type ToolId } from "@/lib/story";
 
-/** Tools grouped by what they know. Neighbors on the ring share an area. */
+/** Six areas evenly around Juno; each area's tools sit together right beside its name. */
 const groups: { id: string; label: string; tools: ToolId[]; dot: string }[] = [
-  { id: "customers", label: "Customers", tools: ["gmail", "slack"], dot: "#36C5F0" },
-  { id: "sales", label: "Sales", tools: ["hubspot"], dot: "#FF7A59" },
-  { id: "support", label: "Support", tools: ["intercom"], dot: "#1F8DED" },
-  { id: "product", label: "Product", tools: ["linear", "jira", "github"], dot: "#5E6AD2" },
-  { id: "brand", label: "Brand", tools: ["figma"], dot: "#A259FF" },
-  { id: "market", label: "Market", tools: ["notion", "drive"], dot: "#FFBA00" },
+  { id: "customers", label: "Customers", tools: ["gmail", "intercom", "slack"], dot: "#36C5F0" },
+  { id: "sales", label: "Sales", tools: ["hubspot", "calendar"], dot: "#FF7A59" },
+  { id: "support", label: "Support", tools: ["zendesk", "jira"], dot: "#3DD68C" },
+  { id: "product", label: "Product", tools: ["linear", "github"], dot: "#7A8FFF" },
+  { id: "brand", label: "Brand", tools: ["figma", "drive"], dot: "#A259FF" },
+  { id: "market", label: "Market", tools: ["analytics", "notion"], dot: "#F9AB00" },
 ];
-const ring = groups.flatMap((g) => g.tools);
 const groupOf = (id: ToolId) => groups.find((g) => g.tools.includes(id))!;
-const STEP = 360 / ring.length;
-const FIRST = -90 - STEP / 2; // centers the first group on top
-const angleOf = (id: ToolId) => FIRST + ring.indexOf(id) * STEP;
+const areaAngle = (i: number) => -90 + (i * 360) / groups.length;
 
 /** The packet's color as it leaves each tool. */
 const pulseColor: Record<ToolId, string> = {
@@ -36,12 +33,14 @@ const pulseColor: Record<ToolId, string> = {
   notion: "#F4F6F8",
   drive: "#FFBA00",
   calendar: "#4285F4",
+  zendesk: "#F4F6F8",
+  analytics: "#F9AB00",
 };
 
 /** Same diagram on every screen; mobile uses roomier proportions so it stays legible. */
 const GEO = {
-  desktop: { C: 360, R: 228, NODE: 28, AR: 318, CORE: 66, font: 13, logo: 22, dash: 46, vb: [-40, 0, 800, 720], mascot: 112, label: 7.4 },
-  mobile: { C: 200, R: 124, NODE: 25, AR: 198, CORE: 50, font: 15, logo: 20, dash: 30, vb: [-60, -22, 520, 444], mascot: 80, label: 8.7 },
+  desktop: { C: 360, R: 228, NODE: 28, AR: 302, CORE: 66, font: 17, spread: 24, logo: 22, dash: 46, vb: [-40, 0, 800, 720], mascot: 112, label: 7.4 },
+  mobile: { C: 200, R: 124, NODE: 23, AR: 182, CORE: 50, font: 16, spread: 28, logo: 20, dash: 30, vb: [-60, -22, 520, 444], mascot: 80, label: 8.7 },
 };
 
 const rad = (d: number) => (d * Math.PI) / 180;
@@ -64,19 +63,19 @@ const useMobile = () =>
 function geometry(mobile: boolean) {
   const g = mobile ? GEO.mobile : GEO.desktop;
   const pt = (r: number, deg: number) => ({ x: r2(g.C + Math.cos(rad(deg)) * r), y: r2(g.C + Math.sin(rad(deg)) * r) });
-  const nodes = ring.map((id) => {
-    const deg = angleOf(id);
-    const p = pt(g.R, deg);
-    const s = pt(g.R - g.NODE - 6, deg);
-    const e = pt(g.CORE, deg);
-    return { id, deg, ...p, line: { x1: s.x, y1: s.y, x2: e.x, y2: e.y }, len: r2(Math.hypot(e.x - s.x, e.y - s.y)) };
-  });
-  // areas sit evenly around the ring, one every 60 degrees, starting at the top
+  // each area's tools are spread around that area's angle
+  const nodes = groups.flatMap((k, gi) =>
+    k.tools.map((id, ti) => {
+      const deg = areaAngle(gi) + (ti - (k.tools.length - 1) / 2) * g.spread;
+      const p = pt(g.R, deg);
+      const s = pt(g.R - g.NODE - 6, deg);
+      const e = pt(g.CORE, deg);
+      return { id, deg, ...p, line: { x1: s.x, y1: s.y, x2: e.x, y2: e.y }, len: r2(Math.hypot(e.x - s.x, e.y - s.y)) };
+    }),
+  );
   const labels = groups.map((k, i) => {
-    const deg = -90 + (i * 360) / groups.length;
-    const t0 = pt(g.AR - g.font * 2.4, deg);
-    const t1 = pt(g.AR - g.font * 1.5, deg);
-    return { ...k, deg, pos: pt(g.AR, deg), tick: { x1: t0.x, y1: t0.y, x2: t1.x, y2: t1.y } };
+    const deg = areaAngle(i);
+    return { ...k, deg, pos: pt(g.AR, deg) };
   });
   return { g, nodes, labels };
 }
@@ -194,9 +193,9 @@ export function Ch2Brain() {
         <Reveal>
           <ChapterIntro
             id="ch2-title"
-            lead="Every tool."
-            muted="One brain."
-            sub="Juno connects your customers, product, sales, and support into one picture it can act on."
+            lead="Finally, someone has"
+            muted="the whole picture."
+            sub="Your company keeps moving. Juno keeps up."
           />
         </Reveal>
 
@@ -205,7 +204,7 @@ export function Ch2Brain() {
             viewBox={g.vb.join(" ")}
             className="absolute inset-0 h-full w-full overflow-visible"
             role="img"
-            aria-label="Juno at the center of ten connected tools grouped into customers, sales, support, product, brand, and market. Information flows from every tool into Juno."
+            aria-label="Juno at the center of your tools, grouped into customers, sales, support, product, brand, and market. Information flows from every tool into Juno."
           >
             <defs>
               <radialGradient id="bNodeFill" cx="50%" cy="35%" r="70%">
@@ -275,24 +274,13 @@ export function Ch2Brain() {
               );
             })}
 
-            {/* areas: quiet mono labels with a hairline tick toward Juno; they take their color when the area sends */}
+            {/* area names in plain white type beside their tools */}
             {labels.map((a) => {
               const on = related?.has(a.id);
               const dim = related && !on;
               return (
                 <g key={a.id} className="b-label" data-g={a.id} style={{ opacity: dim ? 0.35 : 1, transition: "opacity 200ms", ["--lit" as string]: 0, ["--area" as string]: a.dot }}>
-                  <line {...a.tick} className="b-tick" strokeWidth={1} strokeLinecap="round" />
-                  <text
-                    x={a.pos.x}
-                    y={a.pos.y}
-                    textAnchor="middle"
-                    dominantBaseline="central"
-                    fontSize={g.font}
-                    fontWeight="500"
-                    letterSpacing="0.14em"
-                    className="b-label-text font-mono uppercase"
-                    data-on={on || undefined}
-                  >
+                  <text x={a.pos.x} y={a.pos.y} textAnchor="middle" dominantBaseline="central" fontSize={g.font} fontWeight="500" letterSpacing="-0.01em" className="b-label-text" data-on={on || undefined}>
                     {a.label}
                   </text>
                 </g>

@@ -35,6 +35,14 @@ const multi: Partial<Record<ToolId, { vb: string; paths: [string, string][] }>> 
       ["#FFBA00", "m73.4 26.5-12.7-22c-.8-1.4-1.95-2.5-3.3-3.3l-13.75 23.8 16.15 28h27.45c0-1.55-.4-3.1-1.2-4.5z"],
     ],
   },
+  analytics: {
+    vb: "0 0 192 192",
+    paths: [
+      ["#F9AB00", "M130 29v132c0 14.77 10.19 23 21 23 10 0 21-7 21-23V30c0-13.54-10-22-21-22s-21 9.33-21 21z"],
+      ["#E37400", "M75 96v65c0 14.77 10.19 23 21 23 10 0 21-7 21-23V97c0-13.54-10-22-21-22s-21 9.33-21 21z"],
+      ["#E37400", "M20 163a21 21 0 1 0 42 0 21 21 0 1 0-42 0"],
+    ],
+  },
   figma: {
     vb: "0 0 38 57",
     paths: [
@@ -56,9 +64,10 @@ const solid: Partial<Record<ToolId, string>> = {
   intercom: "#1F8DED",
   github: "#181717",
   calendar: "#4285F4",
+  zendesk: "#03363D",
 };
 /** On the dark site, these two read better in white. */
-const onDark: Partial<Record<ToolId, string>> = { notion: "#FFFFFF", github: "#FFFFFF" };
+const onDark: Partial<Record<ToolId, string>> = { notion: "#FFFFFF", github: "#FFFFFF", zendesk: "#FFFFFF" };
 
 export function BrandMark({ id, size = 20, dark = false, className = "" }: { id: ToolId; size?: number; dark?: boolean; className?: string }) {
   const m = multi[id];

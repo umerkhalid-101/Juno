@@ -17,7 +17,7 @@ export function ToolLogo({
   brand?: boolean;
   className?: string;
 }) {
-  if (id === "notion" || id === "github") {
+  if (id === "notion" || id === "github" || id === "zendesk") {
     return (
       <svg viewBox="0 0 24 24" width={size} height={size} fill="currentColor" className={className} aria-hidden>
         <path d={tools[id].path} />

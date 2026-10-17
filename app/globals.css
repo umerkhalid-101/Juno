@@ -912,14 +912,12 @@
   mask-position: 0% 0%;
 }
 
-/* Brain: area labels light up in their color when the area sends */
+/* Brain: area names in plain white type */
 .b-label-text {
-  fill: color-mix(in srgb, var(--area) calc(var(--lit) * 100%), #7c8798);
+  fill: #eef1f6;
   transition: fill 200ms;
 }
 .b-label-text[data-on] {
-  fill: #f4f6f8;
+  fill: #ffffff;
 }
-.b-tick {
-  stroke: color-mix(in srgb, var(--area) calc(var(--lit) * 100%), rgba(255, 255, 255, 0.18));
-}
+
