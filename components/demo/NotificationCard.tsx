@@ -1,38 +1,50 @@
 import { ToolBadge } from "@/components/ui/ToolLogo";
 import { tools, type Notification } from "@/lib/story";
 
-const toneColor = { danger: "var(--st-bad)", warning: "var(--st-warn)", muted: "var(--st-muted)" };
-const toneBg = { danger: "rgba(255,101,104,0.16)", warning: "rgba(255,181,71,0.17)", muted: "rgba(154,166,184,0.16)" };
+const tone = {
+  neutral: { fg: "var(--text-muted)", bg: "rgba(154,166,184,0.12)", dot: "rgba(154,166,184,0.7)" },
+  warning: { fg: "#FFB547", bg: "rgba(255,181,71,0.12)", dot: "#FFB547" },
+  danger: { fg: "#FF6568", bg: "rgba(255,101,104,0.12)", dot: "#FF6568" },
+};
 
-/** Ch1 notification in the visual language of its tool. */
+/** A piece of work waiting on the founder, in the visual language of its tool. */
 export function NotificationCard({ n, className = "", style }: { n: Notification; className?: string; style?: React.CSSProperties }) {
   const t = tools[n.tool];
+  const w = tone[n.wait.tone];
   return (
     <article
-      className={`w-[280px] rounded-md border border-line-strong bg-surface-2/95 p-3.5 shadow-[0_18px_40px_-12px_rgba(0,0,0,0.7)] backdrop-blur-md md:w-[340px] md:p-4 ${className}`}
+      className={`relative w-[300px] overflow-hidden rounded-[18px] border border-white/[0.08] bg-[linear-gradient(180deg,#121722,#0E1218)] p-4 shadow-[0_24px_60px_-24px_rgba(0,0,0,0.85),inset_0_1px_0_rgba(255,255,255,0.05)] md:w-[400px] md:p-5 ${className}`}
       style={style}
-      aria-label={`${t.name}: ${n.title}`}
+      aria-label={`${t.name}, ${n.source}: ${n.title}. ${n.wait.label}.`}
     >
-      <header className="mb-2 flex items-center gap-2.5">
-        <ToolBadge id={n.tool} size={24} />
+      <header className="flex items-center gap-3">
+        <ToolBadge id={n.tool} size={30} className="rounded-[9px] border-white/[0.08] bg-white/[0.04]" />
         <span className="min-w-0 flex-1 truncate text-[13px] leading-5 text-muted">
           <span className="font-medium text-text">{t.name}</span>
           <span className="mx-1.5 text-subtle">·</span>
           {n.source}
         </span>
-        <span className="shrink-0 font-mono text-[11px] text-subtle">{n.time}</span>
-        <span aria-hidden className="size-2 shrink-0 rounded-full bg-danger" />
+        <span className="t-eyebrow shrink-0 !text-[11px] text-subtle">{n.time}</span>
       </header>
-      {n.from && <p className="text-[13px] leading-5 font-medium text-text/90">{n.from}</p>}
-      <p className="text-[14px] leading-[21px] text-text">{n.title}</p>
-      {n.meta && (
+
+      <div className="mt-3.5">
+        {n.from && <p className="text-[13px] leading-5 text-muted">{n.from}</p>}
+        <p className="text-[15px] leading-[22px] text-text md:text-[16px] md:leading-[24px]">{n.title}</p>
+      </div>
+
+      <footer className="mt-4 flex items-center justify-between border-t border-white/[0.06] pt-3.5">
         <span
-          className="mt-2 inline-flex h-5 items-center rounded-[6px] px-1.5 font-mono text-[11px]"
-          style={{ color: toneColor[n.meta.tone], background: toneBg[n.meta.tone] }}
+          className="t-eyebrow inline-flex h-6 items-center gap-1.5 rounded-full px-2.5 !text-[10.5px]"
+          style={{ color: w.fg, background: w.bg }}
         >
-          {n.meta.label}
+          <span className="size-1.5 rounded-full" style={{ background: w.dot }} />
+          {n.wait.label}
         </span>
-      )}
+        <span className="inline-flex items-center gap-1.5 text-[12px] text-muted">
+          <span className="grid size-5 place-items-center rounded-full bg-[#1b2134] text-[9px] font-semibold text-[#C9D5FF] ring-1 ring-white/10">MC</span>
+          On you
+        </span>
+      </footer>
     </article>
   );
 }

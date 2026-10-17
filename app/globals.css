@@ -735,3 +735,21 @@
     animation: none;
   }
 }
+
+/* Chapter 1: resting pile position per breakpoint (GSAP overrides inline once it runs) */
+.stack-pos {
+  transform: translateY(var(--ly-m)) scale(var(--ls-m));
+  opacity: var(--lo-m);
+}
+.stack-veil-pos {
+  opacity: var(--vo-m);
+}
+@media (min-width: 768px) {
+  .stack-pos {
+    transform: translateY(var(--ly-d)) scale(var(--ls-d));
+    opacity: var(--lo-d);
+  }
+  .stack-veil-pos {
+    opacity: var(--vo-d);
+  }
+}

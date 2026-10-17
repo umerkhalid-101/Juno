@@ -92,7 +92,13 @@ export type Notification = {
   mobile: boolean;
   /** Compact text for the Chapter 5 ghosted callback. */
   short: string;
+  /** Status chip while it waits on you. */
+  wait: { label: string; tone: "neutral" | "warning" | "danger" };
+  /** What Juno did with it. */
+  handled: { text: string; status: "done" | "needs-approval" };
 };
+
+export type CardStatus = "waiting" | Notification["handled"]["status"];
 
 export const notifications: Notification[] = [
   {
@@ -104,56 +110,64 @@ export const notifications: Notification[] = [
     time: "8:41 AM",
     mobile: true,
     short: "#launch: Still on for Thursday?",
+    wait: { label: "Waiting", tone: "neutral" },
+    handled: { text: "Replied to Sam: launch is on for Thursday", status: "done" },
   },
   {
     id: "n2",
     tool: "gmail",
-    source: "Inbox",
-    from: "Ravi Menon, Northstar Capital",
+    source: "Northstar Capital",
+    from: "Ravi Menon",
     title: "Hi Maya, any update for this month?",
     time: "8:32 AM",
     mobile: true,
     short: "Investor: any update this month?",
+    wait: { label: "Update overdue", tone: "warning" },
+    handled: { text: "Investor update drafted for Ravi", status: "needs-approval" },
   },
   {
     id: "n3",
     tool: "intercom",
-    source: "Inbox",
+    source: "Support",
     title: "3 customers asking about scheduled exports",
-    meta: { label: "3 open", tone: "warning" },
     time: "8:20 AM",
     mobile: true,
     short: "3 customers asking about exports",
+    wait: { label: "3 open", tone: "neutral" },
+    handled: { text: "3 answers drafted for customers", status: "needs-approval" },
   },
   {
     id: "n4",
     tool: "linear",
     source: "Scheduled Reports",
     title: "SR-112 is blocked",
-    meta: { label: "Blocked", tone: "danger" },
     time: "8:15 AM",
     mobile: true,
     short: "SR-112 is blocked",
+    wait: { label: "Blocked", tone: "danger" },
+    handled: { text: "SR-112 unblocked, owner pinged", status: "done" },
   },
   {
     id: "n5",
     tool: "calendar",
     source: "Calendar",
     title: "Customer call in 10 min, no prep",
-    meta: { label: "8:57 AM", tone: "warning" },
     time: "now",
     mobile: false,
     short: "Customer call in 10 min, no prep",
+    wait: { label: "No prep", tone: "warning" },
+    handled: { text: "Call brief ready", status: "done" },
   },
   {
     id: "n6",
     tool: "hubspot",
     source: "Deals",
-    title: "Deal with Northwind idle for 14 days",
-    meta: { label: "$48,000", tone: "muted" },
+    title: "Deal with Northwind idle for 14 days · $48,000",
     time: "8:02 AM",
     mobile: true,
     short: "Northwind deal idle 14 days",
+    wait: { label: "Going cold", tone: "warning" },
+    handled: { text: "Northwind follow-up drafted", status: "needs-approval" },
   },
   {
     id: "n7",
@@ -163,6 +177,8 @@ export const notifications: Notification[] = [
     time: "Mon",
     mobile: false,
     short: "Launch doc stale for 9 days",
+    wait: { label: "Out of date", tone: "neutral" },
+    handled: { text: "Launch doc updated", status: "done" },
   },
   {
     id: "n8",
@@ -173,11 +189,11 @@ export const notifications: Notification[] = [
     time: "8:46 AM",
     mobile: false,
     short: "Leo: review the release notes?",
+    wait: { label: "Waiting", tone: "neutral" },
+    handled: { text: "Release notes reviewed, 2 edits suggested", status: "done" },
   },
 ];
 
-/** Unread counter value after each card lands. */
-export const unreadSteps = [3, 7, 12, 18, 23, 29, 38, 47];
 
 /* --------------------------------------------------------- chapter 2 */
 

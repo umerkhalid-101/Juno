@@ -1,52 +1,70 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { NotificationCard } from "@/components/demo/NotificationCard";
+import { RollingNumber } from "@/components/ui/RollingNumber";
 import { gsap } from "@/lib/gsap";
 import { usePinnedStory } from "@/lib/usePinnedStory";
-import { notifications, unreadSteps } from "@/lib/story";
+import { notifications, type CardStatus } from "@/lib/story";
 
 const N = notifications.length;
-const PEAK = unreadSteps[N - 1];
+const NM = notifications.filter((n) => n.mobile).length;
 
 /** Where a card sits when it is `depth` layers behind the newest one. */
 function layer(depth: number) {
   return { y: -depth * 24, scale: 1 - depth * 0.05, opacity: Math.max(0, 1 - depth * 0.15) };
 }
 
-/** Monday morning: pings land on a growing stack as the section scrolls into view. */
+/** Position among the cards shown on mobile (5 of 8), or -1 when hidden there. */
+const mobileIndex = notifications.map((n, i) => (n.mobile ? notifications.slice(0, i).filter((m) => m.mobile).length : -1));
+
+/** Monday morning: work lands on a growing pile as the section scrolls into view. */
 export function Ch1Chaos() {
   const root = useRef<HTMLElement>(null);
   const stage = useRef<HTMLDivElement>(null);
-  const counter = useRef<HTMLSpanElement>(null);
+  // Single source of truth: how many cards have landed, and which cards this screen shows.
+  // Final state by default (no JS, reduced motion).
+  const [landed, setLanded] = useState(N);
+  const [mobile, setMobile] = useState(false);
+
+  const shown = notifications.filter((n) => !mobile || n.mobile);
+  const cards: { id: string; status: CardStatus | "incoming" }[] = shown.map((n, i) => ({
+    id: n.id,
+    status: i < landed ? "waiting" : "incoming",
+  }));
+  const waitingCount = cards.filter((c) => c.status === "waiting").length;
 
   usePinnedStory(
     root,
     stage,
-    () => {
+    ({ isMobile }) => {
+      setMobile(isMobile);
       const q = gsap.utils.selector(root);
-      const cards = q(".stack-card") as HTMLElement[];
-      const veils = cards.map((c) => c.querySelector<HTMLElement>(".stack-veil")!);
+      const all = q(".stack-card") as HTMLElement[];
+      const list = all.filter((c) => !isMobile || c.dataset.mobile === "true");
+      const veils = list.map((c) => c.querySelector<HTMLElement>(".stack-veil")!);
+      const lift = isMobile ? 18 : 24;
+      const lay = (d: number) => ({ ...layer(d), y: -d * lift });
       const proxy = { v: 0 };
-      const render = () => {
-        if (counter.current) counter.current.textContent = String(Math.round(proxy.v));
+      let last = -1;
+      const sync = () => {
+        const v = Math.round(proxy.v);
+        if (v !== last) setLanded((last = v));
       };
       const tl = gsap.timeline({ defaults: { ease: "power3.out", duration: 0.45 } });
 
-      tl.set(cards, { y: 90, scale: 1, opacity: 0, x: 0 }, 0)
+      tl.set(list, { y: 90, scale: 1, opacity: 0, x: 0, rotate: 0 }, 0)
         .set(veils, { opacity: 0 }, 0)
-        .set(proxy, { v: 0, onComplete: render }, 0);
+        .set(proxy, { v: 0, onComplete: sync }, 0);
 
-      cards.forEach((card, k) => {
+      list.forEach((card, k) => {
         const at = 0.2 + k * 0.5;
-        tl.fromTo(card, { y: 90, opacity: 0, scale: 1.04 }, { ...layer(0) }, at);
-        cards.slice(0, k).forEach((older, j) => tl.to(older, layer(k - j), at));
+        // a tiny jitter as each one lands
+        const tilt = (k % 2 ? 1 : -1) * (isMobile ? 0.6 : 1.4);
+        tl.fromTo(card, { y: 90, opacity: 0, scale: 1.04, rotate: tilt * 2 }, { ...lay(0), rotate: tilt }, at);
+        list.slice(0, k).forEach((older, j) => tl.to(older, { ...lay(k - j), rotate: 0 }, at));
         if (k > 0) tl.to(veils[k - 1], { opacity: 1, duration: 0.25 }, at);
-        tl.to(
-          proxy,
-          { v: unreadSteps[k], duration: 0.3, ease: "power2.out", onUpdate: render },
-          at + 0.1,
-        );
+        tl.to(proxy, { v: k + 1, duration: 0.2, onUpdate: sync }, at + 0.1);
       });
 
       tl.to({}, { duration: 0.4 });
@@ -59,63 +77,60 @@ export function Ch1Chaos() {
     <section ref={root} id="chaos" aria-labelledby="ch1-title" className="chapter">
       <div ref={stage} className="relative">
         <div className="container-page">
-          <div className="grid items-center gap-10 md:grid-cols-12 md:gap-8">
-            {/* words: three beats share one spot */}
+          <div className="grid items-center gap-12 md:grid-cols-12 md:gap-8">
             <div className="relative md:col-span-6">
-              <div className="grid">
-                <div>
-                  <h2
-                    id="ch1-title"
-                    className="text-[clamp(2.25rem,1.4rem+2.2vw,3.25rem)] font-medium leading-[1.08] tracking-[-0.035em]"
-                  >
-                    You started a company.{" "}
-                    <span className="accent-text">Somehow you&apos;re running inboxes.</span>
-                  </h2>
-                  <p className="mt-5 max-w-[40ch] text-[17px] leading-[27px] text-muted">
-                    Pings, threads, and follow-ups pile up until the real work waits.
-                  </p>
-                </div>
-              </div>
+              <h2
+                id="ch1-title"
+                className="text-[40px] font-medium leading-[44px] tracking-[-0.035em] text-balance md:text-[56px] md:leading-[60px] lg:text-[64px] lg:leading-[66px]"
+              >
+                You started a company. <span className="text-muted">Now it runs you.</span>
+              </h2>
+              <p className="mt-6 max-w-[40ch] text-[17px] leading-[27px] text-muted">
+                Launches slip, deals go quiet, investors wait. The real work gets whatever time is left.
+              </p>
 
-              <div className="mt-10 inline-flex items-center gap-3 rounded-full border border-danger/30 bg-danger/10 py-2 pl-3 pr-4 text-danger">
-                <span className="size-2 rounded-full bg-current" />
-                <span className="text-[15px]">
-                  <span ref={counter} className="font-medium tabular-nums">
-                    {PEAK}
-                  </span>{" "}
-                  unread
+              {/* counter: computed from card state */}
+              <div className="t-eyebrow mt-10 inline-flex h-10 items-center gap-2.5 rounded-full border border-[#FFB547]/25 bg-[#FFB547]/[0.08] px-4 text-[#FFB547]">
+                <span className="relative grid size-2 place-items-center">
+                  <span className="hero-live absolute size-2 rounded-full bg-[#FFB547]" />
+                  <span className="size-2 rounded-full bg-[#FFB547]" />
                 </span>
+                <span aria-hidden className="inline-flex items-center">
+                  <RollingNumber value={waitingCount} className="text-[#F4F6F8]" />
+                  &nbsp;waiting on you
+                </span>
+                <span className="sr-only">{mobile ? NM : N} things waiting on you</span>
               </div>
             </div>
 
             {/* the pile */}
-            <div
-              className="relative h-[320px] md:col-span-6 md:col-start-7 md:h-[400px]"
-              role="list"
-              aria-label="Monday morning notifications"
-            >
-              <div className="absolute inset-x-0 bottom-10 flex justify-center md:bottom-16">
+            <div className="relative h-[330px] md:col-span-6 md:col-start-7 md:h-[420px]" role="list" aria-label="Work waiting on you">
+              <div className="absolute inset-x-0 bottom-8 flex justify-center md:bottom-14">
                 {notifications.map((n, k) => {
-                  const l = layer(N - 1 - k);
+                  const d = layer(N - 1 - k);
+                  const mi = mobileIndex[k];
+                  const m = layer(mi < 0 ? 0 : NM - 1 - mi);
                   return (
                     <div
                       key={n.id}
                       role="listitem"
-                      className="stack-card absolute bottom-0 origin-top will-change-transform"
+                      data-mobile={n.mobile}
+                      className={`stack-card stack-pos absolute bottom-0 origin-top will-change-transform ${n.mobile ? "" : "max-md:hidden"}`}
                       style={{
                         zIndex: k + 1,
-                        transform: `translateY(${l.y}px) scale(${l.scale})`,
-                        opacity: l.opacity,
+                        ["--ly-d" as string]: `${d.y}px`,
+                        ["--ls-d" as string]: d.scale,
+                        ["--lo-d" as string]: d.opacity,
+                        ["--ly-m" as string]: `${(m.y * 18) / 24}px`,
+                        ["--ls-m" as string]: m.scale,
+                        ["--lo-m" as string]: m.opacity,
                       }}
                     >
-                      <NotificationCard
-                        n={n}
-                        className="!bg-surface-2 shadow-[0_24px_60px_-24px_rgba(0,0,0,0.8)] md:!w-[440px]"
-                      />
+                      <NotificationCard n={n} />
                       <span
                         aria-hidden
-                        className="stack-veil pointer-events-none absolute inset-0 rounded-md border border-white/10 bg-surface-2"
-                        style={{ opacity: k === N - 1 ? 0 : 1 }}
+                        className="stack-veil stack-veil-pos pointer-events-none absolute inset-0 rounded-[18px] border border-white/[0.08] bg-[#10141c]"
+                        style={{ ["--vo-d" as string]: k === N - 1 ? 0 : 1, ["--vo-m" as string]: mi === NM - 1 ? 0 : 1 }}
                       />
                     </div>
                   );
