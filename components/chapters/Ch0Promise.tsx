@@ -1,11 +1,10 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { AnimatePresence, motion } from "motion/react";
 import { Apple, ArrowUpRight } from "lucide-react";
 import { Mascot, type MascotApi } from "@/components/mascot/Mascot";
 import { Button } from "@/components/ui/Button";
-import { HeroOrbit, heroTasks } from "@/components/demo/HeroOrbit";
+import { HeroOrbit } from "@/components/demo/HeroOrbit";
 import { ToolLogo } from "@/components/ui/ToolLogo";
 import { connectedTools, tools } from "@/lib/story";
 import { gsap, useGSAP, MQ } from "@/lib/gsap";
@@ -22,7 +21,6 @@ export function Ch0Promise() {
   const mascotWrap = useRef<HTMLDivElement>(null);
   const [tracking, setTracking] = useState(false);
   const [orbiting, setOrbiting] = useState(false);
-  const [inMotion, setInMotion] = useState(heroTasks.length);
   const [lit, setLit] = useState(false);
 
   // The logos light up in sequence (snap, 80ms stagger), each with a brief glow.
@@ -41,11 +39,9 @@ export function Ch0Promise() {
       mm.add("(prefers-reduced-motion: no-preference)", () => {
         const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
         gsap.set([".intro-sub", ".intro-cta"], { y: 14 });
-        gsap.set(".intro-status", { y: 8 });
         tl.fromTo(".hero-mascot", { opacity: 0, scale: 0.92 }, { opacity: 1, scale: 1, duration: 0.45 }, 0)
           .fromTo(".hero-glow-wrap", { opacity: 0 }, { opacity: 1, duration: 1.2, ease: "power2.out" }, 0)
           .call(() => mascot.current?.setState("waking"), [], 0.3)
-          .to(".intro-status", { opacity: 1, y: 0, duration: 0.4, ease: "cubic-bezier(0.2,0.8,0.2,1)" }, 0.35)
           // words land: base timing, 60ms stagger
           .to(".intro-word", { opacity: 1, y: 0, filter: "blur(0px)", duration: 0.4, stagger: 0.06, ease: "cubic-bezier(0.2,0.8,0.2,1)" }, 0.4)
           .call(() => mascot.current?.blink(), [], 0.75)
@@ -74,10 +70,6 @@ export function Ch0Promise() {
       onPointerEnter={() => tracking && mascot.current?.look(0, 0)}
       onPointerLeave={() => mascot.current?.look(0, 0)}
     >
-      {/* depth: a faint perspective grid fading into the bottom */}
-      <div aria-hidden className="hero-floor-wrap pointer-events-none absolute inset-x-0 bottom-0 h-[20%] overflow-hidden [perspective:600px]">
-        <div className="hero-floor absolute -inset-x-[50%] bottom-0 h-[200%]" />
-      </div>
       {/* soft fade into the next section */}
       <div aria-hidden className="pointer-events-none absolute inset-x-0 bottom-0 z-[1] h-24 bg-gradient-to-b from-transparent to-bg" />
 
@@ -86,7 +78,6 @@ export function Ch0Promise() {
           started={orbiting}
           onFocusPill={(el) => (el ? mascot.current?.lookAt(el) : mascot.current?.look(0, 0))}
           onDone={() => mascot.current?.nod()}
-          onStatus={setInMotion}
         >
           {/* Juno glow (glow 1 of 2): breathes slowly, centered on Juno */}
           <div aria-hidden className="hero-glow-wrap intro-hide pointer-events-none absolute left-1/2 top-1/2 -z-10">
@@ -110,36 +101,9 @@ export function Ch0Promise() {
           </div>
         </HeroOrbit>
 
-        {/* status line: Juno is online, count derived from the chips */}
-        <p className="intro-status intro-hide t-eyebrow mt-2 inline-flex items-center gap-2.5 text-muted md:mt-6">
-          <span className="relative grid size-1.5 place-items-center">
-            <span className="hero-live absolute size-1.5 rounded-full bg-[#3DD68C]" />
-            <span className="size-1.5 rounded-full bg-[#3DD68C]" />
-          </span>
-          <span aria-hidden className="inline-flex items-center">
-            Juno · online ·&nbsp;
-            <span className="relative inline-grid h-4 w-[1.2ch] overflow-hidden text-text">
-              <AnimatePresence initial={false} mode="popLayout">
-                <motion.span
-                  key={inMotion}
-                  initial={{ y: "100%", opacity: 0 }}
-                  animate={{ y: 0, opacity: 1 }}
-                  exit={{ y: "-100%", opacity: 0 }}
-                  transition={{ duration: 0.2, ease: [0.3, 0, 0, 1] }}
-                  className="col-start-1 row-start-1 text-center tabular-nums"
-                >
-                  {inMotion}
-                </motion.span>
-              </AnimatePresence>
-            </span>
-            &nbsp;{inMotion === 1 ? "task" : "tasks"} in motion
-          </span>
-          <span className="sr-only">Juno is online with {heroTasks.length} tasks in motion</span>
-        </p>
-
         <h1
           id="hero-title"
-          className="mt-5 max-w-[16ch] text-[48px] font-medium leading-[50px] tracking-[-0.04em] text-balance md:max-w-none md:text-[72px] md:leading-[72px] lg:text-[88px] lg:leading-[88px]"
+          className="mt-4 max-w-[16ch] text-[48px] font-medium leading-[50px] tracking-[-0.04em] text-balance md:max-w-none md:text-[72px] md:leading-[72px] lg:text-[88px] lg:leading-[88px]"
         >
           <span className="block">
             {line1.map((w, i) => (
