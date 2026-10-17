@@ -240,24 +240,20 @@ export function HeroOrbit({
           }}
           className="orbit-chip group absolute left-0 top-0 opacity-0 will-change-transform"
         >
-          <div className="relative flex items-center gap-3 whitespace-nowrap rounded-[18px] bg-[linear-gradient(180deg,rgba(28,34,48,0.82),rgba(14,18,24,0.82))] py-2 pl-2 pr-2 backdrop-blur-xl">
+          <div className="relative flex items-center gap-3 whitespace-nowrap rounded-[18px] bg-[linear-gradient(180deg,rgba(28,34,48,0.82),rgba(14,18,24,0.82))] py-2 pl-2 pr-3 backdrop-blur-xl">
             {/* light edge: brighter on top, lit blue while Juno works it */}
             <span aria-hidden className="chip-edge pointer-events-none absolute inset-0 rounded-[18px]" />
             <BrandIcon id={t.tool} size={30} />
             <span className="text-[13.5px] font-medium tracking-[-0.01em] text-text">{t.text}</span>
-            {/* status: fills while working, then flips to Done (snap) */}
-            <span className="relative grid h-[24px] min-w-[104px] overflow-hidden rounded-full bg-white/[0.05] font-mono text-[10.5px] font-medium uppercase tracking-[0.08em] ring-1 ring-inset ring-white/[0.06] transition-colors duration-[120ms] [transition-timing-function:cubic-bezier(0.3,0,0,1)] group-data-[done=true]:bg-[#3DD68C]/[0.12] group-data-[done=true]:ring-[#3DD68C]/25">
-              <span aria-hidden className="absolute inset-y-0 left-0 w-full origin-left bg-[linear-gradient(90deg,rgba(80,229,255,0.12),rgba(122,143,255,0.32))] group-data-[done=true]:opacity-0" style={{ transform: "scaleX(var(--work, 0))" }} />
-              <span className="relative col-start-1 row-start-1 flex items-center justify-center gap-1.5 px-2.5 text-muted transition-[transform,opacity] duration-[120ms] [transition-timing-function:cubic-bezier(0.3,0,0,1)] group-data-[done=true]:-translate-y-full group-data-[done=true]:opacity-0 group-data-[working=true]:text-[#C9D5FF]">
-                <span className="size-1.5 rounded-full bg-white/30 group-data-[working=true]:animate-pulse group-data-[working=true]:bg-[#50E5FF]" />
-                In progress
-              </span>
-              <span className="relative col-start-1 row-start-1 flex translate-y-full items-center justify-center gap-1 px-2.5 text-[#3DD68C] opacity-0 transition-[transform,opacity] duration-[120ms] [transition-timing-function:cubic-bezier(0.3,0,0,1)] group-data-[done=true]:translate-y-0 group-data-[done=true]:opacity-100">
-                <svg viewBox="0 0 12 12" width="10" height="10" aria-hidden>
-                  <path d="M2.5 6.2 5 8.5 9.5 3.5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-                Done
-              </span>
+            {/* status: a ring that fills while Juno works, then a check (snap) */}
+            <span className="relative mr-1 grid size-[18px] shrink-0 place-items-center" aria-hidden>
+              <svg viewBox="0 0 20 20" width="18" height="18" className="absolute inset-0 -rotate-90 transition-opacity duration-[120ms] group-data-[done=true]:opacity-0" aria-hidden>
+                <circle cx="10" cy="10" r="8" fill="none" stroke="rgba(255,255,255,0.12)" strokeWidth="1.5" />
+                <circle cx="10" cy="10" r="8" fill="none" stroke="#7A8FFF" strokeWidth="1.5" strokeLinecap="round" pathLength={1} strokeDasharray="1" style={{ strokeDashoffset: "calc(1 - var(--work, 0))" }} />
+              </svg>
+              <svg viewBox="0 0 12 12" width="12" height="12" className="scale-50 text-[#3DD68C] opacity-0 transition-[opacity,transform] duration-[120ms] [transition-timing-function:cubic-bezier(0.3,0,0,1)] group-data-[done=true]:scale-100 group-data-[done=true]:opacity-100" aria-hidden>
+                <path d="M2.5 6.2 5 8.5 9.5 3.5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
             </span>
           </div>
         </div>
