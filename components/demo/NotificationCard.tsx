@@ -32,17 +32,13 @@ export function NotificationCard({ n, className = "", style }: { n: Notification
         <p className="text-[15px] leading-[22px] text-text md:text-[16px] md:leading-[24px]">{n.title}</p>
       </div>
 
-      <footer className="mt-4 flex items-center justify-between border-t border-white/[0.06] pt-3.5">
+      <footer className="mt-4 flex items-center">
         <span
           className="t-eyebrow inline-flex h-6 items-center gap-1.5 rounded-full px-2.5 !text-[10.5px]"
           style={{ color: w.fg, background: w.bg }}
         >
           <span className="size-1.5 rounded-full" style={{ background: w.dot }} />
           {n.wait.label}
-        </span>
-        <span className="inline-flex items-center gap-1.5 text-[12px] text-muted">
-          <span className="grid size-5 place-items-center rounded-full bg-[#1b2134] text-[9px] font-semibold text-[#C9D5FF] ring-1 ring-white/10">MC</span>
-          On you
         </span>
       </footer>
     </article>

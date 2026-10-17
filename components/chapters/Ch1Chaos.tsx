@@ -90,17 +90,11 @@ export function Ch1Chaos() {
               </p>
 
               {/* counter: computed from card state */}
-              <div className="t-eyebrow mt-10 inline-flex h-10 items-center gap-2.5 rounded-full border border-[#FFB547]/25 bg-[#FFB547]/[0.08] px-4 text-[#FFB547]">
-                <span className="relative grid size-2 place-items-center">
-                  <span className="hero-live absolute size-2 rounded-full bg-[#FFB547]" />
-                  <span className="size-2 rounded-full bg-[#FFB547]" />
-                </span>
-                <span aria-hidden className="inline-flex items-center">
-                  <RollingNumber value={waitingCount} className="text-[#F4F6F8]" />
-                  &nbsp;waiting on you
-                </span>
+              <p className="mt-8 flex items-baseline gap-1.5 text-[17px] leading-[27px] text-muted">
+                <RollingNumber value={waitingCount} className="text-[17px] font-medium text-text" />
+                <span aria-hidden>{waitingCount === 1 ? "thing" : "things"} waiting on you</span>
                 <span className="sr-only">{mobile ? NM : N} things waiting on you</span>
-              </div>
+              </p>
             </div>
 
             {/* the pile */}
