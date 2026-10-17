@@ -389,156 +389,68 @@ export const jobs: Job[] = [
 
 /* ------------------------------------------------------------------ hero */
 
-export type Lane = "daily" | "mon" | "wed" | "fri" | "monthly";
-
-export const lanes: { id: Lane; label: string }[] = [
-  { id: "daily", label: "Daily" },
-  { id: "mon", label: "Mondays" },
-  { id: "wed", label: "Wednesdays" },
-  { id: "fri", label: "Fridays" },
-  { id: "monthly", label: "Monthly" },
-];
-
-/**
- * The 12 recurring tasks on your plate. `pile` is hand-set: which loose column, the nudge
- * off the column line (px) and the tilt (deg). `order` is when Juno takes it, alternating
- * columns so the pile shrinks evenly; task 9 goes first because it is also the auto-hint.
- */
-export const plate: {
-  n: number;
-  text: string;
-  tool: Source;
-  lane: Lane;
-  chip: string;
-  job: string;
-  pile: { col: 0 | 1; dx: number; rot: number };
-  order: number;
-  phone?: true;
-}[] = [
+/** The things on your plate, as tiles that fold into Juno's hands. Each maps to a job above. */
+export const heroTiles: { text: string; tool: Source; note: string; late?: true; job: string }[] = [
   {
-    n: 1,
-    text: "Send setup help to new teams",
-    tool: "intercom",
-    lane: "daily",
-    chip: "Every weekday",
-    job: "get-new-customers-to-their-first-win",
-    pile: { col: 0, dx: 8, rot: -1.5 },
-    order: 4,
-  },
-  {
-    n: 2,
-    text: "Prep for the 10:00 with Maya",
-    tool: "gmail",
-    lane: "daily",
-    chip: "Before every call",
-    job: "walk-into-every-call-prepared",
-    pile: { col: 1, dx: 0, rot: 1.2 },
-    order: 3,
-    phone: true,
-  },
-  {
-    n: 3,
-    text: "Chase Sam on the launch copy",
-    tool: "slack",
-    lane: "daily",
-    chip: "After every meeting",
-    job: "keep-every-promise-moving",
-    pile: { col: 0, dx: 16, rot: 0.8 },
-    order: 8,
-  },
-  {
-    n: 4,
     text: "Find our next customers",
     tool: "hubspot",
-    lane: "mon",
-    chip: "Every Mon · 9:00",
+    note: "Monday",
     job: "find-our-next-customers",
-    pile: { col: 1, dx: 12, rot: -1.8 },
-    order: 1,
-    phone: true,
   },
   {
-    n: 5,
-    text: "Check in before Northwind renews",
-    tool: "hubspot",
-    lane: "mon",
-    chip: "Every Mon · 8:00",
-    job: "catch-customers-before-they-leave",
-    pile: { col: 0, dx: 0, rot: 1.6 },
-    order: 6,
-    phone: true,
-  },
-  {
-    n: 6,
-    text: "Pause the ad that isn't working",
-    tool: "browser",
-    lane: "mon",
-    chip: "Every Mon · 9:30",
-    job: "make-every-ad-dollar-count",
-    pile: { col: 1, dx: 4, rot: -0.6 },
-    order: 11,
-  },
-  {
-    n: 7,
-    text: "See what drove signups",
-    tool: "hubspot",
-    lane: "mon",
-    chip: "Every Mon · 9:00",
-    job: "show-me-whats-driving-growth",
-    pile: { col: 0, dx: 12, rot: -1.1 },
-    order: 2,
-  },
-  {
-    n: 8,
-    text: "Write a page for “best reporting tools”",
-    tool: "browser",
-    lane: "wed",
-    chip: "Every Wed · 9:00",
-    job: "turn-search-into-signups",
-    pile: { col: 1, dx: 16, rot: 2 },
-    order: 7,
-  },
-  {
-    n: 9,
     text: "Tell Maya her request shipped",
     tool: "gmail",
-    lane: "fri",
-    chip: "Every Fri · 9:00",
+    note: "Today",
     job: "close-the-loop-with-customers",
-    pile: { col: 0, dx: 4, rot: 1.9 },
-    order: 0,
-    phone: true,
   },
   {
-    n: 10,
+    text: "Chase Sam on the launch copy",
+    tool: "slack",
+    note: "Overdue",
+    late: true,
+    job: "keep-every-promise-moving",
+  },
+  {
+    text: "Prep for the 10:00 with Maya",
+    tool: "calendar",
+    note: "In 20 min",
+    job: "walk-into-every-call-prepared",
+  },
+  {
+    text: "Check in before Northwind renews",
+    tool: "intercom",
+    note: "Renews in 30 days",
+    job: "catch-customers-before-they-leave",
+  },
+  {
+    text: "Write the investor update",
+    tool: "notion",
+    note: "Due on the 1st",
+    job: "keep-investors-in-the-loop",
+  },
+  {
     text: "Check competitor pricing",
     tool: "browser",
-    lane: "fri",
-    chip: "Every Fri · 9:00",
+    note: "Friday",
     job: "keep-us-ahead-of-competitors",
-    pile: { col: 1, dx: 8, rot: -1.4 },
-    order: 9,
-    phone: true,
   },
   {
-    n: 11,
+    text: "Send setup help to new teams",
+    tool: "intercom",
+    note: "3 waiting",
+    job: "get-new-customers-to-their-first-win",
+  },
+  {
     text: "Finish the missing help article",
-    tool: "notion",
-    lane: "fri",
-    chip: "Until launch",
+    tool: "linear",
+    note: "Before launch",
     job: "keep-our-launches-on-track",
-    pile: { col: 0, dx: 10, rot: -1.9 },
-    order: 10,
   },
   {
-    n: 12,
-    text: "Write the investor update",
-    tool: "gmail",
-    lane: "monthly",
-    chip: "1st of every month",
-    job: "keep-investors-in-the-loop",
-    pile: { col: 1, dx: 2, rot: 0.9 },
-    order: 5,
-    phone: true,
+    text: "Pause the ad that isn't working",
+    tool: "browser",
+    note: "Overdue",
+    late: true,
+    job: "make-every-ad-dollar-count",
   },
 ];
