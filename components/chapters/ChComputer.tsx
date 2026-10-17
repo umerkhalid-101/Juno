@@ -10,15 +10,16 @@ import { clock, easeInOut, prog, type Scenario } from "@/components/computer/kit
 import { reconcile } from "@/components/computer/sites/CloudHost";
 import { offsite } from "@/components/computer/sites/Retreatly";
 import { prices } from "@/components/computer/sites/Shopfront";
+import { appstore } from "@/components/computer/sites/AppHarbor";
 
 /**
  * "And a computer of its own to handle the rest."
- * A live loop of Juno's own screen: three jobs on sites with no integration, each ending on a
+ * A live loop of Juno's own screen: four jobs on sites with no integration, each ending on a
  * question for you. Everything on screen is a pure function of one clock, so pausing, jumping
  * between jobs and reduced motion all come for free. Juno never approves anything itself.
  */
 
-const scenarios: Scenario[] = [reconcile, offsite, prices];
+const scenarios: Scenario[] = [appstore, reconcile, offsite, prices];
 /** The frame we show without JS or with reduced motion: work done, question asked. */
 const finalT = (s: Scenario) => s.askAt + 0.6;
 const FADE = 0.45;
