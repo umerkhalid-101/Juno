@@ -5,7 +5,7 @@ import { Apple, ArrowUpRight } from "lucide-react";
 import { Mascot, type MascotApi } from "@/components/mascot/Mascot";
 import { Button } from "@/components/ui/Button";
 import { HeroOrbit } from "@/components/demo/HeroOrbit";
-import { ToolLogo } from "@/components/ui/ToolLogo";
+import { BrandMark } from "@/components/ui/BrandIcon";
 import { connectedTools, tools } from "@/lib/story";
 import { gsap, useGSAP, MQ } from "@/lib/gsap";
 
@@ -146,7 +146,7 @@ export function Ch0Promise() {
                 data-lit={lit || undefined}
                 style={{ ["--brand" as string]: brand(id), transitionDelay: lit ? `${i * 80}ms` : "0ms", animationDelay: `${i * 80}ms` }}
               >
-                <ToolLogo id={id} size={20} />
+                <BrandMark id={id} size={22} dark />
                 <span className="sr-only">{tools[id].name}</span>
               </li>
             ))}

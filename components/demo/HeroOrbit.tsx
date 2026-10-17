@@ -2,7 +2,8 @@
 
 import { useEffect, useRef, type ReactNode } from "react";
 import { useReducedMotion } from "motion/react";
-import { tools, type ToolId } from "@/lib/story";
+import { BrandIcon } from "@/components/ui/BrandIcon";
+import { type ToolId } from "@/lib/story";
 
 /** The six tasks Juno is working through. Each rides the orbit and gets done at the front. */
 export const heroTasks: { tool: ToolId; text: string }[] = [
@@ -18,13 +19,14 @@ const TAU = Math.PI * 2;
 const COUNT = heroTasks.length;
 /** Parallax travel per chip, px (4 to 12). */
 const depthPx = [9, 5, 12, 7, 11, 4];
+/** Juno's radius, px: the beam leaves from the edge of the orb. */
+const ORB = 72;
 
 export function HeroOrbit({
   children,
   started,
   onFocusPill,
   onDone,
-  onStatus,
 }: {
   children: ReactNode;
   /** Chips appear and start moving once the intro is done. */
@@ -32,23 +34,26 @@ export function HeroOrbit({
   onFocusPill?: (el: HTMLElement | null) => void;
   /** Called when a task swings to the front and is done. */
   onDone?: (text: string) => void;
-  /** Tasks still in motion, derived from chip state. */
-  onStatus?: (inMotion: number) => void;
 }) {
   const reduce = useReducedMotion();
   const box = useRef<HTMLDivElement>(null);
   const pillEls = useRef<(HTMLDivElement | null)[]>([]);
-  // start with the front chip just past done, so the first flip comes quickly
+  const beam = useRef<SVGLineElement>(null);
+  const beamGlow = useRef<SVGLineElement>(null);
+  const beamGrad = useRef<SVGLinearGradientElement>(null);
+  const spark = useRef<SVGCircleElement>(null);
+  const comet = useRef<SVGCircleElement>(null);
+  const cometA = useRef(-Math.PI / 2);
   const state = useRef(heroTasks.map((_, i) => ({ a: 0.9 + (i * TAU) / COUNT, done: false })));
   const speed = useRef(1);
   const target = useRef(1);
   const pointer = useRef({ x: 0, y: 0, tx: 0, ty: 0 });
   const startedRef = useRef(started);
-  const cbs = useRef({ onFocusPill, onDone, onStatus });
+  const cbs = useRef({ onFocusPill, onDone });
 
   useEffect(() => {
     startedRef.current = started;
-    cbs.current = { onFocusPill, onDone, onStatus };
+    cbs.current = { onFocusPill, onDone };
   });
 
   useEffect(() => {
@@ -58,7 +63,7 @@ export function HeroOrbit({
     let raf = 0;
     let last = performance.now();
     let visible = true;
-    let lastCount = -1;
+    let flow = 0;
     const io = new IntersectionObserver(([e]) => (visible = e.isIntersecting));
     io.observe(el);
 
@@ -78,6 +83,7 @@ export function HeroOrbit({
     const frame = (now: number) => {
       const dt = Math.min(0.05, (now - last) / 1000);
       last = now;
+      flow = (flow + dt) % 1;
       speed.current += (target.current - speed.current) * Math.min(1, dt * 4);
       const p = pointer.current;
       p.x += (p.tx - p.x) * Math.min(1, dt * 3);
@@ -86,7 +92,9 @@ export function HeroOrbit({
       const h = el.clientHeight;
       const mobile = w < 640;
       const r = mobile ? { rx: w * 0.2, ry: h * 0.4 } : { rx: Math.min(430, w * 0.38), ry: h * 0.38 };
-      let inMotion = 0;
+      const cx = w / 2;
+      const cy = h / 2;
+      let best = { work: 0, x: 0, y: 0, top: 0 };
       state.current.forEach((s, i) => {
         const node = pillEls.current[i];
         if (!node) return;
@@ -97,13 +105,12 @@ export function HeroOrbit({
         if (startedRef.current && !reduce) s.a = (s.a + dt * speed.current * 0.13) % TAU;
         const depth = Math.sin(s.a); // 1 = front, -1 = back
         const k = (depth + 1) / 2;
-        // Juno works the chip as it comes round the front: it leans in, then flips to Done.
-        const work = Math.max(0, (depth - 0.72) / 0.28);
-        const pull = 1 - work * 0.1;
-        // keep the whole chip on screen, whatever the width
+        // Juno works the chip as it comes round the front: it leans in, fills, then flips to Done.
+        const work = s.done ? 0 : Math.max(0, (depth - 0.6) / 0.37);
+        const pull = 1 - Math.min(1, work) * 0.08;
         const half = node.offsetWidth / 2 + 8;
-        const x = Math.min(w - half, Math.max(half, w / 2 + Math.cos(s.a) * r.rx * pull + p.x * depthPx[i]));
-        const y = h / 2 + Math.sin(s.a) * r.ry * pull + p.y * depthPx[i] - work * 6;
+        const x = Math.min(w - half, Math.max(half, cx + Math.cos(s.a) * r.rx * pull + p.x * depthPx[i]));
+        const y = cy + Math.sin(s.a) * r.ry * pull + p.y * depthPx[i] - Math.min(1, work) * 6;
         if (!s.done && depth > 0.97) {
           s.done = true;
           node.dataset.done = "true";
@@ -112,17 +119,56 @@ export function HeroOrbit({
           s.done = false;
           node.dataset.done = "false";
         }
-        node.dataset.working = work > 0.05 && !s.done ? "true" : "false";
-        if (!s.done) inMotion++;
-        node.style.transform = `translate3d(${x}px, ${y}px, 0) translate(-50%, -50%) scale(${0.8 + k * 0.2 + work * 0.03})`;
-        node.style.opacity = startedRef.current ? String(0.2 + k * 0.8) : "0";
+        const wk = Math.min(1, work);
+        node.dataset.working = wk > 0.02 ? "true" : "false";
+        node.style.setProperty("--work", String(wk));
+        if (wk > best.work) best = { work: wk, x, y, top: y - node.offsetHeight / 2 };
+        node.style.transform = `translate3d(${x}px, ${y}px, 0) translate(-50%, -50%) scale(${0.78 + k * 0.22 + wk * 0.03})`;
+        node.style.opacity = startedRef.current ? String(0.16 + k * 0.84) : "0";
         node.style.zIndex = depth > 0 ? "30" : "5";
-        node.style.filter = depth < -0.2 ? `blur(${(-depth - 0.2) * 1.8}px)` : "none";
+        node.style.filter = depth < -0.1 ? `blur(${(-depth - 0.1) * 2.2}px)` : "none";
       });
-      if (inMotion !== lastCount) {
-        lastCount = inMotion;
-        cbs.current.onStatus?.(inMotion);
+
+      // a point of light running the orbit, dimmer as it passes behind Juno
+      if (comet.current) {
+        if (!reduce) cometA.current = (cometA.current + dt * 0.7) % TAU;
+        const ca = cometA.current;
+        const d = Math.sin(ca);
+        comet.current.setAttribute("cx", String(cx + Math.cos(ca) * r.rx));
+        comet.current.setAttribute("cy", String(cy + Math.sin(ca) * r.ry));
+        comet.current.style.opacity = startedRef.current && !mobile ? String(0.15 + ((d + 1) / 2) * 0.75) : "0";
       }
+
+      // the beam: from the edge of the orb to the chip being worked on
+      if (beam.current && beamGlow.current && beamGrad.current && spark.current) {
+        const show = startedRef.current && !reduce && best.work > 0.02 && !mobile;
+        const tx = best.x;
+        const ty = best.top;
+        const dx = tx - cx;
+        const dy = ty - cy;
+        const len = Math.hypot(dx, dy) || 1;
+        const sx = cx + (dx / len) * ORB;
+        const sy = cy + (dy / len) * ORB;
+        const op = show ? Math.min(1, best.work * 2.2) * (1 - Math.max(0, best.work - 0.92) * 8) : 0;
+        for (const l of [beam.current, beamGlow.current]) {
+          l.setAttribute("x1", String(sx));
+          l.setAttribute("y1", String(sy));
+          l.setAttribute("x2", String(tx));
+          l.setAttribute("y2", String(ty));
+        }
+        beamGrad.current.setAttribute("x1", String(sx));
+        beamGrad.current.setAttribute("y1", String(sy));
+        beamGrad.current.setAttribute("x2", String(tx));
+        beamGrad.current.setAttribute("y2", String(ty));
+        beam.current.style.opacity = String(op);
+        beamGlow.current.style.opacity = String(op * 0.6);
+        // a spark travelling down the beam, Juno handing off work
+        const f = (flow * 1.6) % 1;
+        spark.current.setAttribute("cx", String(sx + (tx - sx) * f));
+        spark.current.setAttribute("cy", String(sy + (ty - sy) * f));
+        spark.current.style.opacity = String(op * Math.sin(Math.PI * f));
+      }
+
       if (visible && !document.hidden) raf = requestAnimationFrame(frame);
       else raf = window.setTimeout(() => (raf = requestAnimationFrame(frame)), 250) as unknown as number;
     };
@@ -138,72 +184,84 @@ export function HeroOrbit({
 
   return (
     <div ref={box} className="relative h-[290px] w-full max-w-[1180px] md:h-[340px]">
-      {/* the orbit: a hairline ring with a faint inner track */}
+      {/* the orbit in perspective: back half dim, front half lit, a comet running round */}
       <svg aria-hidden className="pointer-events-none absolute inset-0 h-full w-full overflow-visible" preserveAspectRatio="none" viewBox="0 0 100 100">
         <defs>
-          <linearGradient id="orbitRing" x1="0" y1="0" x2="1" y2="0">
-            <stop offset="0%" stopColor="#ffffff" stopOpacity="0" />
-            <stop offset="30%" stopColor="#ffffff" stopOpacity="0.1" />
-            <stop offset="50%" stopColor="#7A8FFF" stopOpacity="0.28" />
-            <stop offset="70%" stopColor="#ffffff" stopOpacity="0.1" />
-            <stop offset="100%" stopColor="#ffffff" stopOpacity="0" />
+          <linearGradient id="orbitFront" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stopColor="#7A8FFF" stopOpacity="0" />
+            <stop offset="50%" stopColor="#9DB0FF" stopOpacity="0.5" />
+            <stop offset="100%" stopColor="#7A8FFF" stopOpacity="0" />
           </linearGradient>
         </defs>
         <g className="hidden md:block">
-          <ellipse cx="50" cy="50" rx="38" ry="38" fill="none" stroke="url(#orbitRing)" strokeWidth="1" vectorEffect="non-scaling-stroke" />
-          <ellipse cx="50" cy="50" rx="27" ry="27" fill="none" stroke="#ffffff" strokeOpacity="0.04" strokeWidth="1" strokeDasharray="2 6" vectorEffect="non-scaling-stroke" />
+          <path d="M12 50 A38 38 0 0 1 88 50" fill="none" stroke="#ffffff" strokeOpacity="0.06" strokeWidth="1" vectorEffect="non-scaling-stroke" />
+          <path d="M88 50 A38 38 0 0 1 12 50" fill="none" stroke="url(#orbitFront)" strokeWidth="1" vectorEffect="non-scaling-stroke" />
+          <ellipse cx="50" cy="50" rx="26" ry="26" fill="none" stroke="#ffffff" strokeOpacity="0.05" strokeWidth="1" strokeDasharray="1 5" vectorEffect="non-scaling-stroke" />
         </g>
-        <ellipse cx="50" cy="50" rx="38" ry="36" fill="none" stroke="url(#orbitRing)" strokeWidth="1" vectorEffect="non-scaling-stroke" className="md:hidden" />
+        <g className="md:hidden">
+          <path d="M12 50 A38 36 0 0 1 88 50" fill="none" stroke="#ffffff" strokeOpacity="0.06" strokeWidth="1" vectorEffect="non-scaling-stroke" />
+          <path d="M88 50 A38 36 0 0 1 12 50" fill="none" stroke="url(#orbitFront)" strokeWidth="1" vectorEffect="non-scaling-stroke" />
+        </g>
+      </svg>
+
+      {/* Juno's beam to the task in hand (pixel space) */}
+      <svg aria-hidden className="pointer-events-none absolute inset-0 z-[25] h-full w-full overflow-visible">
+        <defs>
+          <linearGradient id="beamGrad" ref={beamGrad} gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stopColor="#50E5FF" stopOpacity="0.9" />
+            <stop offset="100%" stopColor="#8F7CFF" stopOpacity="0.35" />
+          </linearGradient>
+        </defs>
+        <line ref={beamGlow} stroke="#5B7CFF" strokeWidth="6" strokeLinecap="round" style={{ opacity: 0, filter: "blur(4px)" }} />
+        <line ref={beam} stroke="url(#beamGrad)" strokeWidth="1.25" strokeLinecap="round" strokeDasharray="3 5" className="beam-flow" style={{ opacity: 0 }} />
+        <circle ref={comet} r="2" fill="#DCE4FF" style={{ opacity: 0, filter: "drop-shadow(0 0 5px #9DB0FF) drop-shadow(0 0 12px #7A8FFF)" }} />
+        <circle ref={spark} r="2.5" fill="#E6FBFF" style={{ opacity: 0, filter: "drop-shadow(0 0 6px #50E5FF)" }} />
       </svg>
 
       {/* Juno at the center */}
       <div className="absolute left-1/2 top-1/2 z-20 -translate-x-1/2 -translate-y-1/2">{children}</div>
 
       {/* tasks in orbit */}
-      {heroTasks.map((t, i) => {
-        const tool = tools[t.tool];
-        return (
-          <div
-            key={t.text}
-            ref={(el) => {
-              pillEls.current[i] = el;
-            }}
-            data-done="false"
-            data-working="false"
-            onPointerEnter={(e) => {
-              target.current = 0;
-              cbs.current.onFocusPill?.(e.currentTarget);
-            }}
-            onPointerLeave={() => {
-              target.current = 1;
-              cbs.current.onFocusPill?.(null);
-            }}
-            className="group absolute left-0 top-0 opacity-0 will-change-transform"
-          >
-            <div className="flex items-center gap-2.5 whitespace-nowrap rounded-2xl border border-white/[0.08] bg-[#0E1218]/80 py-1.5 pl-1.5 pr-1.5 shadow-[0_14px_34px_-18px_rgba(0,0,0,0.9),inset_0_1px_0_rgba(255,255,255,0.05)] backdrop-blur-xl transition-[border-color,background-color] duration-200 group-hover:border-white/[0.16] group-data-[working=true]:border-white/[0.16] group-data-[working=true]:bg-[#151A22]/90">
-              <span className="grid size-7 shrink-0 place-items-center rounded-[9px] bg-white/[0.06] ring-1 ring-inset ring-white/[0.06]">
-                <svg viewBox="0 0 24 24" width="14" height="14" fill={tool.hex.toUpperCase() === "#FFFFFF" ? "#F4F6F8" : tool.hex} aria-hidden>
-                  <path d={tool.path} />
+      {heroTasks.map((t, i) => (
+        <div
+          key={t.text}
+          ref={(el) => {
+            pillEls.current[i] = el;
+          }}
+          data-done="false"
+          data-working="false"
+          onPointerEnter={(e) => {
+            target.current = 0;
+            cbs.current.onFocusPill?.(e.currentTarget);
+          }}
+          onPointerLeave={() => {
+            target.current = 1;
+            cbs.current.onFocusPill?.(null);
+          }}
+          className="orbit-chip group absolute left-0 top-0 opacity-0 will-change-transform"
+        >
+          <div className="relative flex items-center gap-3 whitespace-nowrap rounded-[18px] bg-[linear-gradient(180deg,rgba(28,34,48,0.82),rgba(14,18,24,0.82))] py-2 pl-2 pr-2 backdrop-blur-xl">
+            {/* light edge: brighter on top, lit blue while Juno works it */}
+            <span aria-hidden className="chip-edge pointer-events-none absolute inset-0 rounded-[18px]" />
+            <BrandIcon id={t.tool} size={30} />
+            <span className="text-[13.5px] font-medium tracking-[-0.01em] text-text">{t.text}</span>
+            {/* status: fills while working, then flips to Done (snap) */}
+            <span className="relative grid h-[24px] min-w-[104px] overflow-hidden rounded-full bg-white/[0.05] font-mono text-[10.5px] font-medium uppercase tracking-[0.08em] ring-1 ring-inset ring-white/[0.06] transition-colors duration-[120ms] [transition-timing-function:cubic-bezier(0.3,0,0,1)] group-data-[done=true]:bg-[#3DD68C]/[0.12] group-data-[done=true]:ring-[#3DD68C]/25">
+              <span aria-hidden className="absolute inset-y-0 left-0 w-full origin-left bg-[linear-gradient(90deg,rgba(80,229,255,0.12),rgba(122,143,255,0.32))] group-data-[done=true]:opacity-0" style={{ transform: "scaleX(var(--work, 0))" }} />
+              <span className="relative col-start-1 row-start-1 flex items-center justify-center gap-1.5 px-2.5 text-muted transition-[transform,opacity] duration-[120ms] [transition-timing-function:cubic-bezier(0.3,0,0,1)] group-data-[done=true]:-translate-y-full group-data-[done=true]:opacity-0 group-data-[working=true]:text-[#C9D5FF]">
+                <span className="size-1.5 rounded-full bg-white/30 group-data-[working=true]:animate-pulse group-data-[working=true]:bg-[#50E5FF]" />
+                In progress
+              </span>
+              <span className="relative col-start-1 row-start-1 flex translate-y-full items-center justify-center gap-1 px-2.5 text-[#3DD68C] opacity-0 transition-[transform,opacity] duration-[120ms] [transition-timing-function:cubic-bezier(0.3,0,0,1)] group-data-[done=true]:translate-y-0 group-data-[done=true]:opacity-100">
+                <svg viewBox="0 0 12 12" width="10" height="10" aria-hidden>
+                  <path d="M2.5 6.2 5 8.5 9.5 3.5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
+                Done
               </span>
-              <span className="text-[13px] text-text md:text-[13.5px]">{t.text}</span>
-              {/* status: In progress → Done (snap) */}
-              <span className="relative grid h-[22px] min-w-[100px] overflow-hidden rounded-full bg-white/[0.05] font-mono text-[10.5px] font-medium uppercase tracking-[0.08em] transition-colors duration-[120ms] [transition-timing-function:cubic-bezier(0.3,0,0,1)] group-data-[done=true]:bg-[#3DD68C]/[0.12]">
-                <span className="col-start-1 row-start-1 flex items-center justify-center gap-1.5 px-2 text-muted transition-[transform,opacity] duration-[120ms] [transition-timing-function:cubic-bezier(0.3,0,0,1)] group-data-[done=true]:-translate-y-full group-data-[done=true]:opacity-0">
-                  <span className="size-1.5 rounded-full bg-white/30 group-data-[working=true]:animate-pulse group-data-[working=true]:bg-[#7A8FFF]" />
-                  In progress
-                </span>
-                <span className="col-start-1 row-start-1 flex translate-y-full items-center justify-center gap-1 px-2 text-[#3DD68C] opacity-0 transition-[transform,opacity] duration-[120ms] [transition-timing-function:cubic-bezier(0.3,0,0,1)] group-data-[done=true]:translate-y-0 group-data-[done=true]:opacity-100">
-                  <svg viewBox="0 0 12 12" width="10" height="10" aria-hidden>
-                    <path d="M2.5 6.2 5 8.5 9.5 3.5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
-                  Done
-                </span>
-              </span>
-            </div>
+            </span>
           </div>
-        );
-      })}
+        </div>
+      ))}
     </div>
   );
 }
