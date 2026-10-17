@@ -40,8 +40,8 @@ const pulseColor: Record<ToolId, string> = {
 
 /** Same diagram on every screen; mobile uses roomier proportions so it stays legible. */
 const GEO = {
-  desktop: { C: 360, R: 228, NODE: 28, AR: 322, CORE: 66, font: 14, logo: 22, dash: 46, vb: [-40, 0, 800, 720], mascot: 112, label: 7.4 },
-  mobile: { C: 200, R: 124, NODE: 25, AR: 182, CORE: 50, font: 16, logo: 20, dash: 30, vb: [-46, -14, 492, 428], mascot: 80, label: 8.7 },
+  desktop: { C: 360, R: 228, NODE: 28, AR: 318, CORE: 66, font: 13, logo: 22, dash: 46, vb: [-40, 0, 800, 720], mascot: 112, label: 7.4 },
+  mobile: { C: 200, R: 124, NODE: 25, AR: 198, CORE: 50, font: 15, logo: 20, dash: 30, vb: [-60, -22, 520, 444], mascot: 80, label: 8.7 },
 };
 
 const rad = (d: number) => (d * Math.PI) / 180;
@@ -72,7 +72,12 @@ function geometry(mobile: boolean) {
     return { id, deg, ...p, line: { x1: s.x, y1: s.y, x2: e.x, y2: e.y }, len: r2(Math.hypot(e.x - s.x, e.y - s.y)) };
   });
   // areas sit evenly around the ring, one every 60 degrees, starting at the top
-  const labels = groups.map((k, i) => ({ ...k, pos: pt(g.AR, -90 + (i * 360) / groups.length), w: k.label.length * g.label + 34 }));
+  const labels = groups.map((k, i) => {
+    const deg = -90 + (i * 360) / groups.length;
+    const t0 = pt(g.AR - g.font * 2.4, deg);
+    const t1 = pt(g.AR - g.font * 1.5, deg);
+    return { ...k, deg, pos: pt(g.AR, deg), tick: { x1: t0.x, y1: t0.y, x2: t1.x, y2: t1.y } };
+  });
   return { g, nodes, labels };
 }
 
@@ -112,10 +117,10 @@ export function Ch2Brain() {
           last = i;
           busy.add(i);
           const n = nodes[i];
-          const lbl = q(`.b-label[data-g="${groupOf(n.id).id}"] rect`)[0];
+          const lbl = q(`.b-label[data-g="${groupOf(n.id).id}"]`)[0];
           // the tool lights up as it sends, and so does its area
           gsap.fromTo(q(`.b-send[data-id="${n.id}"]`), { opacity: 0.9, attr: { r: g.NODE } }, { opacity: 0, attr: { r: g.NODE * 1.45 }, duration: 1.2, ease: "power2.out" });
-          if (lbl) gsap.fromTo(lbl, { strokeOpacity: 0.9 }, { strokeOpacity: 0.16, duration: 2, ease: "power1.out" });
+          if (lbl) gsap.fromTo(lbl, { "--lit": 1 }, { "--lit": 0, duration: 2.4, ease: "power1.out" });
           gsap.fromTo(
             flows[i],
             { strokeDashoffset: g.dash, opacity: 0 },
@@ -270,19 +275,26 @@ export function Ch2Brain() {
               );
             })}
 
-            {/* area labels: a dot in the area's color; the outline lights up when the area sends */}
+            {/* areas: quiet mono labels with a hairline tick toward Juno; they take their color when the area sends */}
             {labels.map((a) => {
               const on = related?.has(a.id);
               const dim = related && !on;
               return (
-                <g key={a.id} transform={`translate(${a.pos.x} ${a.pos.y})`}>
-                  <g className="b-label" data-g={a.id} style={{ opacity: dim ? 0.45 : 1, transition: "opacity 200ms" }}>
-                    <rect x={-a.w / 2} y={-15} width={a.w} height={30} rx={15} fill="#0B0E14" stroke={on ? "#A6BBFF" : a.dot} strokeOpacity={on ? 1 : 0.16} />
-                    <circle cx={-a.w / 2 + 15} cy={0} r={3} fill={a.dot} style={{ filter: `drop-shadow(0 0 4px ${a.dot})` }} />
-                    <text x={6} textAnchor="middle" dominantBaseline="central" fontSize={g.font} fontWeight="500" fill={on ? "#F4F6F8" : "#9AA6B8"} style={{ transition: "fill 200ms" }}>
-                      {a.label}
-                    </text>
-                  </g>
+                <g key={a.id} className="b-label" data-g={a.id} style={{ opacity: dim ? 0.35 : 1, transition: "opacity 200ms", ["--lit" as string]: 0, ["--area" as string]: a.dot }}>
+                  <line {...a.tick} className="b-tick" strokeWidth={1} strokeLinecap="round" />
+                  <text
+                    x={a.pos.x}
+                    y={a.pos.y}
+                    textAnchor="middle"
+                    dominantBaseline="central"
+                    fontSize={g.font}
+                    fontWeight="500"
+                    letterSpacing="0.14em"
+                    className="b-label-text font-mono uppercase"
+                    data-on={on || undefined}
+                  >
+                    {a.label}
+                  </text>
                 </g>
               );
             })}

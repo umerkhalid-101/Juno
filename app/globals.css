@@ -444,6 +444,9 @@
   background:
     radial-gradient(50% 50% at 85% 25%, rgba(60, 90, 220, 0.09), transparent 75%),
     radial-gradient(45% 45% at 10% 80%, rgba(110, 100, 230, 0.06), transparent 75%);
+  /* fade in and out at the section edges so sections blend with no visible seam */
+  -webkit-mask-image: linear-gradient(to bottom, transparent, #000 22%, #000 78%, transparent);
+  mask-image: linear-gradient(to bottom, transparent, #000 22%, #000 78%, transparent);
 }
 .chapter:nth-of-type(even)::before {
   background:
@@ -905,4 +908,16 @@
   mask-repeat: no-repeat;
   -webkit-mask-position: 0% 0%;
   mask-position: 0% 0%;
+}
+
+/* Brain: area labels light up in their color when the area sends */
+.b-label-text {
+  fill: color-mix(in srgb, var(--area) calc(var(--lit) * 100%), #7c8798);
+  transition: fill 200ms;
+}
+.b-label-text[data-on] {
+  fill: #f4f6f8;
+}
+.b-tick {
+  stroke: color-mix(in srgb, var(--area) calc(var(--lit) * 100%), rgba(255, 255, 255, 0.18));
 }
