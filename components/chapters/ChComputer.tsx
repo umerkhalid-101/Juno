@@ -8,7 +8,7 @@ import { MascotMark } from "@/components/mascot/Mascot";
 import { Browser, CANVAS } from "@/components/computer/Browser";
 import { clock, easeInOut, prog, type Scenario } from "@/components/computer/kit";
 import { reconcile } from "@/components/computer/sites/CloudHost";
-import { offsite } from "@/components/computer/sites/Retreatly";
+import { publish } from "@/components/computer/sites/Inkwell";
 import { prices } from "@/components/computer/sites/Shopfront";
 import { appstore } from "@/components/computer/sites/AppHarbor";
 
@@ -19,7 +19,7 @@ import { appstore } from "@/components/computer/sites/AppHarbor";
  * between jobs and reduced motion all come for free. Juno never approves anything itself.
  */
 
-const scenarios: Scenario[] = [appstore, reconcile, offsite, prices];
+const scenarios: Scenario[] = [appstore, reconcile, publish, prices];
 /** The frame we show without JS or with reduced motion: work done, question asked. */
 const finalT = (s: Scenario) => s.askAt + 0.6;
 const FADE = 0.45;
@@ -42,7 +42,9 @@ const holds = new Map(
     return [sc.id, [...steps, { at: sc.askAt + 0.6, h: ASK_HOLD }].sort((x, y) => x.at - y.at)];
   }),
 );
-const realLen = new Map(scenarios.map((sc) => [sc.id, sc.duration + holds.get(sc.id)!.reduce((n, x) => n + x.h, 0)]));
+const realLen = new Map(
+  scenarios.map((sc) => [sc.id, sc.duration + holds.get(sc.id)!.reduce((n, x) => n + x.h, 0)]),
+);
 const realDuration = (sc: Scenario) => realLen.get(sc.id)!;
 /** Real elapsed seconds to scene time, standing still during each hold. */
 const warp = (sc: Scenario, rt: number) => {
@@ -55,7 +57,12 @@ const warp = (sc: Scenario, rt: number) => {
   return Math.min(sc.duration, rt - acc);
 };
 /** Scene time back to real elapsed seconds (for jumps and seeks). */
-const unwarp = (sc: Scenario, t: number) => t + holds.get(sc.id)!.filter((x) => x.at < t).reduce((n, x) => n + x.h, 0);
+const unwarp = (sc: Scenario, t: number) =>
+  t +
+  holds
+    .get(sc.id)!
+    .filter((x) => x.at < t)
+    .reduce((n, x) => n + x.h, 0);
 
 export function ChComputer() {
   const reduce = useReducedMotion();
@@ -83,7 +90,9 @@ export function ChComputer() {
   useEffect(() => {
     const el = area.current;
     if (!el) return;
-    const ro = new ResizeObserver(([e]) => setScale(Math.min(1.08, e.contentRect.width / CANVAS.w)));
+    const ro = new ResizeObserver(([e]) =>
+      setScale(Math.min(1.08, e.contentRect.width / CANVAS.w)),
+    );
     ro.observe(el);
     return () => ro.disconnect();
   }, []);
@@ -121,12 +130,18 @@ export function ChComputer() {
       const el = cv.querySelector<HTMLElement>(`[data-c="${target}"]`);
       if (!el) return seen.get(key) ?? fallback;
       const r = el.getBoundingClientRect();
-      const p = { x: (r.left - box.left + Math.min(r.width * 0.5, 60)) / k, y: (r.top - box.top + r.height * 0.6) / k };
+      const p = {
+        x: (r.left - box.left + Math.min(r.width * 0.5, 60)) / k,
+        y: (r.top - box.top + r.height * 0.6) / k,
+      };
       seen.set(key, p);
       return p;
     };
     const keys = sc.cursor;
-    const here = follow.current && follow.current.id === sc.id ? { x: follow.current.x, y: follow.current.y } : { x: 420, y: 330 };
+    const here =
+      follow.current && follow.current.id === sc.id
+        ? { x: follow.current.x, y: follow.current.y }
+        : { x: 420, y: 330 };
     let pos = t < 0.2 ? { x: 420, y: 330 } : here;
     let started = false;
     let prevAt = 0;
@@ -249,21 +264,33 @@ export function ChComputer() {
     <section ref={section} id="computer" aria-labelledby="computer-title" className="chapter">
       <div className="container-page">
         <Reveal className="mx-auto max-w-[900px] text-center">
-          <h2 id="computer-title" className="text-[40px] font-medium leading-[44px] tracking-[-0.035em] text-balance md:text-[56px] md:leading-[60px] lg:text-[64px] lg:leading-[66px]">
+          <h2
+            id="computer-title"
+            className="text-[40px] font-medium leading-[44px] tracking-[-0.035em] text-balance md:text-[56px] md:leading-[60px] lg:text-[64px] lg:leading-[66px]"
+          >
             And a computer of its own <span className="block text-muted">to handle the rest.</span>
           </h2>
           <p className="mx-auto mt-5 max-w-[48ch] text-[17px] leading-[27px] text-muted">
-            No integration? Juno signs in, clicks through, and does the hard part on its own secure computer.
+            No integration? Juno signs in, clicks through, and does the hard part on its own secure
+            computer.
           </p>
         </Reveal>
 
         <div className="relative mx-auto mt-12 w-full max-w-[1140px] md:mt-16">
           {/* Juno glow (glow 2 of 2), faint, behind the computer */}
-          <div aria-hidden className="pointer-events-none absolute left-1/2 top-[45%] -z-10 h-[70%] w-[80%] -translate-x-1/2 -translate-y-1/2 rounded-full opacity-35 blur-[90px]" style={{ background: "var(--glow)" }} />
+          <div
+            aria-hidden
+            className="pointer-events-none absolute left-1/2 top-[45%] -z-10 h-[70%] w-[80%] -translate-x-1/2 -translate-y-1/2 rounded-full opacity-35 blur-[90px]"
+            style={{ background: "var(--glow)" }}
+          />
 
           {/* jobs as tabs, live label, pause */}
           <div className="mb-5 flex flex-wrap items-center justify-between gap-4">
-            <div role="tablist" aria-label="Jobs Juno can do on its computer" className="flex max-w-full gap-1 overflow-x-auto [scrollbar-width:none] max-md:[mask-image:linear-gradient(90deg,#000_85%,transparent)] [&::-webkit-scrollbar]:hidden">
+            <div
+              role="tablist"
+              aria-label="Jobs Juno can do on its computer"
+              className="flex max-w-full gap-1 overflow-x-auto [scrollbar-width:none] max-md:[mask-image:linear-gradient(90deg,#000_85%,transparent)] [&::-webkit-scrollbar]:hidden"
+            >
               {scenarios.map((sc, i) => {
                 const on = i === si;
                 return (
@@ -277,8 +304,15 @@ export function ChComputer() {
                   >
                     {sc.tab}
                     {on && (
-                      <span aria-hidden className="absolute inset-x-4 bottom-1.5 h-px overflow-hidden rounded-full bg-white/10">
-                        <span ref={bar} className="block h-full origin-left bg-[#F4F6F8]" style={{ transform: reduce ? "scaleX(1)" : "scaleX(0)" }} />
+                      <span
+                        aria-hidden
+                        className="absolute inset-x-4 bottom-1.5 h-px overflow-hidden rounded-full bg-white/10"
+                      >
+                        <span
+                          ref={bar}
+                          className="block h-full origin-left bg-[#F4F6F8]"
+                          style={{ transform: reduce ? "scaleX(1)" : "scaleX(0)" }}
+                        />
                       </span>
                     )}
                   </button>
@@ -287,7 +321,9 @@ export function ChComputer() {
             </div>
             <div className="flex items-center gap-3">
               <span className="t-eyebrow inline-flex items-center gap-2 text-muted">
-                <span className={`size-2 rounded-full ${running ? "rec-dot bg-[#FF6568]" : "bg-white/30"}`} />
+                <span
+                  className={`size-2 rounded-full ${running ? "rec-dot bg-[#FF6568]" : "bg-white/30"}`}
+                />
                 Juno&apos;s computer · {running ? "Live" : "Paused"}
               </span>
               {!reduce && (
@@ -306,14 +342,28 @@ export function ChComputer() {
           {/* a dark MacBook */}
           <div className="relative rounded-t-[22px] rounded-b-[6px] bg-[linear-gradient(180deg,#2a2c31,#16171a)] p-[10px] pb-[12px] shadow-[0_40px_120px_rgba(0,0,0,0.5),inset_0_1px_0_rgba(255,255,255,0.12)] md:p-[12px] md:pb-[14px]">
             <div className="relative overflow-hidden rounded-[12px] bg-black p-[2px]">
-              <span aria-hidden className="absolute left-1/2 top-0 z-40 h-[14px] w-[110px] -translate-x-1/2 rounded-b-[8px] bg-black" />
+              <span
+                aria-hidden
+                className="absolute left-1/2 top-0 z-40 h-[14px] w-[110px] -translate-x-1/2 rounded-b-[8px] bg-black"
+              />
               <div className="relative flex gap-4 overflow-hidden rounded-[10px] bg-[radial-gradient(120%_120%_at_0%_0%,#1d2440_0%,#121729_45%,#0b0e18_100%)] p-3 md:p-4">
                 {/* the browser, scaled from its design canvas */}
-                <div ref={area} className="relative min-w-0 flex-1" style={{ height: CANVAS.h * scale }} onPointerEnter={() => setHover(true)} onPointerLeave={() => setHover(false)}>
+                <div
+                  ref={area}
+                  className="relative min-w-0 flex-1"
+                  style={{ height: CANVAS.h * scale }}
+                  onPointerEnter={() => setHover(true)}
+                  onPointerLeave={() => setHover(false)}
+                >
                   <div
                     ref={canvas}
                     className="absolute left-0 top-0 origin-top-left"
-                    style={{ width: CANVAS.w, height: CANVAS.h, transform: `scale(${scale})`, opacity: Math.min(fadeOut, fadeIn) }}
+                    style={{
+                      width: CANVAS.w,
+                      height: CANVAS.h,
+                      transform: `scale(${scale})`,
+                      opacity: Math.min(fadeOut, fadeIn),
+                    }}
                     aria-hidden
                   >
                     <Browser chrome={chrome}>
@@ -321,9 +371,21 @@ export function ChComputer() {
                     </Browser>
 
                     {/* Juno's cursor */}
-                    <div ref={cursor} className="pointer-events-none absolute left-0 top-0 z-30" style={{ opacity: 0 }}>
-                      <span ref={ripple} className="absolute -left-3 -top-3 size-6 rounded-full border-2 border-[#8F7CFF]" style={{ opacity: 0 }} />
-                      <MousePointer2 size={26} strokeWidth={1.5} className="relative -translate-x-[3px] -translate-y-[2px] fill-[#5b74ff] text-white drop-shadow-[0_3px_8px_rgba(0,0,0,0.35)]" />
+                    <div
+                      ref={cursor}
+                      className="pointer-events-none absolute left-0 top-0 z-30"
+                      style={{ opacity: 0 }}
+                    >
+                      <span
+                        ref={ripple}
+                        className="absolute -left-3 -top-3 size-6 rounded-full border-2 border-[#8F7CFF]"
+                        style={{ opacity: 0 }}
+                      />
+                      <MousePointer2
+                        size={26}
+                        strokeWidth={1.5}
+                        className="relative -translate-x-[3px] -translate-y-[2px] fill-[#5b74ff] text-white drop-shadow-[0_3px_8px_rgba(0,0,0,0.35)]"
+                      />
                       <span className="absolute left-5 top-6 inline-flex items-center gap-2 whitespace-nowrap rounded-full bg-[#1b2134] py-1 pl-1 pr-3.5 text-[14px] font-medium text-white shadow-[0_10px_24px_-8px_rgba(0,0,0,0.7)] ring-1 ring-white/10">
                         <MascotMark size={26} />
                         Juno
@@ -340,26 +402,48 @@ export function ChComputer() {
                 </div>
 
                 {/* Juno's activity log */}
-                <div className="hidden w-[300px] shrink-0 flex-col rounded-2xl bg-[#0E1218]/95 p-4 ring-1 ring-white/[0.08] md:flex" style={{ height: CANVAS.h * scale }}>
+                <div
+                  className="hidden w-[300px] shrink-0 flex-col rounded-2xl bg-[#0E1218]/95 p-4 ring-1 ring-white/[0.08] md:flex"
+                  style={{ height: CANVAS.h * scale }}
+                >
                   <div className="mb-4 flex items-center gap-2.5">
                     <MascotMark size={28} />
                     <span className="flex-1">
                       <span className="block text-[14px] font-medium text-text">Juno</span>
-                      <span className="t-eyebrow block !text-[11px] text-muted">{asking ? "Needs you" : "Working"}</span>
+                      <span className="t-eyebrow block !text-[11px] text-muted">
+                        {asking ? "Needs you" : "Working"}
+                      </span>
                     </span>
-                    <span className="t-eyebrow !text-[11px] tabular-nums text-subtle">{clock(si * 40 + t)}</span>
+                    <span className="t-eyebrow !text-[11px] tabular-nums text-subtle">
+                      {clock(si * 40 + t)}
+                    </span>
                   </div>
-                  <ul className="min-h-0 flex-1 space-y-3 overflow-hidden" aria-hidden>
+                  <ul
+                    className={`flex min-h-0 flex-1 flex-col gap-3 overflow-hidden ${asking ? "justify-end [mask-image:linear-gradient(180deg,transparent,#000_32px)]" : ""}`}
+                    aria-hidden
+                  >
                     {log.map((l) => {
                       const done = t >= (l.done ?? l.at + 0.8);
                       return (
-                        <li key={`${s.id}-${l.text}`} className="log-in flex gap-2.5">
-                          <span className={`mt-[3px] grid size-4 shrink-0 place-items-center rounded-full transition-colors duration-[120ms] ${done ? "bg-[#3DD68C]/15 text-[#3DD68C]" : "text-muted"}`}>
-                            {done ? <Check size={10} strokeWidth={3} /> : <Loader2 size={12} className="animate-spin" />}
+                        <li key={`${s.id}-${l.text}`} className="log-in flex shrink-0 gap-2.5">
+                          <span
+                            className={`mt-[3px] grid size-4 shrink-0 place-items-center rounded-full transition-colors duration-[120ms] ${done ? "bg-[#3DD68C]/15 text-[#3DD68C]" : "text-muted"}`}
+                          >
+                            {done ? (
+                              <Check size={10} strokeWidth={3} />
+                            ) : (
+                              <Loader2 size={12} className="animate-spin" />
+                            )}
                           </span>
                           <span className="min-w-0 flex-1">
-                            <span className="t-eyebrow block !text-[10.5px] text-subtle">{clock(si * 40 + l.at)}</span>
-                            <span className={`block text-[13px] leading-[18px] ${done ? "text-text" : "text-muted"}`}>{!done && l.live ? l.live(t) : l.text}</span>
+                            <span className="t-eyebrow block !text-[10.5px] text-subtle">
+                              {clock(si * 40 + l.at)}
+                            </span>
+                            <span
+                              className={`block text-[13px] leading-[18px] ${done ? "text-text" : "text-muted"}`}
+                            >
+                              {!done && l.live ? l.live(t) : l.text}
+                            </span>
                           </span>
                         </li>
                       );
@@ -374,7 +458,10 @@ export function ChComputer() {
               </div>
             </div>
           </div>
-          <div aria-hidden className="relative -mx-[5%] h-[14px] rounded-b-[18px] rounded-t-[3px] bg-[linear-gradient(180deg,#3a3c42_0%,#1c1d21_60%,#0e0f11_100%)] shadow-[0_30px_50px_-20px_rgba(0,0,0,0.9)]">
+          <div
+            aria-hidden
+            className="relative -mx-[5%] h-[14px] rounded-b-[18px] rounded-t-[3px] bg-[linear-gradient(180deg,#3a3c42_0%,#1c1d21_60%,#0e0f11_100%)] shadow-[0_30px_50px_-20px_rgba(0,0,0,0.9)]"
+          >
             <span className="absolute left-1/2 top-0 h-[6px] w-[16%] -translate-x-1/2 rounded-b-[8px] bg-[#121316]" />
           </div>
 
@@ -395,10 +482,22 @@ function Ask({ question, compact = false }: { question: string; compact?: boolea
         <span className="size-1.5 rounded-full bg-[#FFB547]" />
         Needs your yes
       </p>
-      <p className={`mt-1.5 text-text ${compact ? "text-[13px] leading-[18px]" : "text-[14px] leading-[20px]"}`}>{question}</p>
+      <p
+        className={`mt-1.5 text-text ${compact ? "text-[13px] leading-[18px]" : "text-[14px] leading-[20px]"}`}
+      >
+        {question}
+      </p>
       <span className={`flex gap-2 ${compact ? "mt-2" : "mt-3"}`} aria-hidden>
-        <span className={`inline-flex ${compact ? "h-8" : "h-9"} flex-1 items-center justify-center rounded-full bg-[#F4F6F8] text-[13px] font-semibold text-[#07090D]`}>Approve</span>
-        <span className={`inline-flex ${compact ? "h-8" : "h-9"} items-center justify-center rounded-full px-4 text-[13px] text-muted ring-1 ring-white/10`}>Review</span>
+        <span
+          className={`inline-flex ${compact ? "h-8" : "h-9"} flex-1 items-center justify-center rounded-full bg-[#F4F6F8] text-[13px] font-semibold text-[#07090D]`}
+        >
+          Approve
+        </span>
+        <span
+          className={`inline-flex ${compact ? "h-8" : "h-9"} items-center justify-center rounded-full px-4 text-[13px] text-muted ring-1 ring-white/10`}
+        >
+          Review
+        </span>
       </span>
     </>
   );
