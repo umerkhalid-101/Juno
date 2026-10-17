@@ -213,7 +213,7 @@ export function Ch7Close() {
     if (!on) gsap.to(".charge-ring", { opacity: 0, duration: 0.4, overwrite: true });
   };
 
-  // Request access: the button bursts into a wave that fills the screen, then the signup page opens.
+  // Request access: a quick wave bursts from the button and the signup page opens as it fills the screen.
   const requestAccess = (e: ReactMouseEvent) => {
     if (reduce || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return; // plain link behaviour
     e.preventDefault();
@@ -226,7 +226,7 @@ export function Ch7Close() {
     gsap.to(boost, { current: 5, duration: 0.5, ease: "power2.in" });
     mascot.current?.cheer();
     setLaunch({ x, y, d });
-    window.setTimeout(() => window.location.assign(SIGNUP), 950);
+    window.setTimeout(() => window.location.assign(SIGNUP), 380);
   };
 
   // dev only: play the burst without leaving the page
@@ -521,7 +521,7 @@ export function Ch7Close() {
             <motion.span
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
-              transition={{ duration: 0.8, ease: [0.7, 0, 0.2, 1] }}
+              transition={{ duration: 0.42, ease: [0.55, 0, 0.25, 1] }}
               className="absolute rounded-full bg-[radial-gradient(closest-side,#EAF0FF,#A6BBFF_25%,#5B6DFF_55%,#1A1F4D_80%,#07090D)]"
               style={{
                 left: launch.x - launch.d / 2,
@@ -530,20 +530,6 @@ export function Ch7Close() {
                 height: launch.d,
               }}
             />
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.5, duration: 0.35 }}
-              className="absolute inset-0 grid place-items-center bg-[#07090D]"
-            >
-              <motion.div
-                initial={{ scale: 0.5, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                transition={{ delay: 0.55, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-              >
-                <MascotMark size={84} />
-              </motion.div>
-            </motion.div>
           </div>,
           document.body,
         )}
