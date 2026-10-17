@@ -25,43 +25,37 @@ const finalT = (s: Scenario) => s.askAt + 0.6;
 const FADE = 0.45;
 
 /**
- * Pacing: every job takes about 10 seconds of work, with a short beat after each step so you can
- * read what just happened, then the question for you stays up for a moment before the next job.
+ * Pacing: every step plays at natural speed, then Juno holds for a beat so you can read what just
+ * happened; the question for you holds longer. Nothing is sped up, so the cursor never rushes.
  */
-const WORK = 10;
-const ASK_REAL = 2.5;
-const HOLD = 0.35;
+/** Overall playback speed: a little under real time so long cursor moves read as an easy sweep. */
+const SPEED = 0.8;
+const HOLD = 0.45;
+const ASK_HOLD = 1.6;
 const holds = new Map(
-  scenarios.map((sc) => [
-    sc.id,
-    sc.cursor.map((k, i) => {
+  scenarios.map((sc) => {
+    const steps = sc.cursor.map((k, i) => {
       const next = sc.cursor[i + 1];
       const nextMove = next ? Math.max(k.at + 0.15, next.at - 0.75) : Infinity;
       return { at: Math.min(k.at + 0.45, nextMove, sc.askAt), h: HOLD };
-    }),
-  ]),
+    });
+    return [sc.id, [...steps, { at: sc.askAt + 0.6, h: ASK_HOLD }].sort((x, y) => x.at - y.at)];
+  }),
 );
-/** Scene seconds of work (including the beats) squeezed or stretched into WORK real seconds. */
-const workLen = (sc: Scenario) => sc.askAt + holds.get(sc.id)!.reduce((n, x) => n + x.h, 0);
-const realDuration = () => WORK + ASK_REAL;
-/** Real elapsed seconds to scene time. */
+const realLen = new Map(scenarios.map((sc) => [sc.id, sc.duration + holds.get(sc.id)!.reduce((n, x) => n + x.h, 0)]));
+const realDuration = (sc: Scenario) => realLen.get(sc.id)!;
+/** Real elapsed seconds to scene time, standing still during each hold. */
 const warp = (sc: Scenario, rt: number) => {
-  if (rt >= WORK) return Math.min(sc.duration, sc.askAt + ((rt - WORK) / ASK_REAL) * (sc.duration - sc.askAt));
-  const w = (rt / WORK) * workLen(sc);
   let acc = 0;
   for (const x of holds.get(sc.id)!) {
-    if (w < x.at + acc) return w - acc;
-    if (w < x.at + acc + x.h) return x.at;
+    if (rt < x.at + acc) return rt - acc;
+    if (rt < x.at + acc + x.h) return x.at;
     acc += x.h;
   }
-  return Math.min(sc.askAt, w - acc);
+  return Math.min(sc.duration, rt - acc);
 };
 /** Scene time back to real elapsed seconds (for jumps and seeks). */
-const unwarp = (sc: Scenario, t: number) => {
-  if (t >= sc.askAt) return WORK + ((t - sc.askAt) / (sc.duration - sc.askAt)) * ASK_REAL;
-  const w = t + holds.get(sc.id)!.filter((x) => x.at < t).reduce((n, x) => n + x.h, 0);
-  return (w / workLen(sc)) * WORK;
-};
+const unwarp = (sc: Scenario, t: number) => t + holds.get(sc.id)!.filter((x) => x.at < t).reduce((n, x) => n + x.h, 0);
 
 export function ChComputer() {
   const reduce = useReducedMotion();
@@ -110,30 +104,41 @@ export function ChComputer() {
 
   // Juno's cursor: eased curves between targets, a ripple on each click. Drawn every frame from the
   // exact clock, straight to the DOM, so it glides at full frame rate without re-rendering the scene.
-  const place = (sc: Scenario, t: number, rt: number) => {
-    if (bar.current) bar.current.style.transform = `scaleX(${Math.min(1, rt / realDuration())})`;
+  const follow = useRef<{ x: number; y: number; id: string } | null>(null);
+  const lastSeen = useRef(new Map<string, { x: number; y: number }>());
+  const place = (sc: Scenario, t: number, rt: number, dt = 0) => {
+    if (bar.current) bar.current.style.transform = `scaleX(${Math.min(1, rt / realDuration(sc))})`;
     const cv = canvas.current;
     const cur = cursor.current;
     if (!cv || !cur) return;
     const box = cv.getBoundingClientRect();
     const k = box.width / CANVAS.w || 1;
+    // where each target was last seen: a target that has gone (page changed) or is still loading
+    // keeps its last known spot, so the cursor never falls back to the middle of the screen
+    const seen = lastSeen.current;
     const at = (target: string, fallback: { x: number; y: number }) => {
+      const key = `${sc.id}:${target}`;
       const el = cv.querySelector<HTMLElement>(`[data-c="${target}"]`);
-      if (!el) return fallback;
+      if (!el) return seen.get(key) ?? fallback;
       const r = el.getBoundingClientRect();
-      return { x: (r.left - box.left + Math.min(r.width * 0.5, 60)) / k, y: (r.top - box.top + r.height * 0.6) / k };
+      const p = { x: (r.left - box.left + Math.min(r.width * 0.5, 60)) / k, y: (r.top - box.top + r.height * 0.6) / k };
+      seen.set(key, p);
+      return p;
     };
     const keys = sc.cursor;
-    let pos = { x: 420, y: 330 };
+    const here = follow.current && follow.current.id === sc.id ? { x: follow.current.x, y: follow.current.y } : { x: 420, y: 330 };
+    let pos = t < 0.2 ? { x: 420, y: 330 } : here;
+    let started = false;
     let prevAt = 0;
     for (let i = 0; i < keys.length; i++) {
       const kf = keys[i];
       if (t >= kf.at) {
-        // only measure targets we have reached or are heading to
-        if (i === keys.length - 1 || t < keys[i + 1].at - 0.75) pos = at(kf.target, pos);
+        pos = at(kf.target, pos);
+        started = true;
         prevAt = kf.at;
         continue;
       }
+      if (!started) pos = { x: 420, y: 330 };
       const target = at(kf.target, pos);
       const start = Math.max(prevAt + 0.15, kf.at - 0.75);
       const p = easeInOut(prog(t, start, kf.at));
@@ -144,8 +149,18 @@ export function ChComputer() {
       pos = { x: pos.x + dx * p + (-dy / len) * bend, y: pos.y + dy * p + (dx / len) * bend };
       break;
     }
+    // glide toward the scripted point instead of snapping, so the cursor can never jump
+    const f = follow.current;
+    if (!f || f.id !== sc.id || dt === 0 || t < 0.2) {
+      follow.current = { ...pos, id: sc.id };
+    } else {
+      const k2 = 1 - Math.exp(-dt / 0.14);
+      f.x += (pos.x - f.x) * k2;
+      f.y += (pos.y - f.y) * k2;
+    }
+    const fp = follow.current!;
     const fade = Math.min(prog(t, 0.2, 0.5), 1 - prog(t, sc.duration - FADE, sc.duration));
-    cur.style.transform = `translate3d(${pos.x}px, ${pos.y}px, 0)`;
+    cur.style.transform = `translate3d(${fp.x}px, ${fp.y}px, 0)`;
     cur.style.opacity = String(fade);
     const click = [...keys].reverse().find((kf) => kf.click && t >= kf.at);
     const rp = click ? prog(t, click.at, click.at + 0.45) : 1;
@@ -174,8 +189,8 @@ export function ChComputer() {
       const dt = Math.min(0.1, (now - last) / 1000);
       last = now;
       const c = clockRef.current;
-      c.rt += dt;
-      if (c.rt >= realDuration()) {
+      c.rt += dt * SPEED;
+      if (c.rt >= realDuration(scenarios[c.si])) {
         c.si = (c.si + 1) % scenarios.length;
         c.rt = 0;
         setSi(c.si);
@@ -188,7 +203,7 @@ export function ChComputer() {
         lastPaint = q;
         setT(q);
       }
-      placeRef.current(sc, exact, c.rt);
+      placeRef.current(sc, exact, c.rt, dt);
       raf = requestAnimationFrame(tick);
     };
     raf = requestAnimationFrame(tick);

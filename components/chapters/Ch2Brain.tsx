@@ -127,13 +127,13 @@ export function Ch2Brain() {
             {
               keyframes: [
                 { opacity: 1, duration: 0.3 },
-                { strokeDashoffset: -n.len, duration: gsap.utils.random(2.2, 3.0), ease: "sine.inOut" },
+                { strokeDashoffset: -n.len, duration: gsap.utils.random(1.6, 2.2), ease: "sine.inOut" },
               ],
               onComplete: () => {
                 busy.delete(i);
                 gsap.set(flows[i], { opacity: 0 });
                 const now = performance.now();
-                if (now - lastRipple > 1400) {
+                if (now - lastRipple > 1100) {
                   lastRipple = now;
                   ripple();
                 }
@@ -144,8 +144,8 @@ export function Ch2Brain() {
         const loop = () => {
           if (!running) return;
           fire();
-          if (Math.random() < 0.15) gsap.delayedCall(gsap.utils.random(0.6, 1.2), fire);
-          next = gsap.delayedCall(gsap.utils.random(1.0, 2.0), loop);
+          if (Math.random() < 0.15) gsap.delayedCall(gsap.utils.random(0.4, 0.9), fire);
+          next = gsap.delayedCall(gsap.utils.random(0.7, 1.5), loop);
         };
         const pulses = {
           play: () => {
