@@ -349,7 +349,12 @@ const CloseLoop = () => (
   </div>
 );
 
-/** 4. Build us a website: the spring collection site. */
+/** 4. Build us a website: a real storefront for the spring collection. */
+const products = [
+  { n: "Stone vase", p: "$48", img: "1674390521253-79caf82d0ceb" },
+  { n: "Shelf set", p: "$64", img: "1597696929736-6d13bed8e6a8" },
+  { n: "Field vase", p: "$52", img: "1613424777445-f93a2a48e285" },
+];
 const Website = () => (
   <Rise d={0}>
     <Paper className="overflow-hidden">
@@ -360,205 +365,283 @@ const Website = () => (
           <span className="size-2.5 rounded-full bg-[#28C840]" />
         </span>
         <span className="mx-auto rounded-md bg-white px-3 py-0.5 text-[11px] text-[#7a7f8c] ring-1 ring-black/5">everydayobjects.co</span>
+        <Pill tone="ok">Ready to publish</Pill>
       </div>
-      <div className="flex flex-col-reverse sm:grid sm:grid-cols-[1.05fr_1fr]">
-        <div className="p-4 sm:p-5">
-          <div className="flex items-center justify-between text-[12px]">
-            <span className="font-semibold tracking-[-0.01em]">Everyday Objects®</span>
-            <span className="flex gap-3 text-[#5d6370]">
-              <span>Collection</span>
-              <span>About</span>
-            </span>
-          </div>
-          <p className="mt-3 font-mono text-[10px] uppercase tracking-[0.16em] text-[#a2541f] sm:mt-6">The Spring Edit</p>
-          <p className="mock-serif mt-2 text-[30px] leading-[0.98] tracking-[-0.02em] sm:text-[34px]">
+      {/* the site */}
+      <div className="flex items-center justify-between px-4 py-2.5 text-[11.5px]">
+        <span className="font-semibold tracking-[-0.01em]">Everyday Objects®</span>
+        <span className="flex items-center gap-3 text-[#5d6370]">
+          <span>Collection</span>
+          <span className="max-sm:hidden">About</span>
+          <span className="rounded-full bg-[#14161f] px-2 py-0.5 text-[10.5px] text-white">Bag 0</span>
+        </span>
+      </div>
+      <div className="relative mx-3 h-[118px] overflow-hidden rounded-xl bg-[#EDE6DC] sm:h-[124px]">
+        <Image src={photo("1638303322325-ff70d6224a22", 1000)} alt="" fill sizes="(max-width: 640px) 100vw, 600px" className="object-cover" />
+        <div className="absolute inset-0 bg-gradient-to-r from-[#F7F2EA] via-[#F7F2EA]/80 to-transparent" />
+        <div className="absolute inset-y-0 left-0 flex flex-col justify-center px-4">
+          <p className="font-mono text-[9.5px] uppercase tracking-[0.16em] text-[#a2541f]">The Spring Edit</p>
+          <p className="mock-serif mt-1 text-[26px] leading-[0.98] tracking-[-0.02em] sm:text-[30px]">
             Everyday,
             <br />
             beautiful.
           </p>
-          <p className="mt-3 text-[13px] leading-[19px] text-[#5d6370] max-sm:hidden">Good things. For the place you call home.</p>
-          <span className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-[#14161f] px-3.5 py-1.5 text-[12px] font-medium text-white">
+          <span className="mt-2.5 inline-flex w-fit items-center gap-1 rounded-full bg-[#14161f] px-3 py-1 text-[11px] font-medium text-white">
             Explore the collection
-            <ArrowRight size={12} aria-hidden />
+            <ArrowRight size={11} aria-hidden />
           </span>
         </div>
-        <div className="relative h-[84px] bg-[#EDE6DC] sm:h-auto sm:min-h-[230px]">
-          <Image src={photo("1638303322325-ff70d6224a22")} alt="" fill sizes="(max-width: 640px) 100vw, 320px" className="object-cover" />
+      </div>
+      <div className="px-3 pb-3 pt-2.5">
+        <p className="px-1 text-[11px] font-medium text-[#7a7f8c]">New arrivals</p>
+        <div className="mt-1.5 grid grid-cols-3 gap-2">
+          {products.map((pr, i) => (
+            <Rise key={pr.n} d={0.2 + i * 0.08} className="rounded-lg bg-white p-1.5 ring-1 ring-black/[0.05]">
+              <div className="relative h-[46px] overflow-hidden rounded-md bg-[#EDE6DC] sm:h-[44px]">
+                <Image src={photo(pr.img, 300)} alt="" fill sizes="160px" className="object-cover" />
+              </div>
+              <p className="mt-1 flex justify-between px-0.5 text-[10.5px]">
+                <span className="truncate font-medium">{pr.n}</span>
+                <span className="text-[#7a7f8c]">{pr.p}</span>
+              </p>
+            </Rise>
+          ))}
         </div>
       </div>
     </Paper>
   </Rise>
 );
 
-/** 5. Make something worth sharing: the social visual, ready for both channels. */
-const channels = [
-  { m: <LinkedInMark s={16} />, n: "LinkedIn", s: "1200 × 1200" },
-  { m: <XMark s={14} />, n: "X", s: "1600 × 900" },
-];
-const Social = () => (
-  <div className="grid items-center gap-3 sm:grid-cols-[1fr_auto] sm:gap-4">
-    <Rise d={0}>
-      <Paper className="overflow-hidden p-2.5">
-        <div className="relative aspect-[16/10] overflow-hidden rounded-xl bg-[#E9DCCB]">
-          <Image src={photo("1613424777445-f93a2a48e285")} alt="" fill sizes="(max-width: 640px) 100vw, 420px" className="object-cover" />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/10 to-transparent" />
-          <p className="absolute left-4 top-3.5 text-[12px] font-semibold text-white/95">Everyday Objects®</p>
-          <div className="absolute bottom-4 left-4 text-white">
-            <p className="mock-serif text-[28px] leading-[1] sm:text-[30px]">
-              A brighter
-              <br />
-              everyday.
-            </p>
-            <p className="mt-2 font-mono text-[10px] uppercase tracking-[0.16em] text-white/80">The Spring Edit</p>
-          </div>
-        </div>
-      </Paper>
-    </Rise>
-    <div className="flex gap-2 sm:block sm:space-y-2">
-      {channels.map((c, i) => (
-        <Rise key={c.n} d={0.25 + i * 0.1} className="max-sm:flex-1">
-          <div className="flex items-center gap-2.5 rounded-xl bg-[#FBFAF7] px-3 py-2.5 text-[#14161f] ring-1 ring-black/5 sm:w-[150px]">
-            <span className="grid size-7 shrink-0 place-items-center rounded-lg bg-white ring-1 ring-black/5">{c.m}</span>
-            <span>
-              <span className="block text-[12.5px] font-semibold">{c.n}</span>
-              <span className="block whitespace-nowrap text-[11px] text-[#7a7f8c]">{c.s}</span>
-            </span>
-          </div>
-        </Rise>
-      ))}
+/** 5. Make something worth sharing: the visual, already in a LinkedIn post and an X post. */
+const SpringVisual = ({ h }: { h: string }) => (
+  <div className={`relative overflow-hidden rounded-lg bg-[#E9DCCB] ${h}`}>
+    <Image src={photo("1613424777445-f93a2a48e285")} alt="" fill sizes="(max-width: 640px) 100vw, 360px" className="object-cover" />
+    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
+    <p className="absolute left-3 top-2.5 text-[10.5px] font-semibold text-white/95">Everyday Objects®</p>
+    <div className="absolute bottom-3 left-3 text-white">
+      <p className="mock-serif text-[22px] leading-[1]">
+        A brighter
+        <br />
+        everyday.
+      </p>
+      <p className="mt-1 font-mono text-[9px] uppercase tracking-[0.16em] text-white/80">The Spring Edit</p>
     </div>
   </div>
 );
+const Social = () => (
+  <div className="relative mx-auto sm:h-[300px] sm:max-w-[560px]">
+    {/* X post, fanned behind */}
+    <motion.div className="absolute right-0 top-8 w-[210px] max-sm:hidden" initial={{ opacity: 0, x: -100, rotate: 0 }} animate={{ opacity: 1, x: 0, rotate: 5 }} transition={{ duration: 0.7, delay: 0.5, ease: calm }}>
+      <Paper className="p-3">
+        <div className="flex items-center gap-2 text-[11px]">
+          <span className="grid size-6 place-items-center rounded-full bg-[#14161f] text-[9px] font-bold text-white">EO</span>
+          <span className="flex-1">
+            <span className="font-semibold">Everyday Objects</span> <span className="text-[#7a7f8c]">@everyday</span>
+          </span>
+          <XMark s={11} />
+        </div>
+        <p className="mt-1.5 text-[11.5px] leading-[15px]">Spring is in. Meet the new edit.</p>
+        <div className="mt-2">
+          <SpringVisual h="h-[110px]" />
+        </div>
+        <p className="mt-2 flex justify-between font-mono text-[9.5px] text-[#7a7f8c]">
+          <span>18</span>
+          <span>64</span>
+          <span>412</span>
+          <span>3.4K</span>
+        </p>
+      </Paper>
+    </motion.div>
+    {/* LinkedIn post, up front */}
+    <motion.div className="relative z-10 w-full sm:absolute sm:left-6 sm:top-0 sm:w-[310px]" initial={{ opacity: 0, y: 20, scale: 0.97 }} animate={{ opacity: 1, y: 0, scale: 1 }} transition={{ duration: 0.7, delay: 0.25, ease: calm }}>
+      <Paper className="p-3 shadow-[0_40px_80px_-30px_rgba(0,0,0,0.95)]">
+        <div className="flex items-center gap-2.5">
+          <span className="grid size-8 place-items-center rounded-full bg-[#14161f] text-[10.5px] font-bold text-white">EO</span>
+          <span className="min-w-0 flex-1">
+            <span className="block text-[12.5px] font-semibold leading-tight">Everyday Objects</span>
+            <span className="block text-[10.5px] text-[#7a7f8c]">3,180 followers · now</span>
+          </span>
+          <LinkedInMark s={15} />
+        </div>
+        <p className="mt-2 text-[12px] leading-[16px]">A brighter everyday starts here. The Spring Edit is live.</p>
+        <div className="mt-2">
+          <SpringVisual h="h-[120px] sm:h-[150px]" />
+        </div>
+        <div className="mt-2 flex items-center justify-between text-[10.5px] text-[#7a7f8c]">
+          <span className="flex items-center gap-1">
+            <span className="size-3 rounded-full bg-[#0A66C2]" />
+            <span className="-ml-1.5 size-3 rounded-full bg-[#DF704D] ring-1 ring-white" />
+            <span className="ml-0.5">126</span>
+          </span>
+          <span>14 comments · 9 reposts</span>
+        </div>
+      </Paper>
+    </motion.div>
+  </div>
+);
 
-/** 6. Prepare performance reviews: the whole quarter, brought together. */
+/** 6. Prepare performance reviews: a real review doc, the whole quarter in one place. */
+const peers = [
+  { n: "J", bg: "#E9E3FF", fg: "#5b45d6" },
+  { n: "R", bg: "#DFF1EA", fg: "#1f7a4d" },
+  { n: "S", bg: "#FDE8E1", fg: "#B8401F" },
+];
 const Review = () => (
-  <Paper className="p-4 max-sm:p-3.5">
-    <div className="flex items-start justify-between">
+  <Paper className="overflow-hidden">
+    <div className="flex items-center gap-2 border-b border-black/[0.06] px-3.5 py-2 text-[11.5px] text-[#7a7f8c]">
+      <ToolLogo id="notion" size={13} className="text-[#14161f]" />
+      Reviews / Q3 / Alex Morgan
+      <span className="ml-auto">
+        <Pill>Draft</Pill>
+      </span>
+    </div>
+    <div className="p-3.5 sm:p-4">
       <div className="flex items-center gap-3">
-        <span className="mock-serif grid size-11 place-items-center rounded-full bg-[#E3E8DF] text-[16px] text-[#3c4a35]">AM</span>
+        <span className="mock-serif grid size-10 place-items-center rounded-full bg-[#E3E8DF] text-[15px] text-[#3c4a35]">AM</span>
         <div>
-          <p className="text-[17px] font-semibold tracking-[-0.02em]">Alex Morgan</p>
-          <p className="text-[12px] text-[#7a7f8c]">Product designer · Q3 review</p>
+          <p className="text-[16px] font-semibold tracking-[-0.02em]">Alex Morgan</p>
+          <p className="text-[11.5px] text-[#7a7f8c]">Product designer · Q3 review</p>
+        </div>
+        <div className="ml-auto text-right max-sm:hidden">
+          <p className="text-[10.5px] text-[#7a7f8c]">Goals met</p>
+          <p className="text-[15px] font-semibold">3 of 4</p>
         </div>
       </div>
-      <Pill>Draft</Pill>
-    </div>
-    <div className="relative mt-4 grid grid-cols-3 max-sm:mt-3">
-      <span aria-hidden className="absolute left-[10px] right-[calc(33%-10px)] top-[26px] h-px bg-black/10" />
-      {[
-        ["Jul", "Onboarding redesigned"],
-        ["Aug", "Design system shipped"],
-        ["Sep", "Team handoffs simplified"],
-      ].map(([m, w], i) => (
-        <Rise key={m} d={i * 0.12}>
-          <p className="font-mono text-[10px] uppercase tracking-[0.12em] text-[#7a7f8c]">{m}</p>
-          <span className="relative mt-1.5 grid size-5 place-items-center rounded-full bg-[#E6F4EC] text-[#1f7a4d]">
-            <Check size={11} strokeWidth={3} aria-hidden />
+      <div className="mt-3 grid grid-cols-3 gap-2">
+        {[
+          ["Jul", "Onboarding redesigned"],
+          ["Aug", "Design system shipped"],
+          ["Sep", "Handoffs simplified"],
+        ].map(([m, w], i) => (
+          <Rise key={m} d={i * 0.1} className="rounded-lg bg-white p-2 ring-1 ring-black/[0.05]">
+            <p className="flex items-center gap-1 font-mono text-[9.5px] uppercase tracking-[0.12em] text-[#7a7f8c]">
+              <Check size={10} strokeWidth={3} className="text-[#1f7a4d]" aria-hidden />
+              {m}
+            </p>
+            <p className="mt-1 text-[12px] font-medium leading-[15px]">{w}</p>
+          </Rise>
+        ))}
+      </div>
+      <Rise d={0.35} className="mt-2.5 rounded-lg bg-[#F3F2EE] p-2.5">
+        <div className="flex items-center justify-between">
+          <p className="text-[12.5px] font-medium">“Made complex flows feel simple.”</p>
+          <span className="flex">
+            {peers.map((p, i) => (
+              <span key={p.n} className={`grid size-5 place-items-center rounded-full text-[9px] font-semibold ring-2 ring-[#F3F2EE] ${i ? "-ml-1.5" : ""}`} style={{ background: p.bg, color: p.fg }}>
+                {p.n}
+              </span>
+            ))}
           </span>
-          <p className="mt-1.5 pr-3 text-[12.5px] font-medium leading-[16px] sm:text-[13px] sm:leading-[17px]">{w}</p>
-        </Rise>
-      ))}
-    </div>
-    <div className="mt-4 grid gap-2.5 max-sm:mt-3 sm:grid-cols-2">
-      <Rise d={0.4} className="rounded-xl bg-white p-3 ring-1 ring-black/[0.06]">
-        <Label>What stood out</Label>
-        <p className="mt-1.5 text-[13.5px] font-medium leading-[18px]">“Made complex flows feel simple.”</p>
-        <p className="mt-1 text-[11px] text-[#7a7f8c]">Peer feedback</p>
+        </div>
+        <p className="mt-0.5 text-[10.5px] text-[#7a7f8c]">From 3 teammates</p>
       </Rise>
-      <Rise d={0.5} className="rounded-xl bg-white p-3 ring-1 ring-black/[0.06] max-sm:hidden">
-        <Label>Talk through next</Label>
-        <p className="mt-1.5 text-[13.5px] font-medium leading-[18px]">Bring engineering in earlier.</p>
-        <p className="mt-1 text-[11px] text-[#7a7f8c]">Planning retro</p>
+      <Rise d={0.45} className="mt-2.5 max-sm:hidden">
+        <p className="text-[10.5px] font-medium text-[#7a7f8c]">1:1 agenda</p>
+        <p className="mt-1 flex items-center gap-2 text-[12.5px]">
+          <span className="size-3.5 rounded-[4px] ring-1 ring-black/25" />
+          Bring engineering in earlier
+          <span className="text-[10.5px] text-[#9aa0ab]">· planning retro</span>
+        </p>
       </Rise>
     </div>
   </Paper>
 );
 
-/** 7. Keep the updates coming: every Friday at 9, on its own. */
+/** 7. Keep the updates coming: the Friday email, written and sent by Juno. */
 const Updates = () => (
-  <div className="grid gap-3 sm:grid-cols-[150px_1fr]">
-    <Paper className="p-3.5 max-sm:hidden">
-      <Label>Schedule</Label>
-      <div className="mt-2.5 space-y-1">
-        {["Mon", "Tue", "Wed", "Thu", "Fri"].map((d) => (
-          <div key={d} className={`flex items-center justify-between rounded-lg px-2.5 py-1.5 text-[12.5px] ${d === "Fri" ? "bg-[#14161f] font-medium text-white" : "text-[#9aa0ab]"}`}>
-            {d}
-            {d === "Fri" && <span className="font-mono text-[10.5px]">9:00 AM</span>}
-          </div>
-        ))}
+  <Paper className="overflow-hidden">
+    <div className="flex items-center gap-2 border-b border-black/[0.06] px-3.5 py-2 text-[11.5px] text-[#7a7f8c]">
+      <ToolLogo id="gmail" size={13} />
+      From <span className="text-[#14161f]">Juno</span> to <span className="text-[#14161f]">Team</span>
+      <span className="ml-auto">
+        <Pill tone="blue">Every Fri · 9:00 AM</Pill>
+      </span>
+    </div>
+    <div className="p-3.5 sm:p-4">
+      <div className="flex items-end justify-between">
+        <div>
+          <p className="font-mono text-[9.5px] uppercase tracking-[0.14em] text-[#7a7f8c]">Your company update</p>
+          <p className="text-[22px] font-semibold tracking-[-0.03em]">This week.</p>
+        </div>
+        <div className="flex gap-1 max-sm:hidden" aria-hidden>
+          {["M", "T", "W", "T", "F"].map((d, i) => (
+            <span key={i} className={`grid size-6 place-items-center rounded-md text-[10px] font-medium ${i === 4 ? "bg-[#14161f] text-white" : "bg-[#EEEDE8] text-[#9aa0ab]"}`}>
+              {d}
+            </span>
+          ))}
+        </div>
       </div>
-    </Paper>
-    <Paper className="p-4">
-      <div className="flex items-center justify-between">
-        <Label>Your company update</Label>
-        <Pill tone="ok">
-          <span className="sm:hidden">Fri · 9:00 AM</span>
-          <span className="max-sm:hidden">Right on time</span>
-        </Pill>
-      </div>
-      <p className="mt-1.5 text-[22px] font-semibold tracking-[-0.03em]">This week.</p>
-      <div className="mt-3 divide-y divide-black/[0.06]">
+      <div className="mt-3 space-y-2">
         {[
-          { t: "Shipped", tone: "ok" as const, w: "Client portal is live." },
-          { t: "Ready", tone: "blue" as const, w: "Spring campaign is ready." },
-          { t: "Needs you", tone: "warn" as const, w: "Approve the delivery dates." },
+          { t: "Shipped", tone: "ok" as const, w: "Client portal is live.", d: "Used by 12 clients on day one.", tool: "linear" as ToolId },
+          { t: "Ready", tone: "blue" as const, w: "Spring campaign is ready.", d: "Email and posts scheduled for Monday.", tool: "hubspot" as ToolId },
+          { t: "Needs you", tone: "warn" as const, w: "Approve the delivery dates.", d: "Two orders are waiting on this.", tool: "slack" as ToolId },
         ].map((r, i) => (
-          <Rise key={r.t} d={i * 0.12} className="flex items-center justify-between gap-3 py-2.5">
-            <span className="text-[13.5px] font-medium">{r.w}</span>
+          <Rise key={r.t} d={i * 0.12} className="flex items-center gap-3 rounded-xl bg-white p-2.5 ring-1 ring-black/[0.05]">
+            <span className="grid size-7 shrink-0 place-items-center rounded-lg bg-[#F3F2EE]">
+              <ToolLogo id={r.tool} size={14} className="text-[#14161f]" />
+            </span>
+            <span className="min-w-0 flex-1">
+              <span className="block text-[13px] font-semibold">{r.w}</span>
+              <span className="block truncate text-[11.5px] text-[#7a7f8c] max-sm:hidden">{r.d}</span>
+            </span>
             <Pill tone={r.tone}>{r.t}</Pill>
           </Rise>
         ))}
       </div>
-    </Paper>
-  </div>
+    </div>
+  </Paper>
 );
 
-/** 8. Find our next customers: good fits, and a personal way in. */
+/** 8. Find our next customers: scored leads in the CRM, and a personal intro. */
+const leads = [
+  { m: "n.", n: "Northstar Studio", s: "Growing its client team", fit: 94, bg: "#14161f" },
+  { m: "c.", n: "Cedar & Co.", s: "Launching a client service", fit: 88, bg: "#a2541f" },
+  { m: "s.", n: "Sunday Studio", s: "Hiring account managers", fit: 81, bg: "#3346e0" },
+];
 const Prospects = () => (
-  <div className="grid gap-3 sm:grid-cols-[1fr_1.1fr]">
-    <Paper className="p-4">
-      <div className="flex items-center justify-between">
-        <Label>Your next customers</Label>
-        <span className="sm:hidden">
-          <Pill tone="blue">3 intros drafted</Pill>
+  <div className="grid gap-3 sm:grid-cols-[1.1fr_1fr]">
+    <Paper className="overflow-hidden">
+      <div className="flex items-center gap-2 border-b border-black/[0.06] px-3.5 py-2 text-[11.5px] text-[#7a7f8c]">
+        <ToolLogo id="hubspot" size={13} />
+        New leads
+        <span className="ml-auto">
+          <Pill tone="blue">3 good fits</Pill>
         </span>
       </div>
-      <div className="mt-2.5 space-y-2">
-        {[
-          { m: "n.", n: "Northstar Studio", k: "Design agency", s: "Growing its client team", bg: "#14161f" },
-          { m: "c.", n: "Cedar & Co.", k: "Creative studio", s: "Launching a client service", bg: "#a2541f" },
-          { m: "s.", n: "Sunday Studio", k: "Brand agency", s: "Hiring account managers", bg: "#3346e0" },
-        ].map((c, i) => (
-          <Rise key={c.n} d={i * 0.1} className="flex items-center gap-3 rounded-xl bg-white p-2.5 ring-1 ring-black/[0.06]">
-            <span className="mock-serif grid size-9 shrink-0 place-items-center rounded-lg text-[17px] text-white" style={{ background: c.bg }}>
+      <div className="space-y-1.5 p-2.5">
+        {leads.map((c, i) => (
+          <Rise key={c.n} d={i * 0.1} className="flex items-center gap-2.5 rounded-xl bg-white p-2 ring-1 ring-black/[0.05]">
+            <span className="mock-serif grid size-8 shrink-0 place-items-center rounded-lg text-[15px] text-white" style={{ background: c.bg }}>
               {c.m}
             </span>
-            <span className="min-w-0">
-              <span className="block text-[13.5px] font-semibold">{c.n}</span>
-              <span className="block truncate text-[11.5px] text-[#7a7f8c]">
-                {c.k} · {c.s}
-              </span>
+            <span className="min-w-0 flex-1">
+              <span className="block text-[12.5px] font-semibold">{c.n}</span>
+              <span className="block truncate text-[11px] text-[#7a7f8c]">{c.s}</span>
+            </span>
+            <span className="shrink-0 text-right">
+              <span className="block font-mono text-[12px] font-semibold text-[#1f7a4d]">{c.fit}%</span>
+              <span className="block text-[9.5px] text-[#9aa0ab]">fit</span>
             </span>
           </Rise>
         ))}
       </div>
     </Paper>
     <Rise d={0.35} className="max-sm:hidden">
-      <Paper className="h-full p-4">
-        <div className="flex items-center justify-between text-[12px] text-[#7a7f8c]">
-          <span>Personal introduction</span>
-          <Pill>Draft</Pill>
-        </div>
-        <div className="mt-3 flex items-center gap-2.5">
-          <Avatar n="M" bg="#E9E3FF" fg="#5b45d6" />
-          <span className="text-[12.5px]">
-            <span className="font-semibold">Maya</span> <span className="text-[#7a7f8c]">· Northstar Studio</span>
+      <Paper className="h-full overflow-hidden">
+        <div className="flex items-center gap-2 border-b border-black/[0.06] px-3.5 py-2 text-[11.5px] text-[#7a7f8c]">
+          <ToolLogo id="gmail" size={13} />
+          To <span className="text-[#14161f]">Maya, Northstar</span>
+          <span className="ml-auto">
+            <Pill>Draft</Pill>
           </span>
         </div>
-        <p className="mt-3 text-[17px] font-semibold leading-[21px] tracking-[-0.02em]">More clients. Less back-and-forth.</p>
-        <p className="mt-2 text-[13px] leading-[19px] text-[#3a3f4f]">
-          Hi Maya, saw you’re growing the client team. We bring files, feedback and approvals into one shared space. Worth a quick look?
-        </p>
+        <div className="p-3.5">
+          <p className="text-[15.5px] font-semibold leading-[20px] tracking-[-0.02em]">More clients. Less back-and-forth.</p>
+          <p className="mt-1.5 text-[12.5px] leading-[18px] text-[#3a3f4f]">
+            Hi Maya, saw you’re growing the client team. We bring files, feedback and approvals into one shared space. Worth a quick look?
+          </p>
+        </div>
       </Paper>
     </Rise>
   </div>
