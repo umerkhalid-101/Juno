@@ -871,3 +871,26 @@
     animation: none;
   }
 }
+
+/* ---------- That's Juno: halo and ring ---------- */
+.juno-halo {
+  background: conic-gradient(from var(--spin), #50e5ff, #324cff, #8f7cff, #50e5ff);
+  filter: blur(30px);
+  opacity: 0.32;
+  animation: spin-angle 10s linear infinite;
+}
+.juno-ring {
+  padding: 2px;
+  background: conic-gradient(from var(--spin), transparent 0 55%, #50e5ff 75%, #8f7cff 90%, transparent 100%);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  filter: drop-shadow(0 0 6px rgba(80, 229, 255, 0.6));
+  animation: spin-angle 4s linear infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .juno-halo,
+  .juno-ring {
+    animation: none;
+  }
+}

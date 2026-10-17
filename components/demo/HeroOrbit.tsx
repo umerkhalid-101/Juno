@@ -160,13 +160,13 @@ export function HeroOrbit({
         beamGrad.current.setAttribute("y1", String(sy));
         beamGrad.current.setAttribute("x2", String(tx));
         beamGrad.current.setAttribute("y2", String(ty));
-        beam.current.style.opacity = String(op);
-        beamGlow.current.style.opacity = String(op * 0.6);
+        beam.current.style.opacity = String(op * 0.45);
+        beamGlow.current.style.opacity = String(op * 0.2);
         // a spark travelling down the beam, Juno handing off work
         const f = (flow * 1.6) % 1;
         spark.current.setAttribute("cx", String(sx + (tx - sx) * f));
         spark.current.setAttribute("cy", String(sy + (ty - sy) * f));
-        spark.current.style.opacity = String(op * Math.sin(Math.PI * f));
+        spark.current.style.opacity = String(op * 0.55 * Math.sin(Math.PI * f));
       }
 
       if (visible && !document.hidden) raf = requestAnimationFrame(frame);
