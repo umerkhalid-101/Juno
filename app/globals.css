@@ -475,32 +475,6 @@
 }
 
 /* calculator sliders inside the built app */
-.calc-range {
-  -webkit-appearance: none;
-  appearance: none;
-  height: 6px;
-  border-radius: 999px;
-  outline-offset: 6px;
-}
-.calc-range::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  width: 20px;
-  height: 20px;
-  border-radius: 999px;
-  background: #fff;
-  border: 5px solid #5b5bd6;
-  box-shadow: 0 4px 12px rgba(27, 26, 58, 0.25);
-  cursor: pointer;
-}
-.calc-range::-moz-range-thumb {
-  width: 12px;
-  height: 12px;
-  border-radius: 999px;
-  background: #fff;
-  border: 5px solid #5b5bd6;
-  cursor: pointer;
-}
-
 /* a delivery lands on the "now" line */
 @keyframes pill-pop {
   0% {
@@ -1024,5 +998,21 @@
   .ask-shine::after {
     animation: none;
     opacity: 0;
+  }
+}
+
+/* the active app tab fills while that app is on show */
+.build-progress {
+  transform: scaleX(0);
+  animation: build-fill 12s linear forwards;
+}
+@keyframes build-fill {
+  to {
+    transform: scaleX(1);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .build-progress {
+    transform: scaleX(1);
   }
 }
