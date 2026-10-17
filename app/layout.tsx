@@ -7,6 +7,7 @@ import { Nav } from "@/components/ui/Nav";
 import { Footer } from "@/components/ui/Footer";
 import { ScrollSetup } from "@/components/ui/ScrollSetup";
 import "./globals.css";
+import { Ambient } from "@/components/ui/Ambient";
 
 // Used only inside the app mockups Juno builds (brand typography), not for site headings.
 const serif = Instrument_Serif({ subsets: ["latin"], weight: "400", style: ["normal", "italic"], variable: "--font-instrument", display: "swap" });
@@ -41,6 +42,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <Script id="js-flag" strategy="beforeInteractive">{`document.documentElement.classList.add('js')`}</Script>
       </head>
       <body id="top">
+        <Ambient />
         <ScrollSetup />
         <Nav />
         {children}

@@ -98,11 +98,12 @@ export function HeroOrbit({
       state.current.forEach((s, i) => {
         const node = pillEls.current[i];
         if (!node) return;
+        // every chip keeps its place on the orbit, even while hidden, so they never bunch up
+        if (startedRef.current && !reduce) s.a = (s.a + dt * speed.current * 0.13) % TAU;
         if (mobile && i % 2 === 1) {
           node.style.opacity = "0";
           return;
         }
-        if (startedRef.current && !reduce) s.a = (s.a + dt * speed.current * 0.13) % TAU;
         const depth = Math.sin(s.a); // 1 = front, -1 = back
         const k = (depth + 1) / 2;
         // Juno works the chip as it comes round the front: it leans in, fills, then flips to Done.
