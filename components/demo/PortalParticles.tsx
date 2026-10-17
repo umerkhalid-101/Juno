@@ -75,8 +75,10 @@ export function PortalParticles({
         p.vx = (p.vx + (dx / d) * pull) * 0.985;
         p.vy = (p.vy + (dy / d) * pull) * 0.985;
         const speed = 1 + b * 2.2;
-        p.x += p.vx * speed;
-        p.y += p.vy * speed;
+        // while charging, stream straight at the portal too, so the dots react the instant it starts
+        const stream = b * 2.4;
+        p.x += p.vx * speed + (dx / d) * stream;
+        p.y += p.vy * speed + (dy / d) * stream;
         p.life += speed;
         // fade in, fade out, and vanish as they reach the portal
         const t = p.life / p.max;

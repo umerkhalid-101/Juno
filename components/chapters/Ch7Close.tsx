@@ -197,7 +197,7 @@ export function Ch7Close() {
   const [hot, setHot] = useState(false);
   const [launch, setLaunch] = useState<{ x: number; y: number; d: number } | null>(null);
   const reduce = useReducedMotion();
-  const charging = useRef<gsap.core.Tween | null>(null);
+  const charging = useRef<gsap.core.Tween | gsap.core.Timeline | null>(null);
   const pulses = useRef<gsap.core.Timeline | null>(null);
 
   // Hovering the CTA charges Juno: the longer you hold, the stronger it gets.
@@ -205,8 +205,12 @@ export function Ch7Close() {
     if (launch) return;
     setHot(on);
     charging.current?.kill();
+    // on hover the dots start shooting at once, then the charge keeps building while you hold
     charging.current = on
-      ? gsap.to(boost, { current: FULL, duration: 2.6, ease: "power1.in" })
+      ? gsap
+          .timeline()
+          .to(boost, { current: FULL * 0.6, duration: 0.15, ease: "power2.out" })
+          .to(boost, { current: FULL, duration: 2.2, ease: "power1.in" })
       : gsap.to(boost, { current: 0, duration: 1.1, ease: "power2.out" });
     if (on) pulses.current?.play();
     else pulses.current?.pause();
@@ -507,10 +511,6 @@ export function Ch7Close() {
               </Button>
             </span>
           </div>
-          {/* PLACEHOLDER: free plan or trial line */}
-          <p data-placeholder="true" className="mt-6 font-mono text-[12px] text-subtle">
-            Free plan or trial details go here
-          </p>
         </div>
       </div>
 
