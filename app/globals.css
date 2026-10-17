@@ -331,76 +331,84 @@
 }
 
 /* ------------------------------------------------------------ texture */
-/* film grain over everything, shifting a few times a second so the page never sits still */
+/* fine, still film grain: keeps the dark from looking flat without ever moving */
 .grain {
   position: fixed;
-  inset: -50%;
+  inset: 0;
   z-index: 60;
   pointer-events: none;
-  opacity: 0.07;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 1.4 -0.2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-  animation: grain-shift 1.2s steps(6) infinite;
-  will-change: transform;
-}
-@keyframes grain-shift {
-  0% { transform: translate3d(0, 0, 0); }
-  17% { transform: translate3d(-3%, 2%, 0); }
-  33% { transform: translate3d(2%, -4%, 0); }
-  50% { transform: translate3d(-4%, -1%, 0); }
-  67% { transform: translate3d(3%, 3%, 0); }
-  83% { transform: translate3d(-1%, -3%, 0); }
-  100% { transform: translate3d(0, 0, 0); }
+  opacity: 0.032;
+  background-size: 220px 220px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.15' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 1.6 -0.35'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
-/* soft fields of colour drifting behind the whole page */
+/* the backdrop behind the whole page; --sp is how far down the page you are, 0 to 1 */
 .ambient {
+  --sp: 0;
   position: fixed;
   inset: 0;
   z-index: -1;
   overflow: hidden;
   pointer-events: none;
 }
-.ambient-field {
+.ambient > span {
   position: absolute;
+  pointer-events: none;
+}
+/* a soft light falling from above */
+.ambient-light {
+  inset: 0;
+  background: radial-gradient(70% 45% at 50% -12%, rgba(92, 116, 255, 0.075), transparent 70%);
+}
+/* three tints that hand over to one another as you scroll */
+.ambient-field {
+  width: 90vmax;
+  height: 90vmax;
   border-radius: 9999px;
-  filter: blur(110px);
-  will-change: transform;
+  will-change: transform, opacity;
 }
-.ambient-a {
-  width: 62vmax;
-  height: 62vmax;
-  left: -18vmax;
-  top: -22vmax;
-  background: radial-gradient(closest-side, rgba(52, 86, 255, 0.055), transparent);
-  animation: drift-a 46s ease-in-out infinite alternate;
+.ambient-blue {
+  left: -35vmax;
+  top: -30vmax;
+  background: radial-gradient(closest-side, rgba(60, 90, 255, 0.05), transparent);
+  opacity: calc(1 - var(--sp) * 1.6);
+  animation: drift-a 70s ease-in-out infinite alternate;
 }
-.ambient-b {
-  width: 56vmax;
-  height: 56vmax;
-  right: -20vmax;
-  top: 20vh;
-  background: radial-gradient(closest-side, rgba(120, 84, 255, 0.04), transparent);
-  animation: drift-b 58s ease-in-out infinite alternate;
+.ambient-violet {
+  right: -40vmax;
+  top: -10vmax;
+  background: radial-gradient(closest-side, rgba(124, 92, 255, 0.045), transparent);
+  opacity: calc(1 - abs(var(--sp) - 0.5) * 2.4);
+  animation: drift-b 84s ease-in-out infinite alternate;
 }
-.ambient-c {
-  width: 50vmax;
-  height: 50vmax;
-  left: 20vw;
-  bottom: -30vmax;
-  background: radial-gradient(closest-side, rgba(40, 170, 210, 0.025), transparent);
-  animation: drift-c 64s ease-in-out infinite alternate;
+.ambient-teal {
+  left: -20vmax;
+  bottom: -45vmax;
+  background: radial-gradient(closest-side, rgba(40, 160, 220, 0.04), transparent);
+  opacity: calc(var(--sp) * 1.6 - 0.4);
+  animation: drift-c 96s ease-in-out infinite alternate;
+}
+/* edges sink a little, which pulls the eye to the centre */
+.ambient-vignette {
+  inset: 0;
+  background: radial-gradient(120% 90% at 50% 45%, transparent 55%, rgba(0, 0, 0, 0.35) 100%);
 }
 @keyframes drift-a {
-  to { transform: translate3d(22vw, 26vh, 0) scale(1.15); }
+  to {
+    transform: translate3d(14vw, 10vh, 0) scale(1.08);
+  }
 }
 @keyframes drift-b {
-  to { transform: translate3d(-26vw, 18vh, 0) scale(0.9); }
+  to {
+    transform: translate3d(-16vw, 14vh, 0) scale(0.94);
+  }
 }
 @keyframes drift-c {
-  to { transform: translate3d(-14vw, -34vh, 0) scale(1.2); }
+  to {
+    transform: translate3d(12vw, -12vh, 0) scale(1.1);
+  }
 }
 @media (prefers-reduced-motion: reduce) {
-  .grain,
   .ambient-field {
     animation: none;
   }
