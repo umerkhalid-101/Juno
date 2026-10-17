@@ -5,6 +5,14 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 import { AnimatePresence, motion, useInView, useReducedMotion } from "motion/react";
 import {
   ArrowRight,
+  BadgeCheck,
+  BarChart2,
+  Globe,
+  MessageCircle,
+  MessageSquare,
+  Repeat2,
+  Send,
+  ThumbsUp,
   ArrowUp,
   Check,
   ClipboardCheck,
@@ -99,134 +107,216 @@ const OrbitMark = ({ s = 28 }: { s?: number }) => (
   </span>
 );
 
-/** A tiny weekly report, the thing being launched. */
-const MiniReport = ({ tall = false }: { tall?: boolean }) => (
-  <div className="rounded-lg bg-white p-2.5 shadow-[0_8px_20px_-10px_rgba(40,50,120,0.35)] ring-1 ring-black/[0.05]">
-    <div className="flex items-center justify-between">
-      <span className="text-[10.5px] font-semibold">Weekly report</span>
-      <span className="font-mono text-[9px] text-[#7a7f8c]">MON 9:00</span>
+/** A real-looking screenshot of Orbit's weekly report: KPIs and an area chart on a grid. */
+const ReportShot = ({ dark = false, compact = false, chart }: { dark?: boolean; compact?: boolean; chart?: number }) => {
+  const pts = [30, 34, 31, 40, 38, 47, 45, 55, 52, 61, 66, 72];
+  const w = 200;
+  const h = chart ?? (compact ? 46 : 58);
+  const x = (i: number) => (i / (pts.length - 1)) * w;
+  const y = (v: number) => h - (v / 80) * h;
+  const line = pts.map((v, i) => `${i ? "L" : "M"}${x(i).toFixed(1)} ${y(v).toFixed(1)}`).join(" ");
+  const ink = dark ? "#F4F6F8" : "#14161f";
+  const sub = dark ? "rgba(244,246,248,0.55)" : "#7a7f8c";
+  const grid = dark ? "rgba(255,255,255,0.08)" : "rgba(20,22,31,0.07)";
+  return (
+    <div className={`rounded-lg p-2.5 ${dark ? "bg-[#0E1218] ring-1 ring-white/10" : "bg-white ring-1 ring-black/[0.06]"}`}>
+      <div className="flex items-center justify-between">
+        <span className="flex items-center gap-1.5 text-[10px] font-semibold" style={{ color: ink }}>
+          <OrbitMark s={12} />
+          Weekly report
+        </span>
+        <span className="font-mono text-[8.5px]" style={{ color: sub }}>
+          Oct 6 to 12
+        </span>
+      </div>
+      {!compact && (
+        <div className="mt-1.5 grid grid-cols-2 gap-2">
+          {[
+            ["Revenue", "$48.2K", "+12%"],
+            ["Active users", "3,410", "+8%"],
+          ].map(([k, v, d]) => (
+            <div key={k}>
+              <p className="text-[8.5px]" style={{ color: sub }}>
+                {k}
+              </p>
+              <p className="flex items-baseline gap-1 text-[13px] font-semibold tracking-[-0.02em]" style={{ color: ink }}>
+                {v}
+                <span className="text-[8.5px] font-medium text-[#1f9d5c]">{d}</span>
+              </p>
+            </div>
+          ))}
+        </div>
+      )}
+      <svg viewBox={`0 0 ${w} ${h}`} className="mt-1.5 w-full" style={{ height: h }} preserveAspectRatio="none" aria-hidden>
+        <defs>
+          <linearGradient id={`area-${dark ? "d" : "l"}-${compact ? "c" : "f"}`} x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="#5B6DFF" stopOpacity="0.35" />
+            <stop offset="100%" stopColor="#5B6DFF" stopOpacity="0" />
+          </linearGradient>
+        </defs>
+        {[0.25, 0.5, 0.75].map((g) => (
+          <line key={g} x1="0" x2={w} y1={h * g} y2={h * g} stroke={grid} strokeWidth="1" vectorEffect="non-scaling-stroke" />
+        ))}
+        <path d={`${line} L${w} ${h} L0 ${h} Z`} fill={`url(#area-${dark ? "d" : "l"}-${compact ? "c" : "f"})`} />
+        <path d={line} fill="none" stroke="#4F63F5" strokeWidth="1.6" vectorEffect="non-scaling-stroke" strokeLinejoin="round" />
+        <circle cx={x(pts.length - 1)} cy={y(pts[pts.length - 1])} r="2.6" fill="#4F63F5" />
+      </svg>
     </div>
-    <div className={`mt-2 flex items-end gap-1 ${tall ? "h-14" : "h-9"}`}>
-      {[38, 52, 44, 66, 58, 80, 92].map((h, i) => (
-        <span key={i} className="flex-1 rounded-sm bg-[linear-gradient(180deg,#7A8FFF,#3346e0)]" style={{ height: `${h}%`, opacity: 0.45 + i * 0.08 }} />
-      ))}
-    </div>
-  </div>
-);
+  );
+};
 
-const PostActions = () => (
-  <div className="mt-2.5 flex items-center justify-between border-t border-black/[0.06] pt-2 text-[10.5px] text-[#7a7f8c]">
-    <span>Like</span>
-    <span>Comment</span>
-    <span>Repost</span>
-    <span>Send</span>
-  </div>
-);
-
-/** 1. Announce that feature: the email, the LinkedIn post and the X post, ready to go. */
+/** 1. Announce that feature: the email in the inbox, the LinkedIn post and the X post. */
 const LaunchKit = () => (
   <>
     {/* phone: the email, plus the two posts as ready lines */}
     <div className="space-y-2 sm:hidden">
       <Rise>
-        <Paper className="p-3.5">
-          <div className="flex items-center gap-2 text-[11.5px] text-[#7a7f8c]">
-            <ToolLogo id="gmail" size={14} />
-            To all customers
-            <span className="ml-auto">
-              <Pill tone="ok">Ready</Pill>
+        <Paper className="overflow-hidden">
+          <div className="flex items-center gap-2.5 border-b border-black/[0.06] px-3.5 py-2.5">
+            <OrbitMark s={26} />
+            <span className="min-w-0 flex-1 leading-tight">
+              <span className="block text-[12.5px] font-semibold">Monday. Handled.</span>
+              <span className="block truncate text-[11px] text-[#7a7f8c]">Orbit · to all customers</span>
             </span>
+            <ToolLogo id="gmail" size={14} />
           </div>
-          <p className="mt-2 text-[16px] font-semibold tracking-[-0.02em]">Monday. Handled.</p>
-          <div className="mt-2 rounded-xl bg-gradient-to-br from-[#E9EDFF] to-[#F3EEFF] p-2.5">
-            <MiniReport />
+          <div className="p-2.5">
+            <ReportShot chart={34} />
           </div>
         </Paper>
       </Rise>
-      {[
-        { m: <LinkedInMark s={16} />, n: "LinkedIn", t: "Right on time." },
-        { m: <XMark s={14} />, n: "X", t: "Reports. On repeat." },
-      ].map((p, i) => (
-        <Rise key={p.n} d={0.15 + i * 0.1} className="flex items-center gap-3 rounded-xl bg-[#FBFAF7] px-3.5 py-2.5 text-[#14161f] ring-1 ring-black/5">
-          {p.m}
-          <span className="flex-1 truncate text-[13.5px] font-medium">{p.t}</span>
-          <Pill>Post ready</Pill>
-        </Rise>
-      ))}
+      <Rise d={0.15} className="flex items-center gap-3 rounded-xl bg-[#FBFAF7] px-3.5 py-2.5 text-[#14161f] ring-1 ring-black/5">
+        <span className="flex items-center gap-2">
+          <LinkedInMark s={16} />
+          <XMark s={14} />
+        </span>
+        <span className="flex-1 truncate text-[13.5px] font-medium">Posts for LinkedIn and X</span>
+        <Pill>Ready</Pill>
+      </Rise>
     </div>
 
     {/* larger screens: the email up front, the posts fanned behind it */}
-    <div className="relative mx-auto h-[290px] max-w-[600px] max-sm:hidden">
+    <div className="relative mx-auto h-[300px] max-w-[620px] max-sm:hidden">
       {/* LinkedIn post */}
-      <motion.div className="absolute left-0 top-6 w-[220px]" initial={{ opacity: 0, x: 120, rotate: 0 }} animate={{ opacity: 1, x: 0, rotate: -5 }} transition={{ duration: 0.7, delay: 0.45, ease: calm }}>
-        <Paper className="p-3">
-          <div className="flex items-center gap-2">
-            <OrbitMark s={26} />
-            <span className="min-w-0 flex-1">
-              <span className="block text-[12px] font-semibold leading-tight">Orbit</span>
-              <span className="block text-[10px] text-[#7a7f8c]">1,240 followers · now</span>
+      <motion.div className="absolute left-0 top-7 w-[228px]" initial={{ opacity: 0, x: 120, rotate: 0 }} animate={{ opacity: 1, x: 0, rotate: -5 }} transition={{ duration: 0.7, delay: 0.45, ease: calm }}>
+        <div className="overflow-hidden rounded-[10px] bg-white text-[#14161f] shadow-[0_30px_60px_-28px_rgba(0,0,0,0.9)] ring-1 ring-black/[0.08]">
+          <div className="flex items-start gap-2 px-3 pt-3">
+            <OrbitMark s={30} />
+            <span className="min-w-0 flex-1 leading-tight">
+              <span className="block text-[11.5px] font-semibold">Orbit</span>
+              <span className="block text-[9.5px] text-[#666]">1,240 followers</span>
+              <span className="flex items-center gap-1 text-[9.5px] text-[#666]">
+                2h · <Globe size={9} aria-hidden />
+              </span>
             </span>
-            <LinkedInMark s={14} />
+            <span className="text-[10px] font-semibold text-[#0A66C2]">+ Follow</span>
           </div>
-          <p className="mt-2 text-[12px] leading-[16px]">
-            <span className="font-semibold">Right on time.</span> Scheduled Reports land every Monday at 9.
+          <p className="px-3 pt-2 text-[10.5px] leading-[14px]">
+            Right on time. Scheduled Reports now land every Monday at 9, before your first coffee. <span className="text-[#666]">…more</span>
           </p>
-          <div className="mt-2 rounded-lg bg-gradient-to-br from-[#E4F1FB] to-[#EEF2FF] p-2">
-            <MiniReport />
+          <div className="mt-2 bg-[#EEF2FF] p-2">
+            <ReportShot compact chart={36} />
           </div>
-          <PostActions />
-        </Paper>
+          <div className="flex items-center justify-between px-3 pt-1.5 text-[9.5px] text-[#666]">
+            <span className="flex items-center">
+              <span className="grid size-3.5 place-items-center rounded-full bg-[#378FE9] ring-1 ring-white">
+                <ThumbsUp size={7} className="fill-white text-white" aria-hidden />
+              </span>
+              <span className="-ml-1 grid size-3.5 place-items-center rounded-full bg-[#44712E] ring-1 ring-white">
+                <Sparkles size={7} className="text-white" aria-hidden />
+              </span>
+              <span className="-ml-1 grid size-3.5 place-items-center rounded-full bg-[#DF704D] ring-1 ring-white">
+                <Heart size={7} className="fill-white text-white" aria-hidden />
+              </span>
+              <span className="ml-1">128</span>
+            </span>
+            <span>14 comments · 6 reposts</span>
+          </div>
+          <div className="mx-3 mt-1.5 flex items-center justify-between border-t border-black/[0.08] py-1.5 text-[9.5px] font-semibold text-[#555]">
+            {[
+              [ThumbsUp, "Like"],
+              [MessageSquare, "Comment"],
+              [Repeat2, "Repost"],
+              [Send, "Send"],
+            ].map(([I, l]) => {
+              const Icon = I as LucideIcon;
+              return (
+                <span key={l as string} className="flex items-center gap-1">
+                  <Icon size={10} aria-hidden />
+                  {l as string}
+                </span>
+              );
+            })}
+          </div>
+        </div>
       </motion.div>
 
       {/* X post */}
-      <motion.div className="absolute right-0 top-6 w-[220px]" initial={{ opacity: 0, x: -120, rotate: 0 }} animate={{ opacity: 1, x: 0, rotate: 5 }} transition={{ duration: 0.7, delay: 0.55, ease: calm }}>
-        <Paper className="p-3">
-          <div className="flex items-center gap-2">
-            <OrbitMark s={26} />
-            <span className="min-w-0 flex-1 text-[11.5px] leading-tight">
-              <span className="font-semibold">Orbit</span> <span className="text-[#7a7f8c]">@orbit · 1m</span>
-            </span>
-            <XMark s={12} />
+      <motion.div className="absolute right-0 top-7 w-[228px]" initial={{ opacity: 0, x: -120, rotate: 0 }} animate={{ opacity: 1, x: 0, rotate: 5 }} transition={{ duration: 0.7, delay: 0.55, ease: calm }}>
+        <div className="rounded-[14px] bg-white p-3 text-[#0f1419] shadow-[0_30px_60px_-28px_rgba(0,0,0,0.9)] ring-1 ring-black/[0.08]">
+          <div className="flex gap-2">
+            <OrbitMark s={30} />
+            <div className="min-w-0 flex-1">
+              <p className="flex items-center gap-1 text-[11px] leading-tight">
+                <span className="font-bold">Orbit</span>
+                <BadgeCheck size={11} className="fill-[#1D9BF0] text-white" aria-hidden />
+                <span className="truncate text-[#536471]">@orbit · 1m</span>
+              </p>
+              <p className="mt-0.5 text-[11px] leading-[15px]">Reports. On repeat. Every Monday at 9, without anyone lifting a finger.</p>
+              <div className="mt-2 overflow-hidden rounded-xl ring-1 ring-black/[0.08]">
+                <ReportShot dark compact chart={40} />
+              </div>
+              <div className="mt-2 flex items-center justify-between text-[9.5px] text-[#536471]">
+                {[
+                  [MessageCircle, "12"],
+                  [Repeat2, "48"],
+                  [Heart, "310"],
+                  [BarChart2, "2.1K"],
+                ].map(([I, n]) => {
+                  const Icon = I as LucideIcon;
+                  return (
+                    <span key={n as string} className="flex items-center gap-1">
+                      <Icon size={10} aria-hidden />
+                      {n as string}
+                    </span>
+                  );
+                })}
+              </div>
+            </div>
           </div>
-          <p className="mt-2 text-[12.5px] font-medium leading-[17px]">Reports. On repeat. Every Monday, before your first coffee.</p>
-          <div className="mt-2 grid h-[64px] place-items-center rounded-lg bg-[#14161f] text-white">
-            <span className="text-center">
-              <span className="block font-mono text-[9px] uppercase tracking-[0.14em] text-white/60">Every Mon</span>
-              <span className="block text-[18px] font-semibold tracking-[-0.02em]">9:00 AM</span>
-            </span>
-          </div>
-          <div className="mt-2.5 flex items-center justify-between border-t border-black/[0.06] pt-2 font-mono text-[10px] text-[#7a7f8c]">
-            <span>12</span>
-            <span>48</span>
-            <span>310</span>
-            <span>2.1K</span>
-          </div>
-        </Paper>
+        </div>
       </motion.div>
 
-      {/* the email, up front */}
-      <motion.div className="absolute left-1/2 top-0 z-10 w-[300px] -translate-x-1/2" initial={{ opacity: 0, y: 24, scale: 0.96 }} animate={{ opacity: 1, y: 0, scale: 1 }} transition={{ duration: 0.7, delay: 0.25, ease: calm }}>
-        <Paper className="overflow-hidden shadow-[0_40px_80px_-30px_rgba(0,0,0,0.95)]">
-          <div className="flex items-center gap-2 border-b border-black/[0.06] px-3.5 py-2.5 text-[11.5px] text-[#7a7f8c]">
-            <ToolLogo id="gmail" size={14} />
-            To <span className="text-[#14161f]">All customers</span>
-            <span className="ml-auto">
-              <Pill tone="ok">Ready</Pill>
+      {/* the email, open in the inbox */}
+      <motion.div className="absolute left-1/2 top-0 z-10 w-[296px] -translate-x-1/2" initial={{ opacity: 0, y: 24, scale: 0.96 }} animate={{ opacity: 1, y: 0, scale: 1 }} transition={{ duration: 0.7, delay: 0.25, ease: calm }}>
+        <div className="overflow-hidden rounded-[12px] bg-white text-[#1f1f1f] shadow-[0_40px_80px_-30px_rgba(0,0,0,0.95)] ring-1 ring-black/[0.08]">
+          <div className="flex items-center gap-2 border-b border-black/[0.06] bg-[#F6F8FC] px-3 py-2 text-[10.5px] text-[#5f6368]">
+            <ToolLogo id="gmail" size={13} />
+            <span className="flex-1 truncate font-medium text-[#1f1f1f]">Monday. Handled.</span>
+            <span className="rounded bg-[#E8EAED] px-1.5 py-px text-[9px]">Inbox</span>
+          </div>
+          <div className="flex items-center gap-2 px-3 pt-2.5">
+            <OrbitMark s={24} />
+            <span className="min-w-0 flex-1 leading-tight">
+              <span className="block text-[11px] font-semibold">
+                Orbit <span className="font-normal text-[#5f6368]">&lt;hello@orbit.app&gt;</span>
+              </span>
+              <span className="block text-[9.5px] text-[#5f6368]">to me</span>
             </span>
+            <span className="text-[9.5px] text-[#5f6368]">9:00 AM</span>
           </div>
-          <p className="px-3.5 pt-2.5 text-[16px] font-semibold tracking-[-0.02em]">Monday. Handled.</p>
-          <div className="mx-3.5 mt-2.5 rounded-xl bg-gradient-to-br from-[#E9EDFF] to-[#F3EEFF] p-3">
-            <div className="mb-2 flex items-center gap-1.5">
-              <OrbitMark s={16} />
-              <span className="text-[10.5px] font-semibold text-[#3346e0]">Orbit</span>
+          {/* the email body */}
+          <div className="mx-3 mb-3 mt-2 rounded-lg bg-[#F7F7FB] p-2.5">
+            <p className="text-[14px] font-semibold leading-[17px] tracking-[-0.02em]">Your report, every Monday at 9.</p>
+            <div className="mt-2">
+              <ReportShot chart={34} />
             </div>
-            <MiniReport />
+            <div className="mt-2 flex items-center justify-between">
+              <span className="rounded-md bg-[#3346e0] px-3 py-1.5 text-[10.5px] font-semibold text-white">Turn on Scheduled Reports</span>
+              <span className="text-[8.5px] text-[#9aa0ab]">Unsubscribe</span>
+            </div>
           </div>
-          <div className="flex items-center justify-between gap-2 p-3.5 pt-2.5">
-            <span className="text-[11.5px] leading-[15px] text-[#4b515c]">Every Monday at 9, on its own.</span>
-            <span className="inline-flex shrink-0 rounded-full bg-[#14161f] px-3 py-1.5 text-[11.5px] font-medium text-white">Try it</span>
-          </div>
-        </Paper>
+        </div>
       </motion.div>
     </div>
   </>

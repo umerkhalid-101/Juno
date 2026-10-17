@@ -38,8 +38,8 @@ const pulseColor: Record<ToolId, string> = {
 
 /** Same diagram on every screen; mobile uses roomier proportions so it stays legible. */
 const GEO = {
-  desktop: { C: 360, R: 228, NODE: 28, AR: 302, CORE: 66, font: 17, logo: 22, dash: 46, vb: [-40, 0, 800, 720], mascot: 112, label: 7.4 },
-  mobile: { C: 200, R: 124, NODE: 23, AR: 182, CORE: 50, font: 16, logo: 20, dash: 30, vb: [-60, -22, 520, 444], mascot: 80, label: 8.7 },
+  desktop: { C: 360, R: 268, NODE: 26, AR: 348, CORE: 66, font: 17, logo: 21, dash: 46, vb: [-80, -20, 880, 760], mascot: 112, label: 7.4 },
+  mobile: { C: 200, R: 138, NODE: 21, AR: 196, CORE: 50, font: 16, logo: 18, dash: 30, vb: [-68, -30, 536, 460], mascot: 80, label: 8.7 },
 };
 
 const rad = (d: number) => (d * Math.PI) / 180;
@@ -71,7 +71,7 @@ function geometry(mobile: boolean) {
     const deg = angle(id);
     const p = pt(g.R, deg);
     const s = pt(g.R - g.NODE - 6, deg);
-    const e = pt(g.CORE, deg);
+    const e = pt(g.CORE + 14, deg);
     return { id, deg, ...p, line: { x1: s.x, y1: s.y, x2: e.x, y2: e.y }, len: r2(Math.hypot(e.x - s.x, e.y - s.y)) };
   });
   // each area's name is centered on its group of tools
@@ -201,7 +201,7 @@ export function Ch2Brain() {
           />
         </Reveal>
 
-        <div className="b-graph relative mx-auto mt-10 w-full max-w-[860px] md:mt-12" style={{ aspectRatio: `${vw} / ${vh}` }}>
+        <div className="b-graph relative mx-auto mt-10 w-full max-w-[900px] md:mt-12" style={{ aspectRatio: `${vw} / ${vh}` }}>
           <svg
             viewBox={g.vb.join(" ")}
             className="absolute inset-0 h-full w-full overflow-visible"
@@ -236,7 +236,7 @@ export function Ch2Brain() {
                 {...n.line}
                 stroke={active === n.id ? "#A6BBFF" : "#FFFFFF"}
                 strokeWidth={1}
-                style={{ opacity: active === n.id ? 0.7 : active ? 0.04 : 0.08, transition: "opacity 200ms, stroke 200ms" }}
+                style={{ opacity: active === n.id ? 0.55 : active ? 0.025 : 0.045, transition: "opacity 200ms, stroke 200ms" }}
               />
             ))}
 
