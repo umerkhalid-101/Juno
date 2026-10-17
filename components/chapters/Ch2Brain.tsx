@@ -1,95 +1,106 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { ChapterIntro } from "@/components/ui/ChapterIntro";
 import { Mascot } from "@/components/mascot/Mascot";
 import { Reveal } from "@/components/ui/Reveal";
+import { BrandMark } from "@/components/ui/BrandIcon";
 import { gsap, useGSAP, ScrollTrigger, MQ } from "@/lib/gsap";
 import { tools, type ToolId } from "@/lib/story";
-import { BrandMark } from "@/components/ui/BrandIcon";
 
 /** Tools grouped by what they know. Neighbors on the ring share an area. */
-const groups: { id: string; label: string; tools: ToolId[] }[] = [
-  { id: "customers", label: "Customers", tools: ["gmail", "slack"] },
-  { id: "sales", label: "Sales", tools: ["hubspot"] },
-  { id: "support", label: "Support", tools: ["intercom"] },
-  { id: "product", label: "Product", tools: ["linear", "jira", "github"] },
-  { id: "brand", label: "Brand", tools: ["figma"] },
-  { id: "market", label: "Market", tools: ["notion", "drive"] },
+const groups: { id: string; label: string; tools: ToolId[]; dot: string }[] = [
+  { id: "customers", label: "Customers", tools: ["gmail", "slack"], dot: "#36C5F0" },
+  { id: "sales", label: "Sales", tools: ["hubspot"], dot: "#FF7A59" },
+  { id: "support", label: "Support", tools: ["intercom"], dot: "#1F8DED" },
+  { id: "product", label: "Product", tools: ["linear", "jira", "github"], dot: "#5E6AD2" },
+  { id: "brand", label: "Brand", tools: ["figma"], dot: "#A259FF" },
+  { id: "market", label: "Market", tools: ["notion", "drive"], dot: "#FFBA00" },
 ];
 const ring = groups.flatMap((g) => g.tools);
+const groupOf = (id: ToolId) => groups.find((g) => g.tools.includes(id))!;
 const STEP = 360 / ring.length;
 const FIRST = -90 - STEP / 2; // centers the first group on top
 const angleOf = (id: ToolId) => FIRST + ring.indexOf(id) * STEP;
 
-const C = 360; // center (viewBox units)
-const R = 228; // tool ring
-const NODE = 28;
-const AR = 322; // knowledge arc ring
-const CORE = 66; // where pulses land, just outside Juno
-const ARC_PAD = 13; // degrees an arc extends past its outer tools
+/** The packet's color as it leaves each tool. */
+const pulseColor: Record<ToolId, string> = {
+  gmail: "#EA4335",
+  slack: "#36C5F0",
+  hubspot: "#FF7A59",
+  intercom: "#1F8DED",
+  linear: "#5E6AD2",
+  jira: "#2684FF",
+  github: "#F4F6F8",
+  figma: "#A259FF",
+  notion: "#F4F6F8",
+  drive: "#FFBA00",
+  calendar: "#4285F4",
+};
+
+/** Same diagram on every screen; mobile uses roomier proportions so it stays legible. */
+const GEO = {
+  desktop: { C: 360, R: 228, NODE: 28, AR: 322, CORE: 66, font: 14, logo: 22, dash: 46, vb: [-40, 0, 800, 720], mascot: 112, label: 7.4 },
+  mobile: { C: 200, R: 124, NODE: 25, AR: 182, CORE: 50, font: 16, logo: 20, dash: 30, vb: [-46, -14, 492, 428], mascot: 80, label: 8.7 },
+};
 
 const rad = (d: number) => (d * Math.PI) / 180;
 // rounded so server and browser render identical numbers (no hydration mismatch)
 const r2 = (n: number) => Math.round(n * 100) / 100;
-const pt = (r: number, deg: number) => ({ x: r2(C + Math.cos(rad(deg)) * r), y: r2(C + Math.sin(rad(deg)) * r) });
+
+const mq = "(max-width: 767px)";
+const subscribe = (cb: () => void) => {
+  const m = window.matchMedia(mq);
+  m.addEventListener("change", cb);
+  return () => m.removeEventListener("change", cb);
+};
+const useMobile = () =>
+  useSyncExternalStore(
+    subscribe,
+    () => window.matchMedia(mq).matches,
+    () => false,
+  );
+
+function geometry(mobile: boolean) {
+  const g = mobile ? GEO.mobile : GEO.desktop;
+  const pt = (r: number, deg: number) => ({ x: r2(g.C + Math.cos(rad(deg)) * r), y: r2(g.C + Math.sin(rad(deg)) * r) });
+  const nodes = ring.map((id) => {
+    const deg = angleOf(id);
+    const p = pt(g.R, deg);
+    const s = pt(g.R - g.NODE - 6, deg);
+    const e = pt(g.CORE, deg);
+    return { id, deg, ...p, line: { x1: s.x, y1: s.y, x2: e.x, y2: e.y }, len: r2(Math.hypot(e.x - s.x, e.y - s.y)) };
+  });
+  // areas sit evenly around the ring, one every 60 degrees, starting at the top
+  const labels = groups.map((k, i) => ({ ...k, pos: pt(g.AR, -90 + (i * 360) / groups.length), w: k.label.length * g.label + 34 }));
+  return { g, nodes, labels };
+}
 
 export function Ch2Brain() {
   const root = useRef<HTMLElement>(null);
   const [active, setActive] = useState<ToolId | null>(null);
+  const mobile = useMobile();
+  const { g, nodes, labels } = useMemo(() => geometry(mobile), [mobile]);
 
-  const nodes = useMemo(
-    () =>
-      ring.map((id) => {
-        const deg = angleOf(id);
-        const p = pt(R, deg);
-        const s = pt(R - NODE - 6, deg);
-        const e = pt(CORE, deg);
-        return { id, deg, ...p, line: { x1: s.x, y1: s.y, x2: e.x, y2: e.y } };
-      }),
-    [],
-  );
-
-  const arcs = useMemo(
-    () =>
-      groups.map((k) => {
-        const from = angleOf(k.tools[0]) - ARC_PAD;
-        const to = angleOf(k.tools[k.tools.length - 1]) + ARC_PAD;
-        const mid = (from + to) / 2;
-        const a0 = pt(AR, from);
-        const a1 = pt(AR, to);
-        const pos = pt(AR, mid);
-        const w = k.label.length * 7.4 + 30;
-        return { ...k, d: `M ${a0.x} ${a0.y} A ${AR} ${AR} 0 0 1 ${a1.x} ${a1.y}`, pos, w };
-      }),
-    [],
-  );
-
-  // Build once when it scrolls into view, then keep a steady pulse of knowledge flowing to Juno.
+  // Build once when it scrolls into view, then knowledge keeps arriving at random.
   useGSAP(
     () => {
       const mm = gsap.matchMedia();
-      mm.add(MQ.desktop, () => {
+      mm.add(`${MQ.desktop}, ${MQ.mobile}`, () => {
         const q = gsap.utils.selector(root);
         const lines = q(".b-line") as unknown as SVGLineElement[];
-        lines.forEach((l) => {
-          const len = l.getTotalLength();
-          gsap.set(l, { strokeDasharray: len, strokeDashoffset: len });
-        });
-        gsap.set(".b-node", { opacity: 0, scale: 0.4, transformOrigin: "50% 50%" });
-        gsap.set([".b-label", ".b-pulse"], { opacity: 0 });
-        gsap.set(".b-core", { scale: 0.85, opacity: 0 });
+        lines.forEach((l, i) => gsap.set(l, { strokeDasharray: nodes[i].len, strokeDashoffset: nodes[i].len }));
+        gsap.set(q(".b-node"), { opacity: 0, scale: 0.4, transformOrigin: "50% 50%" });
+        gsap.set(q(".b-label"), { opacity: 0 });
+        gsap.set(q(".b-core"), { scale: 0.85, opacity: 0 });
+        const flows = q(".b-flow") as unknown as SVGLineElement[];
+        flows.forEach((f, i) => gsap.set(f, { strokeDasharray: `${g.dash} ${nodes[i].len + g.dash * 2}`, strokeDashoffset: g.dash, opacity: 0 }));
 
         const ripple = () =>
-          gsap.fromTo(
-            ".b-ripple",
-            { attr: { r: CORE }, opacity: 0.55 },
-            { attr: { r: CORE + 46 }, opacity: 0, duration: 1.2, ease: "power2.out", overwrite: true },
-          );
+          gsap.fromTo(q(".b-ripple"), { attr: { r: g.CORE }, opacity: 0.6 }, { attr: { r: g.CORE * 1.7 }, opacity: 0, duration: 1.4, ease: "power2.out", overwrite: true });
         let lastRipple = 0;
 
-        // random pulses: any spoke, irregular gaps, sometimes two at once
-        const dots = q(".b-pulse") as unknown as SVGCircleElement[];
+        // a packet of light leaves a random tool and travels the wire to Juno
         const busy = new Set<number>();
         let running = false;
         let next: gsap.core.Tween | null = null;
@@ -101,19 +112,23 @@ export function Ch2Brain() {
           last = i;
           busy.add(i);
           const n = nodes[i];
+          const lbl = q(`.b-label[data-g="${groupOf(n.id).id}"] rect`)[0];
+          // the tool lights up as it sends, and so does its area
+          gsap.fromTo(q(`.b-send[data-id="${n.id}"]`), { opacity: 0.9, attr: { r: g.NODE } }, { opacity: 0, attr: { r: g.NODE * 1.45 }, duration: 1.2, ease: "power2.out" });
+          if (lbl) gsap.fromTo(lbl, { strokeOpacity: 0.9 }, { strokeOpacity: 0.16, duration: 2, ease: "power1.out" });
           gsap.fromTo(
-            dots[i],
-            { attr: { cx: n.line.x1, cy: n.line.y1 }, opacity: 0 },
+            flows[i],
+            { strokeDashoffset: g.dash, opacity: 0 },
             {
               keyframes: [
-                { opacity: 1, duration: 0.8 },
-                { attr: { cx: n.line.x2, cy: n.line.y2 }, duration: gsap.utils.random(4, 5.5), ease: "sine.inOut" },
-                { opacity: 0, duration: 0.6 },
+                { opacity: 1, duration: 0.3 },
+                { strokeDashoffset: -n.len, duration: gsap.utils.random(2.2, 3.0), ease: "sine.inOut" },
               ],
               onComplete: () => {
                 busy.delete(i);
+                gsap.set(flows[i], { opacity: 0 });
                 const now = performance.now();
-                if (now - lastRipple > 2000) {
+                if (now - lastRipple > 1400) {
                   lastRipple = now;
                   ripple();
                 }
@@ -124,8 +139,8 @@ export function Ch2Brain() {
         const loop = () => {
           if (!running) return;
           fire();
-          if (Math.random() < 0.1) gsap.delayedCall(gsap.utils.random(0.8, 1.6), fire);
-          next = gsap.delayedCall(gsap.utils.random(1.6, 3.2), loop);
+          if (Math.random() < 0.15) gsap.delayedCall(gsap.utils.random(0.6, 1.2), fire);
+          next = gsap.delayedCall(gsap.utils.random(1.0, 2.0), loop);
         };
         const pulses = {
           play: () => {
@@ -141,25 +156,32 @@ export function Ch2Brain() {
 
         const build = gsap.timeline({ paused: true, defaults: { ease: "power3.out" } });
         build
-          .to(".b-core", { scale: 1, opacity: 1, duration: 0.8 }, 0)
-          .to(".b-node", { opacity: 1, scale: 1, duration: 0.6, stagger: 0.05 }, 0.2)
+          .to(q(".b-core"), { scale: 1, opacity: 1, duration: 0.8 }, 0)
+          .to(q(".b-node"), { opacity: 1, scale: 1, duration: 0.6, stagger: 0.05 }, 0.2)
           .to(lines, { strokeDashoffset: 0, duration: 0.7, stagger: 0.05, ease: "power2.inOut" }, 0.5)
-          .to(".b-label", { opacity: 1, duration: 0.5, stagger: 0.08 }, 1.2);
+          .to(q(".b-label"), { opacity: 1, duration: 0.5, stagger: 0.08 }, 1.2);
 
-        ScrollTrigger.create({ trigger: ".b-graph", start: "top 70%", once: true, onEnter: () => build.play() });
+        const graph = q(".b-graph")[0];
+        const a = ScrollTrigger.create({ trigger: graph, start: "top 75%", once: true, onEnter: () => build.play() });
         // only pulse while on screen
-        ScrollTrigger.create({
-          trigger: ".b-graph",
-          start: "top 60%",
+        const b = ScrollTrigger.create({
+          trigger: graph,
+          start: "top 65%",
           end: "bottom top",
           onToggle: (self) => (self.isActive ? pulses.play() : pulses.pause()),
         });
+        return () => {
+          pulses.pause();
+          a.kill();
+          b.kill();
+        };
       });
     },
-    { scope: root },
+    { scope: root, dependencies: [mobile], revertOnUpdate: true },
   );
 
   const related = active ? new Set(groups.filter((k) => k.tools.includes(active)).map((k) => k.id)) : null;
+  const [vx, vy, vw, vh] = g.vb;
 
   return (
     <section ref={root} id="brain" aria-labelledby="ch2-title" className="chapter">
@@ -173,25 +195,34 @@ export function Ch2Brain() {
           />
         </Reveal>
 
-        {/* Desktop: the brain */}
-        <div className="b-graph relative mx-auto mt-10 hidden aspect-[800/720] w-full max-w-[860px] md:block">
+        <div className="b-graph relative mx-auto mt-10 w-full max-w-[860px] md:mt-12" style={{ aspectRatio: `${vw} / ${vh}` }}>
           <svg
-            viewBox="-40 0 800 720"
+            viewBox={g.vb.join(" ")}
             className="absolute inset-0 h-full w-full overflow-visible"
             role="img"
-            aria-label="Juno at the center of ten connected tools grouped into customers, sales, support, product, brand, and market. Information pulses from every tool into Juno."
+            aria-label="Juno at the center of ten connected tools grouped into customers, sales, support, product, brand, and market. Information flows from every tool into Juno."
           >
             <defs>
-              <filter id="pulseGlow" x="-200%" y="-200%" width="500%" height="500%">
-                <feGaussianBlur stdDeviation="4" result="b" />
+              <radialGradient id="bNodeFill" cx="50%" cy="35%" r="70%">
+                <stop offset="0%" stopColor="#1A2130" />
+                <stop offset="100%" stopColor="#0B0E14" />
+              </radialGradient>
+              <filter id="flowGlow" x="-50%" y="-50%" width="200%" height="200%">
+                <feGaussianBlur stdDeviation="3" result="b" />
                 <feMerge>
                   <feMergeNode in="b" />
                   <feMergeNode in="SourceGraphic" />
                 </feMerge>
               </filter>
+              {nodes.map((n) => (
+                <linearGradient key={n.id} id={`flow-${n.id}`} gradientUnits="userSpaceOnUse" x1={n.line.x1} y1={n.line.y1} x2={n.line.x2} y2={n.line.y2}>
+                  <stop offset="0%" stopColor={pulseColor[n.id]} />
+                  <stop offset="100%" stopColor="#B9C8FF" />
+                </linearGradient>
+              ))}
             </defs>
 
-            {/* tool to Juno lines, kept faint */}
+            {/* tool to Juno wires, kept faint */}
             {nodes.map((n) => (
               <line
                 key={n.id}
@@ -203,13 +234,13 @@ export function Ch2Brain() {
               />
             ))}
 
-            {/* Juno receives */}
-            <circle className="b-ripple" cx={C} cy={C} r={CORE} fill="none" stroke="#A6BBFF" strokeWidth="1.5" opacity="0" />
-
-            {/* pulses */}
+            {/* packets of light travelling the wires */}
             {nodes.map((n) => (
-              <circle key={n.id} className="b-pulse" cx={n.line.x2} cy={n.line.y2} r="4" fill="#D6DFFF" filter="url(#pulseGlow)" style={{ opacity: 0 }} />
+              <line key={n.id} className="b-flow" {...n.line} stroke={`url(#flow-${n.id})`} strokeWidth={mobile ? 2 : 2.5} strokeLinecap="round" filter="url(#flowGlow)" style={{ opacity: 0 }} />
             ))}
+
+            {/* Juno receives */}
+            <circle className="b-ripple" cx={g.C} cy={g.C} r={g.CORE} fill="none" stroke="#A6BBFF" strokeWidth="1.5" opacity="0" />
 
             {/* tool nodes */}
             {nodes.map((n) => {
@@ -217,6 +248,7 @@ export function Ch2Brain() {
               const on = active === n.id;
               return (
                 <g key={n.id} transform={`translate(${n.x} ${n.y})`}>
+                  <circle className="b-send" data-id={n.id} r={g.NODE} fill="none" stroke={pulseColor[n.id]} strokeWidth={1.5} style={{ opacity: 0 }} />
                   <g
                     className="b-node cursor-pointer outline-none"
                     tabIndex={0}
@@ -227,47 +259,27 @@ export function Ch2Brain() {
                     onFocus={() => setActive(n.id)}
                     onBlur={() => setActive(null)}
                   >
-                    <circle r={NODE + 10} fill="transparent" />
-                    <circle
-                      r={NODE}
-                      fill="#0E1218"
-                      stroke={on ? "#A6BBFF" : "rgba(255,255,255,0.14)"}
-                      strokeWidth={on ? 1.5 : 1}
-                      style={{ transition: "stroke 150ms" }}
-                    />
-                    <g transform="translate(-11 -11)">
-                      <BrandMark id={n.id} size={22} dark />
+                    <circle r={g.NODE + 10} fill="transparent" />
+                    <circle r={g.NODE} fill="url(#bNodeFill)" stroke={on ? "#A6BBFF" : "rgba(255,255,255,0.13)"} strokeWidth={on ? 1.5 : 1} style={{ transition: "stroke 150ms" }} />
+                    <path d={`M ${r2(-g.NODE * 0.7)} ${r2(-g.NODE * 0.62)} A ${g.NODE} ${g.NODE} 0 0 1 ${r2(g.NODE * 0.7)} ${r2(-g.NODE * 0.62)}`} fill="none" stroke="rgba(255,255,255,0.12)" strokeWidth={1} />
+                    <g transform={`translate(${-g.logo / 2} ${-g.logo / 2})`}>
+                      <BrandMark id={n.id} size={g.logo} dark />
                     </g>
                   </g>
                 </g>
               );
             })}
 
-            {/* area labels sit on their arcs */}
-            {arcs.map((a) => {
+            {/* area labels: a dot in the area's color; the outline lights up when the area sends */}
+            {labels.map((a) => {
               const on = related?.has(a.id);
               const dim = related && !on;
               return (
                 <g key={a.id} transform={`translate(${a.pos.x} ${a.pos.y})`}>
-                  <g className="b-label" style={{ opacity: dim ? 0.45 : 1, transition: "opacity 200ms" }}>
-                    <rect
-                      x={-a.w / 2}
-                      y={-15}
-                      width={a.w}
-                      height={30}
-                      rx={15}
-                      fill="#0B0E14"
-                      stroke={on ? "#A6BBFF" : "rgba(255,255,255,0.14)"}
-                      style={{ transition: "stroke 200ms" }}
-                    />
-                    <text
-                      textAnchor="middle"
-                      dominantBaseline="central"
-                      fontSize="14"
-                      fontWeight="500"
-                      fill={on ? "#F4F6F8" : "#9AA6B8"}
-                      style={{ transition: "fill 200ms" }}
-                    >
+                  <g className="b-label" data-g={a.id} style={{ opacity: dim ? 0.45 : 1, transition: "opacity 200ms" }}>
+                    <rect x={-a.w / 2} y={-15} width={a.w} height={30} rx={15} fill="#0B0E14" stroke={on ? "#A6BBFF" : a.dot} strokeOpacity={on ? 1 : 0.16} />
+                    <circle cx={-a.w / 2 + 15} cy={0} r={3} fill={a.dot} style={{ filter: `drop-shadow(0 0 4px ${a.dot})` }} />
+                    <text x={6} textAnchor="middle" dominantBaseline="central" fontSize={g.font} fontWeight="500" fill={on ? "#F4F6F8" : "#9AA6B8"} style={{ transition: "fill 200ms" }}>
                       {a.label}
                     </text>
                   </g>
@@ -276,27 +288,13 @@ export function Ch2Brain() {
             })}
           </svg>
 
-          <div className="b-core absolute z-10" style={{ left: `${((C + 40) / 800) * 100}%`, top: `${(C / 720) * 100}%`, translate: "-50% -50%" }}>
-            <Mascot size={112} state="idle" halo={false} float wander interactive />
+          {/* Juno at the center, with a slow light ring */}
+          <div className="b-core absolute z-10 grid place-items-center" style={{ left: `${((g.C - vx) / vw) * 100}%`, top: `${((g.C - vy) / vh) * 100}%`, translate: "-50% -50%" }}>
+            <span aria-hidden className="juno-halo pointer-events-none absolute rounded-full" style={{ width: g.mascot * 1.5, height: g.mascot * 1.5, opacity: 0.22 }} />
+            <span aria-hidden className="juno-ring pointer-events-none absolute rounded-full" style={{ width: g.mascot + 22, height: g.mascot + 22 }} />
+            <Mascot size={g.mascot} state="idle" halo={false} float wander={!mobile} interactive />
           </div>
         </div>
-
-        {/* Mobile: areas as a simple list */}
-        <Reveal as="ul" className="mt-10 space-y-3 md:hidden" aria-label="Connected knowledge">
-          {groups.map((k) => (
-            <li key={k.id} className="rounded-md border border-line bg-surface p-4">
-              <p className="mb-3 text-[15px] font-medium">{k.label}</p>
-              <div className="flex flex-wrap gap-2">
-                {k.tools.map((id) => (
-                  <span key={id} className="inline-flex h-8 items-center gap-2 rounded-full border border-line bg-surface-2 px-3 text-[13px] text-text">
-                    <BrandMark id={id} size={14} dark />
-                    {tools[id].name}
-                  </span>
-                ))}
-              </div>
-            </li>
-          ))}
-        </Reveal>
       </div>
     </section>
   );
