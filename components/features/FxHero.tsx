@@ -194,14 +194,14 @@ export function FxHero() {
               mark={<Mascot size={24} state="idle" halo={false} />}
             />
 
-            <div className="grid md:grid-cols-[minmax(0,300px)_minmax(0,1fr)]">
+            <div className="grid grid-cols-[minmax(0,1fr)] md:grid-cols-[minmax(0,300px)_minmax(0,1fr)]">
               {/* the four things Juno does */}
               <nav
                 aria-label="What Juno does"
                 onKeyDown={onKey}
                 className="border-white/[0.07] p-2 md:border-r"
               >
-                <ul className="flex gap-1 overflow-x-auto md:block md:space-y-1 md:overflow-visible">
+                <ul className="grid grid-cols-2 gap-1 md:block md:space-y-1">
                   {groups.map((t, i) => {
                     const Icon = topicIcon[t.key];
                     const on = i === active;
@@ -225,7 +225,7 @@ export function FxHero() {
                           onFocus={() => pick(i)}
                           onClick={() => goToChapter(t.key, reduce)}
                           aria-current={on ? "true" : undefined}
-                          className={`flex w-full items-center gap-3 rounded-[12px] px-3 py-3 text-left outline-none transition-[background-color,box-shadow] duration-300 ${
+                          className={`flex w-full items-center gap-2.5 rounded-[12px] px-2.5 py-2.5 text-left outline-none transition-[background-color,box-shadow] duration-300 md:gap-3 md:px-3 md:py-3 ${
                             on ? "" : "hover:bg-white/[0.03]"
                           }`}
                           style={
@@ -240,7 +240,7 @@ export function FxHero() {
                           <Glyph icon={Icon} size={36} lit={on} />
                           <span className="min-w-0 flex-1">
                             <span
-                              className={`block text-[14.5px] font-medium ${on ? "text-text" : "text-text/75"}`}
+                              className={`block text-[13px] font-medium leading-[17px] md:text-[14.5px] md:leading-normal ${on ? "text-text" : "text-text/75"}`}
                             >
                               {t.chapter}
                             </span>

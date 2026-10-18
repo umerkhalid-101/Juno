@@ -420,7 +420,7 @@ export function AppFrame({
   project = "Product launch",
   thread = "Launch Scheduled Reports",
   height = 620,
-  mobileHeight = 470,
+  mobileHeight = 540,
   chatWidth = 360,
   rail = false,
   stage = false,

@@ -148,7 +148,7 @@ function TabsChapter({ c }: { c: Chapter }) {
   return (
     <Section c={c}>
       <ChapterIntro id={`${c.id}-title`} lead={c.title} muted={c.muted} sub={c.sub} />
-      <div role="tablist" aria-label={c.name} onKeyDown={onKey} className="fx-scroll mx-auto mt-10 flex w-fit max-w-full gap-1 overflow-x-auto rounded-full border border-white/[0.08] bg-white/[0.02] p-1">
+      <div role="tablist" aria-label={c.name} onKeyDown={onKey} className="mx-auto mt-10 flex w-fit max-w-full flex-wrap justify-center gap-1 rounded-[22px] border border-white/[0.08] bg-white/[0.02] p-1 md:flex-nowrap md:rounded-full">
         {c.items.map((it, i) => (
           <button
             key={it.name}
@@ -159,7 +159,7 @@ function TabsChapter({ c }: { c: Chapter }) {
             aria-controls={`${c.id}-panel`}
             tabIndex={tab === i ? 0 : -1}
             onClick={() => pick(i)}
-            className={`h-10 shrink-0 whitespace-nowrap rounded-full px-4 text-[14px] transition-colors duration-200 ${tab === i ? "bg-white/[0.1] text-text" : "text-muted hover:text-text"}`}
+            className={`h-9 shrink-0 whitespace-nowrap rounded-full px-3.5 text-[13px] transition-colors duration-200 md:h-10 md:px-4 md:text-[14px] ${tab === i ? "bg-white/[0.1] text-text" : "text-muted hover:text-text"}`}
           >
             {it.name}
           </button>
@@ -362,7 +362,7 @@ function StepperChapter({ c }: { c: Chapter }) {
             >
               {i + 1}
             </span>
-            <span className={`text-center text-[14px] transition-colors ${step === i ? "text-text" : "text-muted group-hover:text-text"}`}>{it.name}</span>
+            <span className={`text-center text-[13px] leading-[18px] transition-colors md:text-[14px] ${step === i ? "text-text" : "text-muted group-hover:text-text"}`}>{it.name}</span>
           </button>
         ))}
       </div>

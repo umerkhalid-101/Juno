@@ -126,7 +126,7 @@ export function FaqConsole({ items }: { items: { q: string; a: string; placehold
               variants={{
                 show: { transition: { staggerChildren: reduce ? 0 : 0.028, delayChildren: 0.12 } },
               }}
-              className="mt-3 text-[22px] leading-[1.35] tracking-[-0.02em] text-text md:text-[27px]"
+              className="mt-3 text-[19px] leading-[1.4] tracking-[-0.015em] text-text md:text-[22px]"
             >
               {f.a.split(" ").map((w, i) => (
                 <motion.span

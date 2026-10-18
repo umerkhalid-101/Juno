@@ -44,7 +44,7 @@ export function Payoff() {
   const on = useInView(ref, { once: true, amount: 0.35 });
   const [approved, setApproved] = useState(false);
   return (
-    <section id="loyalty" aria-labelledby="loyalty-title" className="relative mt-36 scroll-mt-24 overflow-hidden border-y border-white/[0.06] bg-[#0A0D13] py-24 md:mt-56 md:py-[120px]">
+    <section id="loyalty" aria-labelledby="loyalty-title" className="relative mt-36 scroll-mt-24 overflow-hidden bg-[linear-gradient(180deg,transparent,#0A0D13_14%,#0A0D13_86%,transparent)] py-24 md:mt-56 md:py-[120px]">
       <span aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-[420px] bg-[radial-gradient(50%_100%_at_50%_0%,rgba(122,143,255,0.12),transparent_70%)]" />
       <div className="container-page relative">
         <ChapterIntro id="loyalty-title" lead={payoff.title} muted={payoff.muted} sub={payoff.sub} />

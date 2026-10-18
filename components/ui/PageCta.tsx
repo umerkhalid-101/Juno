@@ -24,6 +24,14 @@ import type { ToolId } from "@/lib/story";
  * Pages can pass their own chips; the default set is drawn from across the site.
  */
 
+/** Where the mobile chips sit around Juno on a phone, clear of the screen edges and the button. */
+const PHONE_SLOTS = [
+  { x: -80, y: -126 },
+  { x: 92, y: -92 },
+  { x: -88, y: 98 },
+  { x: 90, y: 114 },
+];
+
 export type CtaChip = { tool: ToolId | "browser"; text: string; x: number; y: number; m?: boolean };
 
 const defaultChips: CtaChip[] = [
@@ -130,15 +138,23 @@ export function PageCta({
     px.set(0);
     py.set(0);
   };
-  // the field spreads to fit the screen
+  // the field spreads to fit the screen; phones get their own slots so no chip leaves the screen
   const [k, setK] = useState(1);
+  const [phone, setPhone] = useState(false);
   useEffect(() => {
-    const fit = () => setK(Math.min(1, ((root.current?.clientWidth ?? 1200) - 60) / 1040));
+    const fit = () => {
+      const w = root.current?.clientWidth ?? 1200;
+      setK(Math.min(1, (w - 60) / 1040));
+      setPhone(w < 640);
+    };
     fit();
     window.addEventListener("resize", fit);
     return () => window.removeEventListener("resize", fit);
   }, []);
   const calm = [0.16, 1, 0.3, 1] as const;
+  // phones: the chips marked for mobile take these places around Juno, in order
+  const phoneChips = chips.map((c, i) => (c.m ? i : -1)).filter((i) => i >= 0);
+  const slot = (i: number) => PHONE_SLOTS[Math.max(0, phoneChips.indexOf(i)) % PHONE_SLOTS.length];
 
   return (
     <section
@@ -199,8 +215,8 @@ export function PageCta({
                     : {
                         x: "-50%",
                         y: "-50%",
-                        translateX: (seen || reduce ? c.x : c.x * 1.25) * k,
-                        translateY: (seen || reduce ? c.y : c.y * 1.25) * Math.max(0.85, k),
+                        translateX: phone ? slot(i).x * (seen || reduce ? 1 : 1.2) : (seen || reduce ? c.x : c.x * 1.25) * k,
+                        translateY: phone ? slot(i).y * (seen || reduce ? 1 : 1.2) : (seen || reduce ? c.y : c.y * 1.25) * Math.max(0.85, k),
                         scale: 1,
                         opacity: seen || reduce ? 1 : 0,
                       }

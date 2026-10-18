@@ -257,18 +257,18 @@ export function FilesBody({ on }: { on: boolean }) {
           <span className="text-[#16181d]">{done ? "=PROPER(TRIM(A2))" : "maya chen"}</span>
         </div>
         <div className="min-h-0 flex-1 overflow-hidden text-[12px]">
-          <div className="grid grid-cols-[28px_repeat(5,minmax(0,1fr))] border-b border-black/[0.07] bg-[#F3F4F6] text-[11px] text-[#8a909c]">
+          <div className="grid grid-cols-[28px_repeat(3,minmax(0,1fr))] sm:grid-cols-[28px_repeat(5,minmax(0,1fr))] border-b border-black/[0.07] bg-[#F3F4F6] text-[11px] text-[#8a909c]">
             <span />
-            {"ABCDE".split("").map((l) => (
-              <span key={l} className="border-l border-black/[0.06] px-2 py-1">
+            {"ABCDE".split("").map((l, k) => (
+              <span key={l} className={`border-l border-black/[0.06] px-2 py-1 ${k > 2 ? "max-sm:hidden" : ""}`}>
                 {l}
               </span>
             ))}
           </div>
-          <div className="grid grid-cols-[28px_repeat(5,minmax(0,1fr))] border-b border-black/[0.07] font-medium">
+          <div className="grid grid-cols-[28px_repeat(3,minmax(0,1fr))] sm:grid-cols-[28px_repeat(5,minmax(0,1fr))] border-b border-black/[0.07] font-medium">
             <span className="bg-[#F3F4F6] py-1.5 text-center text-[11px] text-[#8a909c]">1</span>
-            {cols.map((h) => (
-              <span key={h} className="truncate border-l border-black/[0.06] px-2 py-1.5">
+            {cols.map((h, k) => (
+              <span key={h} className={`truncate border-l border-black/[0.06] px-2 py-1.5 ${k > 2 ? "max-sm:hidden" : ""}`}>
                 {h}
               </span>
             ))}
@@ -276,7 +276,7 @@ export function FilesBody({ on }: { on: boolean }) {
           {clean.map((row, r) => (
             <div
               key={r}
-              className="grid grid-cols-[28px_repeat(5,minmax(0,1fr))] border-b border-black/[0.05]"
+              className="grid grid-cols-[28px_repeat(3,minmax(0,1fr))] sm:grid-cols-[28px_repeat(5,minmax(0,1fr))] border-b border-black/[0.05]"
             >
               <span className="bg-[#F3F4F6] py-1.5 text-center text-[11px] text-[#8a909c]">
                 {r + 2}
@@ -288,7 +288,7 @@ export function FilesBody({ on }: { on: boolean }) {
                     key={k}
                     className={`truncate border-l border-black/[0.06] px-2 py-1.5 transition-[transform,background-color] duration-500 ${
                       fixed ? "" : "bg-[#FFF6EC] text-[#9a4b2f]"
-                    }`}
+                    } ${k > 2 ? "max-sm:hidden" : ""}`}
                     style={{ transform: fixed ? "none" : `translateX(${skew[(r + k) % 5]}px)` }}
                   >
                     {fixed ? cell : messy[r][k]}

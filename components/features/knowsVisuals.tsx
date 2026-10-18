@@ -233,7 +233,8 @@ export function WikiVisual({ on }: { on: boolean }) {
                   Customer sharing
                 </span>
                 <Chip tone="blue" className={`${T} delay-[900ms] ${on ? "" : "opacity-0"}`}>
-                  Updated with the latest
+                  <span className="sm:hidden">Updated</span>
+                  <span className="max-sm:hidden">Updated with the latest</span>
                 </Chip>
               </div>
               <div
@@ -350,7 +351,7 @@ export function BrandVisual({ on }: { on: boolean }) {
     >
       <div className="p-4">
         {/* the kit */}
-        <div className="grid grid-cols-[1.1fr_1fr] gap-4">
+        <div className="grid gap-4 sm:grid-cols-[1.1fr_1fr]">
           <div>
             <Label>Colors</Label>
             <div className="mt-2 grid grid-cols-4 gap-1.5">
@@ -364,24 +365,24 @@ export function BrandVisual({ on }: { on: boolean }) {
                     className="block h-11 rounded-[8px] ring-1 ring-white/10"
                     style={{ background: x.c }}
                   />
-                  <span className="mt-1 block text-[11px] text-text/85">{x.n}</span>
-                  <span className="block font-mono text-[9.5px] text-subtle">{x.c}</span>
+                  <span className="mt-1 block truncate text-[11px] text-text/85">{x.n}</span>
+                  <span className="block truncate font-mono text-[9.5px] text-subtle">{x.c}</span>
                 </div>
               ))}
             </div>
           </div>
           <div>
             <Label>Type</Label>
-            <div className="mt-2 space-y-1.5">
+            <div className="mt-2 flex gap-5 sm:block sm:space-y-1.5">
               <p className="flex items-baseline gap-2.5">
                 <span className="font-[family-name:var(--font-mock-serif)] text-[28px] leading-none text-text">
                   Aa
                 </span>
-                <span className="text-[11.5px] text-muted">Serif · Headlines</span>
+                <span className="whitespace-nowrap text-[11.5px] text-muted">Serif · Headlines</span>
               </p>
               <p className="flex items-baseline gap-2.5">
                 <span className="text-[24px] font-medium leading-none text-text">Aa</span>
-                <span className="text-[11.5px] text-muted">Sans · Body</span>
+                <span className="whitespace-nowrap text-[11.5px] text-muted">Sans · Body</span>
               </p>
             </div>
           </div>

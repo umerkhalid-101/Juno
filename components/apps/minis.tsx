@@ -190,7 +190,7 @@ export function CustomerPortal({
         <div className="relative mt-4 min-h-0 flex-1 @2xl:mt-5">
           <AnimatePresence mode="wait" initial={false}>
             {view === "overview" ? (
-              <motion.div key="o" className="grid gap-4" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}>
+              <motion.div key="o" className="grid grid-cols-[minmax(0,1fr)] gap-4" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}>
                 <div>
                   {/* progress */}
                   <div className="flex items-center justify-between text-[12px]" style={{ color: C.muted }}>
@@ -205,17 +205,17 @@ export function CustomerPortal({
                   <ol className="mt-3 flex items-center gap-2 text-[12px]">
                     {steps.map((s, i) => (
                       <li key={s} className="flex flex-1 items-center gap-1.5 last:flex-none">
-                        <span className="flex items-center gap-1.5" style={{ color: i <= at ? C.ink : C.muted }}>
+                        <span className="flex shrink-0 items-center gap-1.5" style={{ color: i <= at ? C.ink : C.muted }}>
                           <span
-                            className="grid size-[18px] place-items-center rounded-full transition-colors duration-300"
+                            className="grid size-[18px] shrink-0 place-items-center rounded-full transition-colors duration-300"
                             style={{ background: i < at ? C.accent : i === at ? C.soft : "transparent", border: i > at ? `1px solid ${C.line}` : "none", color: "#fff" }}
                           >
                             {i < at && <Check size={10} strokeWidth={3} aria-hidden />}
                             {i === at && <span className="size-1.5 rounded-full" style={{ background: C.accent }} />}
                           </span>
-                          {s}
+                          <span className={i === at ? "" : "@max-md:hidden"}>{s}</span>
                         </span>
-                        {i < steps.length - 1 && <span className="h-px flex-1" style={{ background: C.line }} />}
+                        {i < steps.length - 1 && <span className="h-px min-w-3 flex-1" style={{ background: C.line }} />}
                       </li>
                     ))}
                   </ol>

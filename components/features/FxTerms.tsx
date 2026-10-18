@@ -20,7 +20,7 @@ const calm = [0.16, 1, 0.3, 1] as const;
 function Tile({ children, className = "" }: { children: ReactNode; className?: string }) {
   return (
     <div
-      className={`flex flex-col rounded-[20px] border border-line bg-surface p-6 transition-colors duration-200 hover:border-line-strong md:p-8 ${className}`}
+      className={`flex min-w-0 flex-col rounded-[20px] border border-line bg-surface p-5 transition-colors duration-200 hover:border-line-strong md:p-8 ${className}`}
     >
       {children}
     </div>
@@ -394,7 +394,7 @@ export function FxTerms() {
           muted={chapters.terms.muted}
           sub={chapters.terms.sub}
         />
-        <div className="mt-16 grid gap-5 md:mt-24 md:grid-cols-12">
+        <div className="mt-16 grid grid-cols-[minmax(0,1fr)] gap-5 md:mt-24 md:grid-cols-12">
           <Tile className="md:col-span-7">
             <div id="vault" className="scroll-mt-32">
               <Anatomy f={feature("vault")} />

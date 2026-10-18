@@ -945,8 +945,12 @@ export function JobScene({
     return () => ro.disconnect();
   }, []);
 
-  // fit the width fully; let tall scenes run a little past the bottom edge, like Stripe's
-  const scale = box
+  // fit the width fully; let tall scenes run a little past the bottom edge, like Stripe's.
+  // Phone-width cards show the scene larger and centred, cropping its sides, so it stays legible.
+  const narrow = !!box && box.w < 420;
+  const scale = narrow
+    ? Math.min(f.max, 0.74)
+    : box
     ? Math.max(
         0.5,
         Math.min(
@@ -956,7 +960,7 @@ export function JobScene({
         ),
       )
     : Math.min(f.max, 0.9);
-  const left = box ? Math.max(12, (box.w - ex * scale) / 2) : 12;
+  const left = box ? (narrow ? (box.w - ex * scale) / 2 : Math.max(12, (box.w - ex * scale) / 2)) : 12;
 
   return (
     <div

@@ -42,8 +42,8 @@ function CardHead({ icon, title, meta, right }: { icon: ReactNode; title: string
   return (
     <div className="flex items-center gap-2 text-[12.5px]">
       {icon}
-      <span className="font-medium text-text/90">{title}</span>
-      {meta && <span className="truncate text-subtle">{meta}</span>}
+      <span className="shrink-0 whitespace-nowrap font-medium text-text/90">{title}</span>
+      {meta && <span className="min-w-0 truncate text-subtle">{meta}</span>}
       {right && <span className="ml-auto">{right}</span>}
     </div>
   );
@@ -726,8 +726,8 @@ function LaunchRoom({ s, from = 0, live = false, compact = false }: { s: number;
     <Browser url="launch.yourcompany.com" lock={live}>
       <div className="flex items-center gap-2 border-b border-black/[0.06] px-4 py-2.5">
         <span className="grid size-5 place-items-center rounded-[5px] bg-[#16181d] text-[9px] font-bold text-white">L</span>
-        <p className="text-[12.5px] font-semibold">Launch room</p>
-        <span className="text-[12px] text-[#8a909c]">Scheduled Reports</span>
+        <p className="whitespace-nowrap text-[12.5px] font-semibold">Launch room</p>
+        <span className="truncate text-[12px] text-[#8a909c] max-sm:hidden">Scheduled Reports</span>
         <span className="ml-auto">{live ? <Pill tone="lightOk">Live</Pill> : <Pill tone="light">Private preview</Pill>}</span>
       </div>
       <div className={compact ? "p-3.5" : "p-4"}>
@@ -1111,8 +1111,8 @@ function ActionsDesk({ s, approved }: DeskProps) {
             ))}
             <div className="mt-3 flex items-center gap-2 rounded-[7px] bg-[#F4F5F7] px-2.5 py-1.5 text-[11.5px]">
               <Paperclip size={12} className="text-[#6b7080]" aria-hidden />
-              <span className="font-medium">Customer call</span>
-              <span className="truncate text-[#6b7080]">Invoice export request</span>
+              <span className="shrink-0 whitespace-nowrap font-medium">Customer call</span>
+              <span className="min-w-0 truncate text-[#6b7080]">Invoice export request</span>
               <span className="ml-auto shrink-0 text-[10.5px] text-[#1f7a4d]">Context included</span>
             </div>
           </div>

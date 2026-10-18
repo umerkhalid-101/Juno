@@ -124,7 +124,7 @@ export const chapters: Chapter[] = [
     n: "06",
     name: "Connected tools & permissions",
     title: "Turn commitments",
-    muted: "into follow-through.",
+    muted: "into follow‑through.",
     sub: "Carry the context into your tools. Turn a customer-call request into a Linear issue, with the details already attached.",
     pattern: "tabs",
     items: [{ name: "Connected actions" }, { name: "Browser access" }, { name: "Ask / Auto" }],

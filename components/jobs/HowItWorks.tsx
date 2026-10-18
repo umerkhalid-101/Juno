@@ -152,7 +152,7 @@ function Build({ step }: { step: number }) {
             <p className="text-[12px] text-subtle">Juno</p>
 
             {/* the reply: listening, then the rhythm */}
-            <div className="mt-0.5 grid h-6 items-center">
+            <div className="mt-0.5 grid min-h-6 items-center">
               <span
                 className={`[grid-area:1/1] transition-opacity duration-300 ${step === 0 ? "opacity-100" : "opacity-0"}`}
               >
@@ -185,13 +185,13 @@ function Build({ step }: { step: number }) {
             </div>
 
             {/* the results: the same footprint before, during and after */}
-            <div className="mt-5 grid">
+            <div className="mt-5 grid grid-cols-[minmax(0,1fr)]">
               {/* waiting, or working */}
               <div
                 className={`[grid-area:1/1] transition-opacity duration-500 ${step < 2 || working ? "opacity-100" : "pointer-events-none opacity-0"}`}
                 aria-hidden
               >
-                <div className="flex h-6 items-center text-[13px] text-subtle">
+                <div className="flex min-h-6 items-center text-[13px] text-subtle">
                   {working ? <Dots /> : "Friday's updates land here"}
                 </div>
                 <div className="mt-3 space-y-2 rounded-[18px] border border-dashed border-white/[0.12] p-3.5">
@@ -216,7 +216,7 @@ function Build({ step }: { step: number }) {
               <div
                 className={`[grid-area:1/1] transition-[opacity,transform] duration-500 [transition-timing-function:cubic-bezier(0.16,1,0.3,1)] ${step === 2 && !working ? "translate-y-0 opacity-100" : "pointer-events-none translate-y-2 opacity-0"}`}
               >
-                <p className="flex h-6 items-center text-[15px] text-text">
+                <p className="flex min-h-6 items-center text-[15px] text-text">
                   Friday&apos;s updates are ready.
                 </p>
                 <div className="mt-3 rounded-[18px] bg-[#FBFAF7] p-3.5 text-[#14161f]">
@@ -228,11 +228,12 @@ function Build({ step }: { step: number }) {
                       >
                         <Face who={u.who} size={30} />
                         <span className="min-w-0 flex-1 leading-tight">
-                          <span className="block text-[13.5px] font-medium">{u.to}</span>
-                          <span className="block text-[12px] text-[#6b7080]">{u.what}</span>
+                          <span className="block truncate text-[13.5px] font-medium">{u.to}</span>
+                          <span className="block truncate text-[12px] text-[#6b7080]">{u.what}</span>
                         </span>
-                        <span className="inline-flex h-6 items-center rounded-md bg-[#E9F7EF] px-2 font-mono text-[10px] uppercase tracking-[0.08em] text-[#1f7a4d]">
-                          Ready to send
+                        <span className="inline-flex h-6 shrink-0 items-center rounded-md bg-[#E9F7EF] px-2 font-mono text-[10px] uppercase tracking-[0.08em] text-[#1f7a4d]">
+                          <span className="sm:hidden">Ready</span>
+                          <span className="max-sm:hidden">Ready to send</span>
                         </span>
                       </li>
                     ))}
@@ -293,7 +294,7 @@ export function HowItWorks() {
           </h2>
         </header>
 
-        <div className="mt-16 grid gap-10 md:mt-24 lg:grid-cols-12 lg:gap-12">
+        <div className="mt-16 grid grid-cols-[minmax(0,1fr)] gap-10 md:mt-24 lg:grid-cols-12 lg:gap-12">
           {/* the steps, with a rail that fills as you go */}
           {/* the steps as statements: the one you are on is lit, the rest wait quietly */}
           <ol className="lg:col-span-5">
@@ -305,23 +306,28 @@ export function HowItWorks() {
                 }}
                 data-step={k}
                 aria-current={k === shown ? "step" : undefined}
-                className="py-8 lg:flex lg:min-h-[64vh] lg:items-center lg:py-0"
+                className="border-t border-white/[0.07] py-6 first:border-0 first:pt-0 lg:flex lg:min-h-[64vh] lg:items-center lg:border-0 lg:py-0"
               >
-                <div className="max-w-[18ch] lg:max-w-none">
+                <div className="flex gap-4 lg:block">
+                  <span aria-hidden className="mt-0.5 grid size-8 shrink-0 place-items-center rounded-full border border-[#A6BBFF]/30 text-[13px] font-medium text-[#B4C2FF] lg:hidden">
+                    {k + 1}
+                  </span>
+                  <div className="min-w-0">
                   <h3
-                    className={`text-[30px] font-medium leading-[1.08] tracking-[-0.035em] transition-colors duration-500 md:text-[40px] ${
+                    className={`text-[23px] font-medium leading-[1.15] tracking-[-0.03em] transition-colors duration-500 md:text-[40px] md:leading-[1.08] md:tracking-[-0.035em] ${
                       k === shown ? "text-text" : "text-text lg:text-white/20"
                     }`}
                   >
                     {s.title}
                   </h3>
                   <p
-                    className={`mt-4 max-w-[36ch] text-[17px] leading-[27px] transition-colors duration-500 ${
+                    className={`mt-2.5 max-w-[40ch] text-[15.5px] leading-[24px] transition-colors duration-500 md:mt-4 md:text-[17px] md:leading-[27px] ${
                       k === shown ? "text-muted" : "text-muted lg:text-white/15"
                     }`}
                   >
                     {s.body}
                   </p>
+                  </div>
                 </div>
               </li>
             ))}

@@ -250,10 +250,10 @@ export function SiteArtifact({ on }: { on: boolean }) {
           <div className="grid grid-cols-[1fr_auto_1fr] items-center border-b border-black/[0.06] px-5 py-2.5 text-[11px] text-[#5e584e]">
             <span className="flex gap-4">
               <span className="text-[#1d1b17]">Shop</span>
-              <span>Spring</span>
+              <span className="hidden sm:inline">Spring</span>
               <span className="hidden sm:inline">Journal</span>
             </span>
-            <span className="font-[family-name:var(--font-mock-serif)] text-[19px] leading-none text-[#1d1b17]">
+            <span className="whitespace-nowrap font-[family-name:var(--font-mock-serif)] text-[16px] leading-none text-[#1d1b17] sm:text-[19px]">
               everyday objects
             </span>
             <span className="flex items-center justify-end gap-3">
@@ -408,16 +408,16 @@ export function CmsArtifact({ on }: { on: boolean }) {
             </span>
           </div>
           <div className="mt-3 overflow-hidden rounded-[10px] ring-1 ring-black/[0.07]">
-            <div className="grid grid-cols-[1fr_90px_70px] gap-3 bg-[#FAFAFB] px-3 py-2 text-[10.5px] font-medium text-[#8a909c] sm:grid-cols-[1fr_96px_60px_80px]">
+            <div className="grid grid-cols-[1fr_96px] gap-3 bg-[#FAFAFB] px-3 py-2 text-[10.5px] font-medium text-[#8a909c] sm:grid-cols-[1fr_96px_60px_80px]">
               <span>Title</span>
               <span>Status</span>
               <span className="hidden sm:block">Author</span>
-              <span>Updated</span>
+              <span className="hidden sm:block">Updated</span>
             </div>
             {rows.map((r, i) => (
               <div
                 key={r.t}
-                className={`grid grid-cols-[1fr_90px_70px] items-center gap-3 border-t border-black/[0.05] px-3 py-2.5 text-[12px] transition-colors duration-500 sm:grid-cols-[1fr_96px_60px_80px] ${
+                className={`grid grid-cols-[1fr_96px] items-center gap-3 border-t border-black/[0.05] px-3 py-2.5 text-[12px] transition-colors duration-500 sm:grid-cols-[1fr_96px_60px_80px] ${
                   i === 0 && pub ? "bg-[#F6FBF8]" : ""
                 }`}
               >
@@ -434,7 +434,7 @@ export function CmsArtifact({ on }: { on: boolean }) {
                 <span className="hidden sm:block">
                   <Face who={r.who} size={18} className="!ring-0" />
                 </span>
-                <span className="text-[11px] text-[#8a909c]">{r.d}</span>
+                <span className="hidden text-[11px] text-[#8a909c] sm:block">{r.d}</span>
               </div>
             ))}
           </div>
