@@ -2,7 +2,6 @@
 
 import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion, useInView, useReducedMotion } from "motion/react";
-import { Check } from "lucide-react";
 import { Mascot, type MascotApi } from "@/components/mascot/Mascot";
 import { DotField } from "./DotField";
 import { Face } from "./scenes";
@@ -108,7 +107,9 @@ function Build({ step }: { step: number }) {
             "linear-gradient(180deg, transparent 40%, rgba(166,187,255,0.08) 72%, rgba(182,166,240,0.18) 100%)",
         }}
       />
-      <DotField mode="rise" rgb="166,187,255" rgb2="182,166,240" play={seen} />
+      <div aria-hidden className="pointer-events-none absolute inset-x-0 bottom-0 h-[45%]">
+        <DotField mode="rise" rgb="166,187,255" rgb2="182,166,240" play={seen} />
+      </div>
 
       {/* the job itself: its name and where it stands */}
       <div className="relative flex items-center gap-3 border-b border-white/[0.06] bg-[#0E1218]/80 px-5 py-3.5 backdrop-blur md:px-7">
@@ -164,7 +165,11 @@ function Build({ step }: { step: number }) {
                   {WEEK.map((d, k) => (
                     <span
                       key={k}
-                      className={`t-eyebrow grid size-8 place-items-center rounded-md border !text-[10.5px] transition-colors duration-[120ms] ${k === 4 ? "border-[#7A8FFF]/40 bg-[#324CFF]/15 text-[#A6BBFF]" : "border-white/[0.08] text-subtle"}`}
+                      className={`grid size-9 place-items-center rounded-lg font-mono text-[12px] font-medium transition-colors duration-[120ms] ${
+                        k === 4
+                          ? "bg-[#A6BBFF] text-[#07111F] shadow-[0_0_0_4px_rgba(166,187,255,0.18)]"
+                          : "bg-[#1A1F2A] text-[#9AA6B8] ring-1 ring-white/10"
+                      }`}
                     >
                       {d}
                     </span>
@@ -275,16 +280,8 @@ export function HowItWorks() {
 
         <div className="mt-16 grid gap-10 md:mt-24 lg:grid-cols-12 lg:gap-12">
           {/* the steps, with a rail that fills as you go */}
-          <ol className="relative lg:col-span-5">
-            <span
-              aria-hidden
-              className="absolute bottom-6 left-[15px] top-6 hidden w-px bg-white/[0.08] lg:block"
-            >
-              <span
-                className="block w-full origin-top bg-[#7A8FFF] transition-transform duration-500"
-                style={{ height: "100%", transform: `scaleY(${shown / 2})` }}
-              />
-            </span>
+          {/* the steps as statements: the one you are on is lit, the rest wait quietly */}
+          <ol className="lg:col-span-5">
             {steps.map((s, k) => (
               <li
                 key={s.title}
@@ -292,35 +289,25 @@ export function HowItWorks() {
                   refs.current[k] = el;
                 }}
                 data-step={k}
-                className="relative flex gap-5 py-6 lg:min-h-[62vh] lg:items-center lg:py-0"
+                aria-current={k === shown ? "step" : undefined}
+                className="py-8 lg:flex lg:min-h-[64vh] lg:items-center lg:py-0"
               >
-                <span
-                  className={`relative z-10 grid size-8 shrink-0 place-items-center rounded-full border font-mono text-[12px] transition-colors duration-300 ${
-                    k <= shown
-                      ? "border-[#7A8FFF]/50 bg-[#151A22] text-text"
-                      : "border-white/[0.08] bg-[#0B0E14] text-subtle"
-                  }`}
-                >
-                  {k < shown ? (
-                    <Check size={14} strokeWidth={2.5} className="text-[#3DD68C]" aria-hidden />
-                  ) : (
-                    k + 1
-                  )}
-                </span>
-                <div className="max-w-[40ch]">
+                <div className="max-w-[18ch] lg:max-w-none">
                   <h3
-                    className={`t-h3 transition-colors duration-300 ${k === shown ? "text-text" : "text-subtle"}`}
+                    className={`text-[30px] font-medium leading-[1.08] tracking-[-0.035em] transition-colors duration-500 md:text-[40px] ${
+                      k === shown ? "text-text" : "text-text lg:text-white/20"
+                    }`}
                   >
                     {s.title}
                   </h3>
                   <p
-                    className={`mt-2 text-[16px] leading-[26px] transition-colors duration-300 ${k === shown ? "text-muted" : "text-subtle"}`}
+                    className={`mt-4 max-w-[36ch] text-[17px] leading-[27px] transition-colors duration-500 ${
+                      k === shown ? "text-muted" : "text-muted lg:text-white/15"
+                    }`}
                   >
                     {s.body}
                   </p>
                 </div>
-                {/* phones: each step carries its own picture */}
-                <span className="sr-only">Step {k + 1} of 3</span>
               </li>
             ))}
           </ol>
