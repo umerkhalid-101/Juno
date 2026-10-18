@@ -38,9 +38,11 @@ export function DotField({
     let h = 0;
     const dpr = Math.min(2, window.devicePixelRatio || 1);
     const size = () => {
-      const r = canvas.getBoundingClientRect();
-      w = r.width;
-      h = r.height;
+      // layout size, not the on-screen box: the card morphs with transforms when it opens,
+      // and measuring mid-morph would stretch every dot
+      w = canvas.clientWidth;
+      h = canvas.clientHeight;
+      if (!w || !h) return;
       canvas.width = Math.round(w * dpr);
       canvas.height = Math.round(h * dpr);
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -170,7 +172,7 @@ export function DotField({
     <canvas
       ref={ref}
       aria-hidden
-      className="absolute inset-0 h-full w-full [mask-image:linear-gradient(to_bottom,transparent_8%,#000_55%)]"
+      className="absolute inset-0 h-full w-full opacity-60 [mask-image:linear-gradient(to_bottom,transparent_8%,#000_55%)]"
     />
   );
 }

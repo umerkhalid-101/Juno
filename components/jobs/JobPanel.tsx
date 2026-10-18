@@ -415,7 +415,7 @@ export function JobPanel({
               <div
                 className="relative mx-5 grid gap-4 overflow-hidden rounded-[28px] border border-white/[0.08] p-4 md:mx-12 md:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)] md:p-5"
                 style={{
-                  background: `radial-gradient(80% 90% at 30% 110%, rgba(${tint.a},0.38), rgba(${tint.b},0.14) 50%, transparent 80%), #11151d`,
+                  background: `radial-gradient(80% 90% at 30% 110%, rgba(${tint.a},0.18), rgba(${tint.b},0.07) 50%, transparent 80%), #11151d`,
                 }}
               >
                 <div className="relative h-[440px] overflow-hidden rounded-[20px] md:h-[560px]">

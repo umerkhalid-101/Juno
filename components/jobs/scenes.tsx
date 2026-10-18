@@ -17,34 +17,31 @@ const MUTED = "#6b7080";
 
 type World = { a: string; b: string; at?: string; dots?: DotMode };
 // a colour field per job, glowing up from the bottom of the card
+// One palette that sits with the site's navy and periwinkle: dawn (peach, rose, sand),
+// sea (mint, teal, sky) and dusk (lavender, periwinkle). Soft, desaturated, never loud.
+const P = {
+  peach: "244,182,156",
+  rose: "232,164,196",
+  sand: "232,204,150",
+  mint: "150,214,190",
+  teal: "120,196,206",
+  sky: "140,186,240",
+  lavender: "182,166,240",
+  periwinkle: "166,187,255",
+};
 export const worlds: Record<string, World> = {
-  "find-our-next-customers": { a: "255,122,89", b: "255,77,141", dots: "globe" },
-  "turn-search-into-signups": { a: "56,189,248", b: "52,211,153", at: "30% 115%", dots: "wave" },
-  "make-every-ad-dollar-count": { a: "168,85,247", b: "236,72,153" },
-  "catch-customers-before-they-leave": {
-    a: "251,146,60",
-    b: "239,68,68",
-    at: "30% 115%",
-    dots: "wave",
-  },
-  "get-new-customers-to-their-first-win": { a: "52,211,153", b: "34,197,94", dots: "rise" },
-  "close-the-loop-with-customers": {
-    a: "99,102,241",
-    b: "56,189,248",
-    at: "70% 115%",
-    dots: "globe",
-  },
-  "keep-every-promise-moving": { a: "192,38,211", b: "124,58,237", dots: "ripple" },
-  "keep-our-launches-on-track": { a: "79,70,229", b: "34,211,238", at: "65% 115%", dots: "rise" },
-  "walk-into-every-call-prepared": { a: "234,67,53", b: "251,188,4", dots: "ripple" },
-  "show-me-whats-driving-growth": {
-    a: "132,204,22",
-    b: "16,185,129",
-    at: "35% 115%",
-    dots: "rise",
-  },
-  "keep-us-ahead-of-competitors": { a: "14,165,233", b: "99,102,241", dots: "radar" },
-  "keep-investors-in-the-loop": { a: "245,158,11", b: "234,88,12", at: "60% 115%", dots: "globe" },
+  "find-our-next-customers": { a: P.peach, b: P.rose, dots: "globe" },
+  "turn-search-into-signups": { a: P.teal, b: P.sky, at: "30% 115%", dots: "wave" },
+  "make-every-ad-dollar-count": { a: P.lavender, b: P.rose },
+  "catch-customers-before-they-leave": { a: P.sand, b: P.peach, at: "30% 115%", dots: "wave" },
+  "get-new-customers-to-their-first-win": { a: P.mint, b: P.teal, dots: "rise" },
+  "close-the-loop-with-customers": { a: P.sky, b: P.periwinkle, at: "70% 115%", dots: "globe" },
+  "keep-every-promise-moving": { a: P.lavender, b: P.rose, dots: "ripple" },
+  "keep-our-launches-on-track": { a: P.periwinkle, b: P.teal, at: "65% 115%", dots: "rise" },
+  "walk-into-every-call-prepared": { a: P.peach, b: P.sand, dots: "ripple" },
+  "show-me-whats-driving-growth": { a: P.mint, b: P.sky, at: "35% 115%", dots: "rise" },
+  "keep-us-ahead-of-competitors": { a: P.sky, b: P.lavender, dots: "radar" },
+  "keep-investors-in-the-loop": { a: P.sand, b: P.rose, at: "60% 115%", dots: "globe" },
 };
 
 const card =
@@ -845,14 +842,14 @@ export function JobScene({
         aria-hidden
         className="absolute inset-0"
         style={{
-          background: `linear-gradient(180deg, transparent 22%, rgba(${w.a},0.32) 58%, rgba(${w.b},0.7) 100%), radial-gradient(90% 60% at ${w.at ?? "50% 112%"}, rgba(${w.a},0.75), transparent 70%)`,
+          background: `linear-gradient(180deg, transparent 28%, rgba(${w.a},0.14) 62%, rgba(${w.b},0.32) 100%), radial-gradient(90% 55% at ${w.at ?? "50% 112%"}, rgba(${w.a},0.38), transparent 72%)`,
         }}
       />
       {/* larger cards get a soft ribbon of colour behind the product */}
       {ribbon && (
         <div
           aria-hidden
-          className="absolute -left-[20%] top-[46%] h-[180px] w-[140%] -rotate-[9deg] rounded-[50%] opacity-70 blur-[46px]"
+          className="absolute -left-[20%] top-[46%] h-[180px] w-[140%] -rotate-[9deg] rounded-[50%] opacity-30 blur-[56px]"
           style={{
             background: `linear-gradient(90deg, rgba(${w.b},0), rgba(${w.a},0.9) 35%, rgba(${w.b},0.85) 70%, rgba(${w.a},0))`,
           }}
