@@ -793,6 +793,13 @@
   }
 }
 
+/* Chapter 1: the tool chips stay hidden until the pile animation brings them in (no flash on load) */
+@media (prefers-reduced-motion: no-preference) {
+  .stack-chip {
+    opacity: 0;
+  }
+}
+
 /* Chapter 1: resting pile position per breakpoint (GSAP overrides inline once it runs) */
 .stack-pos {
   transform: translateY(var(--ly-m)) scale(var(--ls-m));
@@ -1473,4 +1480,42 @@
   -webkit-mask-composite: xor;
   mask-composite: exclude;
   pointer-events: none;
+}
+
+/* Apps page: the ROI calculator's sliders, in the app's own ink */
+.roi-range {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 6px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--ink) var(--fill), rgba(31, 42, 28, 0.15) var(--fill));
+  cursor: pointer;
+}
+.roi-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 999px;
+  background: #fff;
+  box-shadow: 0 0 0 2px var(--ink), 0 4px 10px rgba(0, 0, 0, 0.15);
+}
+.roi-range::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border: 0;
+  border-radius: 999px;
+  background: #fff;
+  box-shadow: 0 0 0 2px var(--ink), 0 4px 10px rgba(0, 0, 0, 0.15);
+}
+
+/* Apps page: the Juno desktop the app ideas open on. Dark, with the open app's light falling
+   across it in two diagonal beams; --tint is the app's colour and crossfades as you switch. */
+.apps-wall {
+  background:
+    radial-gradient(60% 45% at 50% 100%, rgba(var(--tint), 0.35), transparent 70%),
+    linear-gradient(118deg, transparent 38%, rgba(var(--tint), 0.22) 46%, transparent 54%),
+    linear-gradient(118deg, transparent 58%, rgba(var(--tint), 0.14) 63%, transparent 68%),
+    radial-gradient(70% 60% at 0% 100%, rgba(var(--tint), 0.18), transparent 70%),
+    #05070b;
+  transition: background 0.8s cubic-bezier(0.16, 1, 0.3, 1);
 }

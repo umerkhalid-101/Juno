@@ -14,6 +14,7 @@ const columns: { title: string; links: { label: string; href: string }[] }[] = [
       { label: "Product", href: "/product" },
       { label: "Features", href: "/features" },
       { label: "Automations", href: "/jobs" },
+      { label: "Apps", href: "/apps" },
       { label: "Download", href: "/download" },
     ],
   },
@@ -55,13 +56,13 @@ export function Footer() {
       {/* Juno for Mac, the pages, and the way back up */}
       <div className="container-page relative grid gap-10 pt-20 md:pt-24 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,2fr)_auto] lg:gap-10">
         <div className="self-start">
-          <Link href="/download" className="group flex items-center gap-5">
+          <Link href="/download" className="group flex items-center gap-4">
             <Image
               src="/home/juno-mac-icon.png"
               alt=""
-              width={108}
-              height={108}
-              className="size-[108px] shrink-0 rounded-[26px] shadow-[0_24px_50px_-24px_rgba(50,76,255,0.55),0_0_0_1px_rgba(255,255,255,0.08)] transition-transform duration-300 group-hover:-translate-y-0.5"
+              width={64}
+              height={64}
+              className="size-16 shrink-0 rounded-[16px] shadow-[0_16px_32px_-16px_rgba(50,76,255,0.55),0_0_0_1px_rgba(255,255,255,0.08)] transition-transform duration-300 group-hover:-translate-y-0.5"
             />
             <span className="block text-[16px] font-medium leading-6 text-text">
               Keep Juno close.
