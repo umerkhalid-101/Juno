@@ -166,7 +166,7 @@ function Ads() {
       <div className={`${card} overflow-hidden`} style={S({ left: 28, top: 30, width: 196 })}>
         <div className="relative h-[92px] bg-[#e5e7eb]">
           <Image
-            src={photo("1551288049-bebda4e38f71")}
+            src={photo("1575318634028-6a0cfcb60c59")}
             alt=""
             fill
             sizes="200px"
@@ -194,7 +194,7 @@ function Ads() {
       >
         <div className="relative h-[100px] overflow-hidden bg-[#e7e0d8]">
           <Image
-            src={photo("1444418776041-9c7e33cc5a9c")}
+            src={photo("1542330952-bffc55e812b2")}
             alt=""
             fill
             sizes="220px"
