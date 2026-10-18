@@ -1,11 +1,14 @@
 "use client";
 
-import { useEffect, useRef, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { useReducedMotion } from "motion/react";
 import { BrandIcon } from "@/components/ui/BrandIcon";
 import { type ToolId } from "@/lib/story";
 
-/** The six tasks Juno is working through. Each rides the orbit and gets done at the front. */
+/**
+ * What Juno works through. Six chips ride the orbit; each time one passes behind Juno it picks up
+ * a task nobody is showing, so every lap brings new work to the front.
+ */
 export const heroTasks: { tool: ToolId; text: string }[] = [
   { tool: "gmail", text: "Investor update" },
   { tool: "linear", text: "Triage 6 bugs" },
@@ -13,10 +16,21 @@ export const heroTasks: { tool: ToolId; text: string }[] = [
   { tool: "hubspot", text: "Follow up with Northwind" },
   { tool: "notion", text: "Weekly metrics report" },
   { tool: "intercom", text: "Answer 4 setup questions" },
+  { tool: "calendar", text: "Prep for 10:00 with Lumen" },
+  { tool: "github", text: "Review 3 pull requests" },
+  { tool: "gmail", text: "Reply to Dana at Northwind" },
+  { tool: "hubspot", text: "Update 12 deals" },
+  { tool: "slack", text: "Nudge Sam about the deck" },
+  { tool: "notion", text: "Write the onboarding guide" },
+  { tool: "linear", text: "Plan next sprint" },
+  { tool: "drive", text: "Tidy the board deck" },
+  { tool: "intercom", text: "Close 9 support tickets" },
+  { tool: "calendar", text: "Book the team offsite" },
 ];
+const POOL = heroTasks.length;
 
 const TAU = Math.PI * 2;
-const COUNT = heroTasks.length;
+const COUNT = 6;
 /** How many tasks ride the orbit on phones. */
 const MOBILE_COUNT = 5;
 /** Parallax travel per chip, px (4 to 12). */
@@ -48,16 +62,21 @@ export function HeroOrbit({
   const cometA = useRef(-Math.PI / 2);
   /** Phones: five chips share one rotation, evenly spaced. */
   const mobileRot = useRef(0.9);
-  const state = useRef(heroTasks.map((_, i) => ({ a: 0.9 + (i * TAU) / COUNT, done: false })));
+  const state = useRef(Array.from({ length: COUNT }, (_, i) => ({ a: 0.9 + (i * TAU) / COUNT, done: false })));
   const speed = useRef(1);
   const target = useRef(1);
   const pointer = useRef({ x: 0, y: 0, tx: 0, ty: 0 });
   const startedRef = useRef(started);
   const cbs = useRef({ onFocusPill, onDone });
+  // which task each chip is carrying, and which one comes next
+  const [shown, setShown] = useState(() => Array.from({ length: COUNT }, (_, i) => i));
+  const shownRef = useRef(shown);
+  const nextTask = useRef(COUNT);
 
   useEffect(() => {
     startedRef.current = started;
     cbs.current = { onFocusPill, onDone };
+    shownRef.current = shown;
   });
 
   useEffect(() => {
@@ -115,6 +134,24 @@ export function HeroOrbit({
         }
         const depth = Math.sin(s.a); // 1 = front, -1 = back
         const k = (depth + 1) / 2;
+        // right at the back, faded out, the chip picks up a task nobody is showing
+        if (startedRef.current && !reduce && depth < -0.95) {
+          if (!node.dataset.swapped) {
+            node.dataset.swapped = "true";
+            s.done = false;
+            node.dataset.done = "false";
+            const cur = shownRef.current;
+            let n = nextTask.current % POOL;
+            while (cur.includes(n)) n = (n + 1) % POOL;
+            nextTask.current = n + 1;
+            const copy = [...cur];
+            copy[i] = n;
+            shownRef.current = copy;
+            setShown(copy);
+          }
+        } else if (node.dataset.swapped && depth > -0.6) {
+          delete node.dataset.swapped;
+        }
         if (mobile) {
           // the chip opens as it comes round to the front and closes as it leaves, frame by frame
           const t = Math.min(1, Math.max(0, (depth - 0.86) / 0.14));
@@ -146,7 +183,7 @@ export function HeroOrbit({
         if (!s.done && depth > 0.97) {
           s.done = true;
           node.dataset.done = "true";
-          if (startedRef.current && !reduce) cbs.current.onDone?.(heroTasks[i].text);
+          if (startedRef.current && !reduce) cbs.current.onDone?.(heroTasks[shownRef.current[i]].text);
         } else if (s.done && depth < -0.6) {
           s.done = false;
           node.dataset.done = "false";
@@ -156,7 +193,9 @@ export function HeroOrbit({
         node.style.setProperty("--work", String(wk));
         if (wk > best.work) best = { work: wk, x, y, top: y - node.offsetHeight / 2 };
         node.style.transform = `translate3d(${x}px, ${y}px, 0) translate(-50%, -50%) scale(${(0.78 + k * 0.22) * (mobile ? 0.86 : 1)})`;
-        const op = mobile ? 0.28 + k * 0.72 : 0.16 + k * 0.84;
+        // fully out right at the back, where a chip changes task, then easing back in
+        const back = Math.min(1, k / 0.08);
+        const op = (mobile ? 0.28 + k * 0.72 : 0.16 + k * 0.84) * back;
         node.style.opacity = startedRef.current ? String(op) : "0";
         node.style.zIndex = depth > 0 ? "30" : "5";
         node.style.filter = depth < -0.1 ? `blur(${(-depth - 0.1) * 2.2}px)` : "none";
@@ -255,10 +294,11 @@ export function HeroOrbit({
       <div className="absolute left-1/2 top-1/2 z-20 -translate-x-1/2 -translate-y-1/2">{children}</div>
 
       {/* tasks in orbit */}
-      {heroTasks.map((t, i) => {
+      {shown.map((ti, i) => {
+        const t = heroTasks[ti];
         return (
         <div
-          key={t.text}
+          key={i}
           ref={(el) => {
             pillEls.current[i] = el;
           }}
