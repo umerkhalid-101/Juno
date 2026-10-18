@@ -1,10 +1,15 @@
 "use client";
 
 import type { CSSProperties, ReactNode } from "react";
+import Image from "next/image";
 import { Check, Globe, Search } from "lucide-react";
 import { ToolLogo } from "@/components/ui/ToolLogo";
 import { DotField, type DotMode } from "./DotField";
 import type { ToolId } from "@/lib/story";
+
+/** Real photography for the ad creatives (Unsplash, free licence). */
+const photo = (id: string) =>
+  `https://images.unsplash.com/photo-${id}?auto=format&fit=crop&w=600&q=75`;
 
 /**
  * The catalog card scenes, after Stripe: each job gets its own colour world, a main product
@@ -159,7 +164,15 @@ function Ads() {
   return (
     <>
       <div className={`${card} overflow-hidden`} style={S({ left: 28, top: 30, width: 196 })}>
-        <div className="h-[92px] bg-[linear-gradient(135deg,#c7d2fe,#e9d5ff)]" />
+        <div className="relative h-[92px] bg-[#e5e7eb]">
+          <Image
+            src={photo("1551288049-bebda4e38f71")}
+            alt=""
+            fill
+            sizes="200px"
+            className="object-cover"
+          />
+        </div>
         <div className="p-3">
           <p
             className="text-[14px] font-semibold leading-[17px] tracking-[-0.02em]"
@@ -179,7 +192,15 @@ function Ads() {
         className={`${card} scene-win overflow-hidden`}
         style={S({ left: 238, top: 14, width: 210 })}
       >
-        <div className="scene-holo relative h-[100px] overflow-hidden bg-[linear-gradient(135deg,#fbcfe8,#f0abfc_55%,#a78bfa)]" />
+        <div className="relative h-[100px] overflow-hidden bg-[#e7e0d8]">
+          <Image
+            src={photo("1444418776041-9c7e33cc5a9c")}
+            alt=""
+            fill
+            sizes="220px"
+            className="object-cover"
+          />
+        </div>
         <div className="p-3">
           <p
             className="text-[14px] font-semibold leading-[17px] tracking-[-0.02em]"
