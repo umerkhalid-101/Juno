@@ -287,8 +287,7 @@ export function HowItWorks() {
     <section id="how-it-works" aria-labelledby="how-title" className="chapter scroll-mt-20">
       <div className="container-page">
         <header className="mx-auto max-w-[820px] text-center">
-          <p className="t-eyebrow text-muted">Your way of working, on repeat</p>
-          <h2 id="how-title" className="t-display-l mt-5 text-balance">
+          <h2 id="how-title" className="t-display-l text-balance">
             Hand over the outcome.{" "}
             <span className="block text-muted">Leave the follow-through.</span>
           </h2>

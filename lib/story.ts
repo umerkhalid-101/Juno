@@ -335,8 +335,9 @@ export const faqs: { q: string; a: string; placeholder?: string }[] = [
 ];
 
 export const nav = [
-  { label: "Product", href: "/#work" },
+  { label: "Product", href: "/product" },
+  { label: "Features", href: "/features" },
   { label: "Automations", href: "/jobs" },
-  { label: "Apps", href: "/#apps" },
-  { label: "Download", href: "/#close" },
+  { label: "Download", href: "/download" },
+  { label: "Contact", href: "/contact" },
 ];

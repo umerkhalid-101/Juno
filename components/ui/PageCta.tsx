@@ -1,7 +1,15 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { motion, useInView, useReducedMotion } from "motion/react";
+import {
+  motion,
+  useInView,
+  useMotionValue,
+  useReducedMotion,
+  useSpring,
+  useTransform,
+  type MotionValue,
+} from "motion/react";
 import { ArrowUpRight, Globe } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { ToolLogo } from "@/components/ui/ToolLogo";
@@ -11,7 +19,8 @@ import type { ToolId } from "@/lib/story";
 
 /**
  * The closing call to action for inner pages. A quiet field of the things Juno takes on sits
- * around the button; hover it and every one is pulled into the button, handed over.
+ * around Juno. A soft light follows the cursor and the chips lean away from it; click one and
+ * it is handed to Juno on its own. Hover the button and every one is pulled in at once.
  * Pages can pass their own chips; the default set is drawn from across the site.
  */
 
@@ -32,7 +41,7 @@ const defaultChips: CtaChip[] = [
 
 function Chip({ c }: { c: CtaChip }) {
   return (
-    <span className="flex items-center gap-2 whitespace-nowrap rounded-full bg-[linear-gradient(180deg,rgba(28,34,48,0.9),rgba(14,18,24,0.9))] py-1.5 pl-1.5 pr-3 text-[12.5px] text-text shadow-[0_10px_30px_-12px_rgba(0,0,0,0.9)] ring-1 ring-white/[0.08]">
+    <span className="flex items-center gap-2 whitespace-nowrap rounded-full bg-[linear-gradient(180deg,rgba(28,34,48,0.9),rgba(14,18,24,0.9))] py-1.5 pl-1.5 pr-3 text-[12.5px] text-text shadow-[0_10px_30px_-12px_rgba(0,0,0,0.9)] ring-1 ring-white/[0.08] transition-[box-shadow,transform] duration-300 group-hover:-translate-y-0.5 group-hover:shadow-[0_0_0_1px_rgba(166,187,255,0.45),0_12px_34px_-10px_rgba(122,143,255,0.55)]">
       <span className="grid size-6 place-items-center rounded-full bg-white text-[#14161f]">
         {c.tool === "browser" ? (
           <Globe size={13} strokeWidth={1.75} aria-hidden />
@@ -45,6 +54,27 @@ function Chip({ c }: { c: CtaChip }) {
   );
 }
 
+/** Leans each chip away from the cursor; nearer chips move more, so the field has depth. */
+function Lean({
+  mx,
+  my,
+  depth,
+  children,
+}: {
+  mx: MotionValue<number>;
+  my: MotionValue<number>;
+  depth: number;
+  children: React.ReactNode;
+}) {
+  const x = useTransform(mx, (v) => v * depth);
+  const y = useTransform(my, (v) => v * depth);
+  return (
+    <motion.span className="block" style={{ x, y }}>
+      {children}
+    </motion.span>
+  );
+}
+
 export function PageCta({
   title,
   sub,
@@ -52,7 +82,7 @@ export function PageCta({
   href = CTA_HREF,
   chips = defaultChips,
 }: {
-  title: string;
+  title: React.ReactNode;
   sub?: string;
   label?: string;
   href?: string;
@@ -63,6 +93,43 @@ export function PageCta({
   const seen = useInView(root, { once: true, amount: 0.35 });
   const juno = useRef<MascotApi>(null);
   const [pull, setPull] = useState(false);
+  // chips handed over one at a time by clicking them
+  const [sent, setSent] = useState<Set<number>>(() => new Set());
+  const send = (i: number) => {
+    if (sent.has(i) || pull) return;
+    setSent((s) => new Set(s).add(i));
+    window.setTimeout(() => juno.current?.nod(), 420);
+    window.setTimeout(
+      () =>
+        setSent((s) => {
+          const n = new Set(s);
+          n.delete(i);
+          return n;
+        }),
+      2600,
+    );
+  };
+  // the cursor, relative to the field's centre; drives the light and the lean
+  const field = useRef<HTMLDivElement>(null);
+  const px = useMotionValue(0);
+  const py = useMotionValue(0);
+  const lx = useSpring(px, { stiffness: 120, damping: 20, mass: 0.6 });
+  const ly = useSpring(py, { stiffness: 120, damping: 20, mass: 0.6 });
+  const mx = useTransform(lx, (v) => -v * 0.035);
+  const my = useTransform(ly, (v) => -v * 0.035);
+  const [lit, setLit] = useState(false);
+  const onMove = (e: React.PointerEvent) => {
+    if (reduce || e.pointerType !== "mouse" || !field.current) return;
+    const r = field.current.getBoundingClientRect();
+    px.set(e.clientX - (r.left + r.width / 2));
+    py.set(e.clientY - (r.top + r.height / 2));
+    if (!lit) setLit(true);
+  };
+  const onLeaveField = () => {
+    setLit(false);
+    px.set(0);
+    py.set(0);
+  };
   // the field spreads to fit the screen
   const [k, setK] = useState(1);
   useEffect(() => {
@@ -101,15 +168,33 @@ export function PageCta({
         )}
 
         {/* Juno, with everything you could hand over gathered around it */}
-        <div className="relative mt-16 grid h-[360px] w-full place-items-center md:mt-14">
-          <div aria-hidden className="pointer-events-none absolute inset-0">
+        <div
+          ref={field}
+          onPointerMove={onMove}
+          onPointerLeave={onLeaveField}
+          className="relative mt-16 grid h-[360px] w-full place-items-center md:mt-14"
+        >
+          {/* a soft light that follows the cursor */}
+          <motion.span
+            aria-hidden
+            className="pointer-events-none absolute left-1/2 top-1/2 -ml-[280px] -mt-[280px] size-[560px] rounded-full transition-opacity duration-500"
+            style={{
+              x: lx,
+              y: ly,
+              opacity: lit ? 1 : 0,
+              background:
+                "radial-gradient(closest-side, rgba(122,143,255,0.14), rgba(160,130,255,0.05) 55%, transparent)",
+            }}
+          />
+          <div aria-hidden className="absolute inset-0">
             {chips.map((c, i) => (
               <motion.span
                 key={c.text}
-                className={`absolute left-1/2 top-1/2 ${c.m ? "" : "max-md:hidden"}`}
+                className={`group absolute left-1/2 top-1/2 cursor-pointer ${c.m ? "" : "max-md:hidden"}`}
+                onClick={() => send(i)}
                 initial={false}
                 animate={
-                  pull && !reduce
+                  (pull || sent.has(i)) && !reduce
                     ? { x: "-50%", y: "-50%", translateX: 0, translateY: 0, scale: 0.3, opacity: 0 }
                     : {
                         x: "-50%",
@@ -121,35 +206,57 @@ export function PageCta({
                       }
                 }
                 transition={
-                  pull
-                    ? { duration: 0.55, delay: i * 0.025, ease: [0.55, 0, 0.75, 0.2] }
+                  pull || sent.has(i)
+                    ? {
+                        duration: 0.55,
+                        delay: pull ? i * 0.025 : 0,
+                        ease: [0.55, 0, 0.75, 0.2],
+                      }
                     : { duration: reduce ? 0 : 0.9, delay: seen ? 0.2 + i * 0.04 : 0, ease: calm }
                 }
               >
-                <span className="cta-drift block" style={{ animationDelay: `${-i * 1.3}s` }}>
-                  <Chip c={c} />
-                </span>
+                <Lean mx={mx} my={my} depth={0.6 + ((i * 7) % 5) * 0.2}>
+                  <span className="cta-drift block" style={{ animationDelay: `${-i * 1.3}s` }}>
+                    <Chip c={c} />
+                  </span>
+                </Lean>
               </motion.span>
             ))}
           </div>
 
           {/* Juno, at the centre, taking it all on */}
           <motion.div
-            className="relative grid place-items-center"
+            className="pointer-events-none relative grid place-items-center"
             initial={false}
             animate={{ opacity: seen || reduce ? 1 : 0, scale: pull ? 1.08 : 1 }}
             transition={{ duration: 0.5, ease: calm }}
           >
             <span
               aria-hidden
-              className="pointer-events-none absolute -inset-20 rounded-full transition-opacity duration-700"
+              className="cta-breathe pointer-events-none absolute -inset-20 rounded-full"
               style={{
                 background:
                   "radial-gradient(closest-side, rgba(122,143,255,0.42), rgba(122,143,255,0.1) 55%, transparent)",
-                opacity: pull ? 1 : 0.4,
               }}
             />
-            <Mascot size={140} state="idle" halo={false} apiRef={juno} />
+            <span
+              aria-hidden
+              className="pointer-events-none absolute -inset-20 rounded-full transition-opacity duration-700"
+              style={{
+                background:
+                  "radial-gradient(closest-side, rgba(150,170,255,0.5), rgba(122,143,255,0.12) 55%, transparent)",
+                opacity: pull ? 1 : sent.size ? 0.55 : 0,
+              }}
+            />
+            {/* a ring that goes out each time Juno takes something on */}
+            {[...sent].map((i) => (
+              <span
+                key={i}
+                aria-hidden
+                className="cta-receive pointer-events-none absolute inset-0 rounded-full"
+              />
+            ))}
+            <Mascot size={140} state="idle" halo={false} apiRef={juno} trackCursor={!pull} />
           </motion.div>
         </div>
 
@@ -169,14 +276,40 @@ export function PageCta({
           onFocus={() => setPull(true)}
           onBlur={() => setPull(false)}
         >
-          <Button
-            size="xl"
-            variant="white"
-            href={href}
-            trailing={<ArrowUpRight size={18} strokeWidth={1.75} aria-hidden />}
-          >
-            {label}
-          </Button>
+          <span className="relative inline-flex">
+            {/* glow pooled under the button, brighter when it is about to be pressed */}
+            <span
+              aria-hidden
+              className="pointer-events-none absolute -inset-x-16 -inset-y-10 rounded-full transition-opacity duration-500"
+              style={{
+                background:
+                  "radial-gradient(closest-side, rgba(122,143,255,0.45), rgba(160,130,255,0.12) 60%, transparent)",
+                opacity: pull ? 1 : 0.7,
+              }}
+            />
+            {/* a light that runs round the edge */}
+            <span
+              aria-hidden
+              className="pointer-events-none absolute -inset-[2px] overflow-hidden rounded-full"
+            >
+              <span
+                className="cta-orbit absolute left-1/2 top-1/2 aspect-square w-[150%]"
+                style={{
+                  background:
+                    "conic-gradient(from 0deg, transparent 0deg, rgba(166,187,255,0.95) 40deg, rgba(200,170,255,0.8) 70deg, transparent 110deg, transparent 360deg)",
+                }}
+              />
+            </span>
+            <Button
+              size="xl"
+              variant="white"
+              magnetic={false}
+              href={href}
+              trailing={<ArrowUpRight size={18} strokeWidth={1.75} aria-hidden />}
+            >
+              {label}
+            </Button>
+          </span>
         </motion.div>
       </div>
     </section>

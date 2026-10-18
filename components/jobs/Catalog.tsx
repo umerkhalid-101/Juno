@@ -187,8 +187,7 @@ export function Catalog() {
     >
       {/* intro */}
       <Reveal className="container-page text-center">
-        <p className="t-eyebrow text-muted">Think bigger than a to-do list</p>
-        <h2 id="catalog-title" className="t-display-l mx-auto mt-5 max-w-[16ch] text-balance">
+        <h2 id="catalog-title" className="t-display-l mx-auto max-w-[16ch] text-balance">
           What would you love <span className="text-muted">to stop worrying about?</span>
         </h2>
         <p className="t-body-l mx-auto mt-5 max-w-[42ch] text-muted">

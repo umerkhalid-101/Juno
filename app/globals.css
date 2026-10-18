@@ -1290,6 +1290,208 @@
   from { transform: translate3d(0, -4px, 0); }
   to { transform: translate3d(0, 4px, 0); }
 }
+/* the CTA: Juno's light breathes, a ring goes out when it takes something on, and a light
+   runs round the button's edge */
+.cta-breathe {
+  animation: cta-breathe 4.5s ease-in-out infinite alternate;
+}
+@keyframes cta-breathe {
+  from { opacity: 0.32; transform: scale(0.96); }
+  to { opacity: 0.55; transform: scale(1.04); }
+}
+.cta-receive {
+  animation: cta-receive 1.1s cubic-bezier(0.16, 1, 0.3, 1) 0.5s both;
+}
+@keyframes cta-receive {
+  from { opacity: 0.9; transform: scale(0.7); box-shadow: inset 0 0 0 2px rgba(166, 187, 255, 0.9); }
+  to { opacity: 0; transform: scale(2.2); box-shadow: inset 0 0 0 1px rgba(166, 187, 255, 0.4); }
+}
+.cta-orbit {
+  translate: -50% -50%;
+  animation: cta-orbit 4s linear infinite;
+}
+@keyframes cta-orbit {
+  to { rotate: 360deg; }
+}
 @media (prefers-reduced-motion: reduce) {
-  .cta-drift { animation: none; }
+  .cta-drift,
+  .cta-breathe,
+  .cta-orbit,
+  .cta-receive { animation: none; }
+}
+
+/* ------------------------------------------------------------ features page */
+/* the launcher list scrolls without a visible bar */
+.fx-scroll {
+  scrollbar-width: none;
+}
+.fx-scroll::-webkit-scrollbar {
+  display: none;
+}
+/* the request arriving in the wiki */
+@keyframes fx-arrive {
+  0% { opacity: 0; transform: translate(-60%, 0); }
+  35% { opacity: 1; transform: translate(0, 0); }
+  80% { opacity: 0.9; transform: translate(40px, -112px) scale(0.92); }
+  100% { opacity: 0; transform: translate(40px, -112px) scale(0.92); }
+}
+@media (prefers-reduced-motion: reduce) {
+}
+/* a hairline edge that catches the chapter colours: cool at the top left, warm at the bottom right */
+.fx-ring::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(135deg, rgba(166, 187, 255, 0.45), rgba(255, 255, 255, 0.07) 38%, rgba(255, 255, 255, 0.07) 62%, rgba(242, 198, 176, 0.35));
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+/* particles rising off the hero launcher and gathering into the button */
+.fx-spark {
+  opacity: 0;
+  animation: fx-spark 3.4s cubic-bezier(0.35, 0, 0.25, 1) infinite;
+  box-shadow: 0 0 6px currentColor;
+}
+@keyframes fx-spark {
+  0% { opacity: 0; transform: translate3d(var(--x0), 0, 0) scale(0.6); }
+  20% { opacity: 0.75; }
+  75% { opacity: 0.55; }
+  100% { opacity: 0; transform: translate3d(var(--x1), -76px, 0) scale(1); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .fx-spark { animation: none; display: none; }
+}
+
+
+
+/* Automations hero: sparks drifting up off the plate */
+.jh-ember {
+  opacity: 0;
+  box-shadow: 0 0 6px currentColor;
+  animation: jh-ember 7s linear infinite;
+}
+@keyframes jh-ember {
+  0% { opacity: 0; transform: translate3d(0, 0, 0); }
+  15% { opacity: 0.7; }
+  70% { opacity: 0.45; }
+  100% { opacity: 0; transform: translate3d(6px, -260px, 0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .jh-ember { animation: none; display: none; }
+}
+
+
+/* Nav: one big solid pill with a lit edge (no glass) */
+.nav-pill {
+  position: relative;
+  background: linear-gradient(180deg, #121722, #0C1018);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.07),
+    0 20px 50px -24px rgba(0, 0, 0, 0.9);
+}
+.nav-pill::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(115deg, rgba(166, 187, 255, 0.4), rgba(255, 255, 255, 0.07) 30%, rgba(255, 255, 255, 0.05) 70%, rgba(195, 182, 255, 0.34));
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+.nav-pill--raised {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    0 24px 60px -20px rgba(0, 0, 0, 0.95);
+}
+
+/* Download: Quick Ask's panel, and the voice waveform */
+.dl-panel {
+  position: relative;
+  background: linear-gradient(180deg, #161B26, #10141C);
+  box-shadow:
+    0 40px 80px -24px rgba(0, 0, 0, 0.95),
+    0 0 0 1px rgba(255, 255, 255, 0.08),
+    0 0 60px -20px rgba(122, 143, 255, 0.55),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+.dl-wave > span {
+  transform-origin: center;
+  animation: dl-wave 1.1s ease-in-out infinite;
+}
+@keyframes dl-wave {
+  0%, 100% { transform: scaleY(0.35); }
+  50% { transform: scaleY(1); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .dl-wave > span { animation: none; }
+}
+
+/* Contact: the grid running to the horizon, the core's orbits, and the field's lit line */
+.ct-grid {
+  background-image:
+    linear-gradient(rgba(122, 143, 255, 0.22) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(122, 143, 255, 0.22) 1px, transparent 1px);
+  background-size: 64px 64px;
+  animation: ct-grid 6s linear infinite;
+}
+@keyframes ct-grid {
+  to { background-position: 0 64px; }
+}
+.ct-orbit {
+  animation: ct-orbit 28s linear infinite;
+}
+@keyframes ct-orbit {
+  to { transform: rotate(360deg); }
+}
+/* a field's line: dim, then lit while you're in it */
+.ct-line::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.12);
+  transition: background 300ms ease, box-shadow 300ms ease, height 200ms ease;
+}
+.ct-line:focus-within::after {
+  height: 2px;
+  background: linear-gradient(90deg, #7a8fff, #c3b6ff);
+  box-shadow: 0 0 14px rgba(122, 143, 255, 0.85);
+}
+.ct-line--wrong::after {
+  background: rgba(255, 101, 104, 0.7);
+}
+@media (prefers-reduced-motion: reduce) {
+  .ct-grid,
+  .ct-orbit { animation: none; }
+}
+
+/* Contact: the compose window, solid with a lit edge */
+.contact-console {
+  background: linear-gradient(180deg, #11151E, #0C1017);
+  box-shadow:
+    0 50px 120px -40px rgba(0, 0, 0, 0.95),
+    0 0 80px -30px rgba(122, 143, 255, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.07);
+}
+.contact-console::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(140deg, rgba(166, 187, 255, 0.45), rgba(255, 255, 255, 0.06) 35%, rgba(255, 255, 255, 0.04) 70%, rgba(195, 182, 255, 0.35));
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
 }

@@ -15,6 +15,7 @@ import {
   X,
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
+import { ApprovalPrompt } from "@/components/demo/ApprovalPrompt";
 import { Mascot, MascotMark } from "@/components/mascot/Mascot";
 import { ToolLogo } from "@/components/ui/ToolLogo";
 import { CTA_HREF, CTA_LABEL } from "@/lib/site";
@@ -489,24 +490,29 @@ export function JobPanel({
                 </div>
               </div>
 
-              {/* E. proof, placeholder until Juno has a real one */}
-              <figure
-                data-placeholder="true"
-                className="mx-auto max-w-[720px] px-5 py-16 text-center md:py-20"
-              >
-                <span className="t-eyebrow inline-block rounded-sm border border-dashed border-white/20 px-1.5 !text-[10px] text-subtle">
-                  Placeholder
-                </span>
-                <p className="mt-6 text-[15px] font-semibold tracking-[0.18em] text-muted">
-                  NORTHWIND
+              {/* E. your call: the approval this job brings back, and the tools it works in */}
+              <div className="border-t border-white/[0.06] px-5 py-16 text-center md:py-20">
+                <p className="text-[24px] font-medium tracking-[-0.02em] text-text md:text-[28px]">
+                  Nothing goes out without your yes.
                 </p>
-                <blockquote className="mt-5 text-[22px] leading-[1.35] tracking-[-0.02em] text-text md:text-[26px]">
-                  “{job.title} used to be a Friday afternoon. Now it is a two-minute review.”
-                </blockquote>
-                <figcaption className="mt-5 text-[14px] text-muted">
-                  Jordan Lee, Head of operations
-                </figcaption>
-              </figure>
+                <div className="mx-auto mt-8 max-w-[600px] text-left">
+                  <ApprovalPrompt key={slug} question={job.action} approvedStatus="Done" approvedNote="Approved. Juno's on it." />
+                </div>
+                <div className="mt-8 flex flex-wrap items-center justify-center gap-2">
+                  <span className="mr-1 text-[13px] text-muted">Works with</span>
+                  {job.connects.map((c) => (
+                    <span
+                      key={c}
+                      className="inline-flex h-8 items-center gap-2 rounded-full border border-white/[0.08] bg-white/[0.03] pl-1.5 pr-3 text-[13px] text-text/85"
+                    >
+                      <span className="grid size-5 place-items-center rounded-full bg-white">
+                        <SourceMark src={c} size={11} />
+                      </span>
+                      {toolLabel(c)}
+                    </span>
+                  ))}
+                </div>
+              </div>
 
               {/* F. close */}
               <div className="border-t border-white/[0.06] px-5 py-16 text-center md:py-20">

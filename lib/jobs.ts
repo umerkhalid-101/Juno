@@ -389,68 +389,13 @@ export const jobs: Job[] = [
 
 /* ------------------------------------------------------------------ hero */
 
-/** The things on your plate, as tiles that fold into Juno's hands. Each maps to a job above. */
-export const heroTiles: { text: string; tool: Source; note: string; late?: true; job: string }[] = [
-  {
-    text: "Find our next customers",
-    tool: "hubspot",
-    note: "Monday",
-    job: "find-our-next-customers",
-  },
-  {
-    text: "Tell Maya her request shipped",
-    tool: "gmail",
-    note: "Today",
-    job: "close-the-loop-with-customers",
-  },
-  {
-    text: "Chase Sam on the launch copy",
-    tool: "slack",
-    note: "Overdue",
-    late: true,
-    job: "keep-every-promise-moving",
-  },
-  {
-    text: "Prep for the 10:00 with Maya",
-    tool: "calendar",
-    note: "In 20 min",
-    job: "walk-into-every-call-prepared",
-  },
-  {
-    text: "Check in before Northwind renews",
-    tool: "intercom",
-    note: "Renews in 30 days",
-    job: "catch-customers-before-they-leave",
-  },
-  {
-    text: "Write the investor update",
-    tool: "notion",
-    note: "Due on the 1st",
-    job: "keep-investors-in-the-loop",
-  },
-  {
-    text: "Check competitor pricing",
-    tool: "browser",
-    note: "Friday",
-    job: "keep-us-ahead-of-competitors",
-  },
-  {
-    text: "Send setup help to new teams",
-    tool: "intercom",
-    note: "3 waiting",
-    job: "get-new-customers-to-their-first-win",
-  },
-  {
-    text: "Finish the missing help article",
-    tool: "linear",
-    note: "Before launch",
-    job: "keep-our-launches-on-track",
-  },
-  {
-    text: "Pause the ad that isn't working",
-    tool: "browser",
-    note: "Overdue",
-    late: true,
-    job: "make-every-ad-dollar-count",
-  },
+/** The things on your plate, as tasks that fold into Juno's hands. Each maps to a job above. */
+export type TaskKind = "marketing" | "sales" | "team" | "meetings" | "investors" | "research";
+export const heroTiles: { text: string; kind: TaskKind; label: string; note: string; late?: true; job: string }[] = [
+  { text: "Post the launch blog", kind: "marketing", label: "Marketing", note: "Today", job: "keep-our-launches-on-track" },
+  { text: "Find our next customers", kind: "sales", label: "Sales", note: "Monday", job: "find-our-next-customers" },
+  { text: "Chase the launch copy", kind: "team", label: "Team", note: "Overdue", late: true, job: "keep-every-promise-moving" },
+  { text: "Prep for the 10:00 call", kind: "meetings", label: "Meetings", note: "In 20 min", job: "walk-into-every-call-prepared" },
+  { text: "Write the investor update", kind: "investors", label: "Investors", note: "Due on the 1st", job: "keep-investors-in-the-loop" },
+  { text: "Check competitor pricing", kind: "research", label: "Research", note: "Friday", job: "keep-us-ahead-of-competitors" },
 ];
