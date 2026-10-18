@@ -299,16 +299,18 @@ type Spot = {
 
 /** Hand-set on a 1320 × 720 stage, as in the layout we agreed: Juno in the middle, tilted a touch toward it. */
 const spots: Spot[] = [
-  { id: "knowledge", title: "Company knowledge", href: "#knowledge", icon: <BookOpen size={18} strokeWidth={1.75} />, ask: "What should we prioritize next?", x: 82, y: 63, w: 357, rx: 4, ry: 8, rz: -2.5, depth: 1.2 },
-  { id: "apps", title: "Apps, sites & dashboards", href: "#apps", icon: <AppWindow size={18} strokeWidth={1.75} />, ask: "Build a launch dashboard for the team.", x: 425, y: 38, w: 565, rx: 5, ry: 0, rz: 0, depth: 0.7 },
-  { id: "images", title: "Images & video", href: "#brand", icon: <ImageIcon size={18} strokeWidth={1.75} />, ask: "Make it look and sound like us.", x: 945, y: 63, w: 357, rx: 4, ry: -8, rz: 2, depth: 1.1 },
-  { id: "tasks", title: "Tasks, taken care of", href: "#tools", icon: <ListChecks size={18} strokeWidth={1.75} />, ask: "Let’s get this launched.", x: 82, y: 356, w: 428, rx: -3, ry: 8, rz: -2, depth: 1 },
-  { id: "jobs", title: "Jobs", href: "#jobs", icon: <Repeat size={18} strokeWidth={1.75} />, ask: "Brief me every Friday at 9 AM.", x: 488, y: 495, w: 424, rx: -5, ry: 0, rz: 0, depth: 0.8 },
-  { id: "computer", title: "A computer of its own", href: "#computer", icon: <Globe size={18} strokeWidth={1.75} />, ask: "Add this article to our CMS as a draft.", x: 891, y: 356, w: 428, rx: -3, ry: -8, rz: 2, depth: 1.3 },
+  { id: "knowledge", title: "Company knowledge", href: "#knowledge", icon: <BookOpen size={18} strokeWidth={1.75} />, ask: "What should we prioritize next?", x: 35, y: 75, w: 357, rx: 4, ry: 8, rz: -2.5, depth: 1.2 },
+  { id: "apps", title: "Apps, sites & dashboards", href: "#apps", icon: <AppWindow size={18} strokeWidth={1.75} />, ask: "Build a launch dashboard for the team.", x: 437, y: 35, w: 565, rx: 5, ry: 0, rz: 0, depth: 0.7 },
+  { id: "images", title: "Images & video", href: "#brand", icon: <ImageIcon size={18} strokeWidth={1.75} />, ask: "Make it look and sound like us.", x: 1047, y: 75, w: 357, rx: 4, ry: -8, rz: 2, depth: 1.1 },
+  { id: "tasks", title: "Tasks, taken care of", href: "#tools", icon: <ListChecks size={18} strokeWidth={1.75} />, ask: "Let’s get this launched.", x: 35, y: 420, w: 428, rx: -3, ry: 8, rz: -2, depth: 1 },
+  { id: "jobs", title: "Jobs", href: "#jobs", icon: <Repeat size={18} strokeWidth={1.75} />, ask: "Brief me every Friday at 9 AM.", x: 508, y: 560, w: 424, rx: -5, ry: 0, rz: 0, depth: 0.8 },
+  { id: "computer", title: "A computer of its own", href: "#computer", icon: <Globe size={18} strokeWidth={1.75} />, ask: "Add this article to our CMS as a draft.", x: 977, y: 420, w: 428, rx: -3, ry: -8, rz: 2, depth: 1.3 },
 ];
-const SW = 1320;
-const SH = 720;
-const JUNO = { x: 660, y: 372 };
+/** Order on tablets and smaller laptops, where the cards sit in a two-column grid. */
+const GRID = ["apps", "knowledge", "images", "tasks", "computer", "jobs"] as const;
+const SW = 1440;
+const SH = 800;
+const JUNO = { x: 720, y: 400 };
 /** cards are drawn at this size, so the scene can breathe */
 const CS = 0.84;
 const CYCLE = 4200;
@@ -476,7 +478,7 @@ export function PxHero() {
               px.set(0);
               py.set(0);
             }}
-            className="relative mx-auto hidden max-w-[1320px] lg:block"
+            className="relative mx-auto hidden max-w-[1320px] xl:block"
             style={{ height: SH * k }}
           >
             {/* glow 1 of 2 */}
@@ -524,15 +526,16 @@ export function PxHero() {
       <div className="container-page">
 
         {/* phones and tablets: Juno and its request, then the cards, stacked */}
-        <div className="mt-12 flex flex-col items-center lg:hidden">
+        <div className="mt-12 flex flex-col items-center xl:hidden">
           <div className="relative grid place-items-center">
             <span aria-hidden className="cta-breathe absolute -inset-12 rounded-full" style={{ background: "radial-gradient(closest-side, rgba(90,120,255,0.5), rgba(90,120,255,0.1) 55%, transparent)" }} />
             <Mascot size={120} state="idle" halo={false} />
           </div>
         </div>
-        <ul className="mx-auto mt-10 grid max-w-[720px] gap-4 sm:grid-cols-2 lg:hidden">
-          {spots.map((s) => (
-            <li key={s.id} className={s.id === "apps" ? "sm:col-span-2" : ""}>
+        <ul className="mx-auto mt-10 grid max-w-[720px] gap-4 sm:grid-cols-2 xl:hidden">
+          {/* the wide ones span the row, the rest pair up, so no row is left half empty */}
+          {GRID.map((id) => spots.find((s) => s.id === id)!).map((s) => (
+            <li key={s.id} className={s.id === "apps" || s.id === "jobs" ? "sm:col-span-2" : ""}>
               <Shell icon={s.icon} title={s.title} href={s.href}>
                 <Body id={s.id} n={shown} on />
               </Shell>
