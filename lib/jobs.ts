@@ -171,7 +171,7 @@ export const jobs: Job[] = [
     handles: [
       "Watches upcoming renewals",
       "Connects support threads to blockers",
-      "Finds what's really in the way",
+      "Finds what’s really in the way",
       "Drafts a personal check-in",
     ],
   },
@@ -273,7 +273,7 @@ export const jobs: Job[] = [
     handles: [
       "Checks the launch plan every day",
       "Spots gaps across teams",
-      "Drafts what's missing",
+      "Drafts what’s missing",
       "Flags what needs you",
     ],
   },
@@ -377,9 +377,9 @@ export const jobs: Job[] = [
     when: "On the 1st of every month at 9:00 AM.",
     days: [],
     connects: ["hubspot", "linear", "notion", "gmail"],
-    activity: ["Pulled the month's numbers", "Summarized what shipped", "Drafted it in your voice"],
+    activity: ["Pulled the month’s numbers", "Summarized what shipped", "Drafted it in your voice"],
     handles: [
-      "Pulls the month's numbers",
+      "Pulls the month’s numbers",
       "Summarizes what shipped",
       "Writes it in your voice",
       "Keeps the asks clear",

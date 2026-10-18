@@ -31,7 +31,7 @@ const kindIcon: Record<TaskKind, LucideIcon> = {
 };
 
 /**
- * "Off your plate. On Juno's." Text first; below it, the things on your plate fanned out as
+ * "Off your plate. On Juno’s." Text first; below it, the things on your plate fanned out as
  * tiles. As you scroll they fold into a single deck and disappear into Juno, and Juno has it.
  * The same fold as the homepage's "Your whole stack. One Juno.", told with your work.
  */

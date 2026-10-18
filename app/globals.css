@@ -1519,3 +1519,9 @@
     #05070b;
   transition: background 0.8s cubic-bezier(0.16, 1, 0.3, 1);
 }
+
+/* sections out of view: their CSS animations wait (see ScrollSetup) */
+[data-offscreen],
+[data-offscreen] * {
+  animation-play-state: paused !important;
+}

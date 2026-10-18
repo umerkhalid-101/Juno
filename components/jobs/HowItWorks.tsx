@@ -19,7 +19,7 @@ const steps = [
   },
   {
     title: "Give it a rhythm.",
-    body: "Make it part of the working week. You shouldn't have to remember to ask again.",
+    body: "Make it part of the working week. You shouldn’t have to remember to ask again.",
   },
   {
     title: "Come back to the next move.",
@@ -192,7 +192,7 @@ function Build({ step }: { step: number }) {
                 aria-hidden
               >
                 <div className="flex min-h-6 items-center text-[13px] text-subtle">
-                  {working ? <Dots /> : "Friday's updates land here"}
+                  {working ? <Dots /> : "Friday’s updates land here"}
                 </div>
                 <div className="mt-3 space-y-2 rounded-[18px] border border-dashed border-white/[0.12] p-3.5">
                   {[0, 1, 2].map((k) => (

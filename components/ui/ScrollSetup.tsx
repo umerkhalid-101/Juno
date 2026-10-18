@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { usePathname } from "next/navigation";
 import { ScrollTrigger } from "@/lib/gsap";
 import { config } from "@/lib/config";
 
@@ -31,5 +32,20 @@ export function ScrollSetup() {
       destroy?.();
     };
   }, []);
+  // Looping CSS animations (halos, shimmers, the CTA orbit) pause while their section is off
+  // screen and pick up again just before it scrolls back in, so nothing works out of sight.
+  const path = usePathname();
+  useEffect(() => {
+    const io = new IntersectionObserver(
+      (entries) => entries.forEach((e) => e.target.toggleAttribute("data-offscreen", !e.isIntersecting)),
+      { rootMargin: "300px 0px" },
+    );
+    const t = window.setTimeout(() => document.querySelectorAll("main section, footer").forEach((el) => io.observe(el)), 50);
+    return () => {
+      window.clearTimeout(t);
+      io.disconnect();
+      document.querySelectorAll("[data-offscreen]").forEach((el) => el.removeAttribute("data-offscreen"));
+    };
+  }, [path]);
   return null;
 }

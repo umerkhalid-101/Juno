@@ -13,7 +13,7 @@ export type Src = ToolId | "call" | "file" | "browser" | "juno" | "cms";
 export const hero = {
   title: "Inside Juno.",
   secondary: { label: "See all features", href: "/features" }, // [new]
-  you: "Let's get this launched.",
+  you: "Let’s get this launched.",
   juno: "On it. Three things to get it out the door.", // [new]
   tasks: ["Write the announcement", "Create the social visuals", "Prepare customer emails"],
   approval: "Shall I send the email and post on LinkedIn and X?",
@@ -96,7 +96,7 @@ export const chapters: Chapter[] = [
     n: "04",
     name: "App builder",
     title: "Give your team",
-    muted: "the tool it's missing.",
+    muted: "the tool it’s missing.",
     sub: "Build the tool your team needs, right in chat. A launch dashboard puts owners, blockers, and customer commitments in one place.",
     pattern: "stepper",
     items: [{ name: "Build & preview" }, { name: "Company data" }, { name: "Publish & domains" }],
@@ -109,7 +109,7 @@ export const chapters: Chapter[] = [
     name: "Content & CMS",
     title: "Keep publishing.",
     muted: "Keep people interested.",
-    sub: "Organize posts, publish to your website, and collect leads with Juno's built-in CMS.",
+    sub: "Organize posts, publish to your website, and collect leads with Juno’s built-in CMS.",
     pattern: "list",
     mirror: true,
     items: [
@@ -182,5 +182,5 @@ export const close = {
 export const meta = {
   title: "Product | Juno",
   description:
-    "Explore Juno's chat and Desk, company knowledge, skills, its own computer and browser, app builder, content, connected tools, and recurring Jobs.",
+    "Explore Juno’s chat and Desk, company knowledge, skills, its own computer and browser, app builder, content, connected tools, and recurring Jobs.",
 };

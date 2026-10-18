@@ -91,7 +91,7 @@ const visuals = [QuickAsk, Shared, Access];
 export function Day() {
   const [ref, on] = usePlayOnce<HTMLUListElement>(0.25);
   return (
-    <section aria-labelledby="day-title" className="pt-36 md:pt-56">
+    <section aria-labelledby="day-title" className="pt-44 md:pt-72">
       <div className="container-page">
         <ChapterIntro id="day-title" lead={day.title} muted={day.muted} sub="Juno is there wherever the work is: on your screen, in the thread, across the team." />
         <ul ref={ref} className="mx-auto mt-14 grid max-w-[1100px] gap-4 md:mt-16 md:grid-cols-3">

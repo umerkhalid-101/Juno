@@ -159,7 +159,7 @@ export function Statement() {
             <p className="st-line text-[44px] font-medium leading-[48px] tracking-[-0.04em] md:text-[68px] md:leading-[72px] lg:text-[80px] lg:leading-[84px]">
               <span className="sr-only">That&apos;s Juno.</span>
               <span aria-hidden className="st-reveal inline-block">
-                {"That's"}
+                {"That’s"}
                 {"\u00A0"}
                 <span className="st-name accent-text inline-block">Juno.</span>
               </span>

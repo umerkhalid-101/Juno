@@ -3,6 +3,7 @@
 import { useRef, useState, type KeyboardEvent } from "react";
 import { motion, useReducedMotion } from "motion/react";
 import { ArrowRight, ArrowUpRight } from "lucide-react";
+import Link from "next/link";
 import { MascotMark } from "@/components/mascot/Mascot";
 
 const ease = [0.2, 0.8, 0.2, 1] as const;
@@ -153,8 +154,8 @@ export function FaqConsole({ items }: { items: { q: string; a: string; placehold
             )}
           </motion.div>
 
-          <a
-            href="#contact"
+          <Link
+            href="/contact"
             className="group relative mt-10 flex items-center justify-between gap-4 rounded-2xl bg-white/[0.03] px-5 py-4 ring-1 ring-white/[0.06] transition-colors hover:bg-white/[0.06]"
           >
             <span className="text-[14px] text-muted">
@@ -166,7 +167,7 @@ export function FaqConsole({ items }: { items: { q: string; a: string; placehold
               aria-hidden
               className="text-[#A6BBFF] transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
             />
-          </a>
+          </Link>
         </div>
       </div>
     </div>

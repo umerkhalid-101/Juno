@@ -6,7 +6,8 @@ import { ArrowUp, AppWindow } from "lucide-react";
 import { ChapterIntro } from "@/components/ui/ChapterIntro";
 import { MascotMark } from "@/components/mascot/Mascot";
 import { apps } from "@/lib/apps";
-import { Section, Window, base, calm, useIdle } from "./kit";
+import { useAutoPlay } from "@/components/ui/useAutoPlay";
+import { Section, Window, base, calm } from "./kit";
 import { CustomerPortal } from "./minis";
 
 const o = apps.more;
@@ -36,15 +37,15 @@ export function OneMore() {
     }, wait);
     window.setTimeout(() => setMarks((k) => ({ ...k, [(["approve", "files", "date"] as const)[i]]: now })), wait + (reduce ? 0 : 350));
   };
-  const touch = useIdle(root, 4000, () => ask(0));
   const restart = () => {
-    touch();
     setUsed([]);
     setMsgs([]);
     setMarks({});
     setRun((r) => r + 1);
   };
   const left = o.chips.map((c, i) => ({ ...c, i })).filter((c) => !used.includes(c.i));
+  // three seconds on screen and Juno is asked the next question, one after another
+  useAutoPlay(root, () => left[0] && ask(left[0].i), !thinking && left.length > 0);
   const latest = msgs.slice(-2);
 
   const chips = (
@@ -56,10 +57,7 @@ export function OneMore() {
             type="button"
             layout
             exit={{ opacity: 0, scale: 0.94, transition: { duration: 0.15 } }}
-            onClick={() => {
-              touch();
-              ask(c.i);
-            }}
+            onClick={() => ask(c.i)}
             className="rounded-full border border-white/[0.12] bg-white/[0.04] px-3.5 py-2 text-left text-[13px] leading-[18px] text-text/90 transition-colors hover:border-[#A6BBFF]/40 hover:bg-[#A6BBFF]/[0.08] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#009CFF]"
           >
             {c.ask}

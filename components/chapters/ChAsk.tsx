@@ -33,7 +33,7 @@ import { type ToolId } from "@/lib/story";
 import { IMG } from "@/lib/images";
 
 /**
- * "What's on your plate?"
+ * "What’s on your plate?"
  * Pick a task. Your request lands, Juno thinks for a beat, then answers with what it read,
  * the finished work, and one question for you. Content mirrors runjuno.ai.
  */

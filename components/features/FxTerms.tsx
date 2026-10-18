@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 import { AnimatePresence, motion, useInView, useReducedMotion } from "motion/react";
 import { Check, FileText, KeyRound, Lock, RotateCcw, ShieldCheck } from "lucide-react";
 import { TextLink } from "@/components/ui/TextLink";
+import { useAutoPlay } from "@/components/ui/useAutoPlay";
 import { MascotMark } from "@/components/mascot/Mascot";
 import { Face } from "@/components/jobs/scenes";
 import { chapters, feature } from "@/lib/features";
@@ -157,6 +158,8 @@ function QuickAskDemo() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [inView]);
 
+  // three seconds on screen and the keys press themselves
+  useAutoPlay(ref, fire, !open && pressed === -1);
   return (
     <div
       ref={ref}
@@ -196,7 +199,7 @@ function QuickAskDemo() {
           >
             <div className="flex items-center gap-2.5 border-b border-line pb-3 text-[14px] text-muted">
               <MascotMark size={20} />
-              Ask about what&apos;s on screen…
+              Ask about what&apos;s on screen
             </div>
             <motion.div
               className="mt-3"
@@ -204,9 +207,7 @@ function QuickAskDemo() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4, delay: 0.35, ease: calm }}
             >
-              <span className="text-[11px] font-semibold tracking-[0.08em] text-[#A6BBFF]">
-                JUNO
-              </span>
+              <span className="text-[12px] font-medium text-[#A6BBFF]">Juno</span>
               <p className="mt-1 text-[15px] text-text">Here&apos;s what the customer needs.</p>
               <ul className="mt-2 space-y-1 text-[13px] text-muted">
                 <li>Client sharing for scheduled reports</li>
@@ -229,6 +230,7 @@ function QuickAskDemo() {
 
 /* Shared Conversations: bring Maya in and everyone has the same context. */
 function SharedDemo() {
+  const ref = useRef<HTMLDivElement>(null);
   const [step, setStep] = useState(0);
   const bring = () => {
     if (step) return;
@@ -236,8 +238,9 @@ function SharedDemo() {
     window.setTimeout(() => setStep(2), 600);
     window.setTimeout(() => setStep(3), 1500);
   };
+  useAutoPlay(ref, bring, step === 0);
   return (
-    <div className="mt-8 flex flex-1 flex-col rounded-[16px] border border-line bg-white/[0.02] p-4">
+    <div ref={ref} className="mt-8 flex flex-1 flex-col rounded-[16px] border border-line bg-white/[0.02] p-4">
       <div className="flex h-[42px] items-center justify-between border-b border-line pb-3">
         <span className="text-[13px] text-muted">Launch planning</span>
         <span className="flex items-center -space-x-2">
@@ -313,6 +316,7 @@ function SharedDemo() {
 /* Approval: the queue waits for you; approve all and each goes out in turn. */
 const queue = ["Launch email to 2,140 customers", "Post in #team", "Follow-up to Maya"];
 function ApprovalDemo() {
+  const ref = useRef<HTMLDivElement>(null);
   const [sent, setSent] = useState(0);
   const [busy, setBusy] = useState(false);
   const all = () => {
@@ -328,8 +332,9 @@ function ApprovalDemo() {
       ),
     );
   };
+  useAutoPlay(ref, all, sent === 0 && !busy);
   return (
-    <div className="mt-8 rounded-[16px] border border-line bg-white/[0.02] p-4">
+    <div ref={ref} className="mt-8 rounded-[16px] border border-line bg-white/[0.02] p-4">
       <ul className="space-y-2">
         {queue.map((q, i) => {
           const done = sent > i;

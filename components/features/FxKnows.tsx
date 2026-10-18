@@ -90,7 +90,7 @@ export function FxKnows() {
   const [ended, setEnded] = useState(false);
 
   // Desktop: the whole section holds still, heading and all, while the cards slide sideways
-  // with the scroll, smoothed a little so it glides both ways. The amber line follows the
+  // with the scroll, smoothed a little so it glides both ways. The blue line follows the
   // middle of the screen; each card comes into focus as it reaches it.
   useGSAP(
     () => {
@@ -128,7 +128,7 @@ export function FxKnows() {
             current = best;
             setActive(best);
           }
-          // the amber travels with the cards and meets the last dot as the last card settles
+          // the blue travels with the cards and meets the last dot as the last card settles
           setFill(Math.min(1, Math.max(0, (centre(0) - x) / span())));
           setEnded((x - centre(last)) / span() < 0.03);
         };
@@ -222,7 +222,7 @@ export function FxKnows() {
         </div>
 
         <div className="kn-track container-page relative mt-14 flex flex-col gap-16 md:mt-[clamp(20px,4vh,44px)] md:w-max md:max-w-none md:flex-row md:items-start md:gap-[7vw] md:px-0 md:will-change-transform">
-          {/* the line through every card's start: amber as far as you've come */}
+          {/* the line through every card's start: blue as far as you've come */}
           <span
             aria-hidden
             className="kn-base absolute top-[34px] hidden h-px bg-white/10 md:block"

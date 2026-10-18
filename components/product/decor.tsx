@@ -1,7 +1,8 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { BookOpen, Compass, FileSpreadsheet, FileText, Folder, Lock, Mail, MessageSquare, Wifi } from "lucide-react";
+import Image from "next/image";
+import { BookOpen, Lock, Wifi } from "lucide-react";
 import { BrandIcon } from "@/components/ui/BrandIcon";
 import { MascotMark } from "@/components/mascot/Mascot";
 import type { ToolId } from "@/lib/story";
@@ -43,16 +44,16 @@ function Source({ tool, head, meta, text }: { tool: ToolId; head: string; meta: 
 export function KnowledgeDecor() {
   return (
     <>
-      <Float className="-left-[96px] top-[150px]" rotate={-4}>
+      <Float className="-left-[48px] 2xl:-left-[96px] top-[150px]" rotate={-4}>
         <Source tool="slack" head="#product-updates" meta="Leo" text="Shared reports is live. On every plan." />
       </Float>
-      <Float className="-left-[70px] bottom-[70px]" rotate={3} delay={-2}>
+      <Float className="-left-[35px] 2xl:-left-[70px] bottom-[70px]" rotate={3} delay={-2}>
         <Source tool="intercom" head="Intercom" meta="Maya, Cedar & Co." text="Can I share this report with my client?" />
       </Float>
-      <Float className="-right-[84px] -top-[46px]" rotate={3} delay={-3.5}>
+      <Float className="-right-[42px] 2xl:-right-[84px] -top-[46px]" rotate={3} delay={-3.5}>
         <Source tool="linear" head="Linear" meta="Planned" text="Shareable report links" />
       </Float>
-      <Float className="-bottom-[54px] -right-[90px]" rotate={-3} delay={-5}>
+      <Float className="-bottom-[54px] -right-[45px] 2xl:-right-[90px]" rotate={-3} delay={-5}>
         <Source tool="drive" head="Drive" meta="Quarterly priorities.md" text="Make client reporting effortless." />
       </Float>
     </>
@@ -65,7 +66,7 @@ export function BrandDecor() {
   return (
     <>
       <span aria-hidden className="pointer-events-none absolute -inset-24 -z-10" style={{ background: "radial-gradient(50% 50% at 50% 50%, rgba(255,150,130,0.10), transparent 70%)" }} />
-      <Float className="-bottom-[64px] -left-[84px]" rotate={-4}>
+      <Float className="-bottom-[64px] -left-[42px] 2xl:-left-[84px]" rotate={-4}>
         <div className="w-[250px] overflow-hidden rounded-[16px] bg-[#F4F1EC] text-[#16181d] shadow-[0_30px_60px_-24px_rgba(0,0,0,0.9)]">
           <div className="flex items-center justify-between border-b border-black/[0.06] px-4 py-2.5 text-[11.5px] text-[#6b7080]">
             Brand kit
@@ -96,19 +97,13 @@ export function BrandDecor() {
 
 /* ------------------------------------------------------------------ 03 · a desktop for its own computer */
 
-const dock = [
-  { I: Folder, bg: "linear-gradient(180deg,#6FB6FF,#2E7BEA)" },
-  { I: Compass, bg: "linear-gradient(180deg,#FFFFFF,#E6E8EC)", dark: true },
-  { I: FileSpreadsheet, bg: "linear-gradient(180deg,#38C27A,#1E8E55)" },
-  { I: FileText, bg: "linear-gradient(180deg,#5B8CFF,#3256D8)" },
-  { I: Mail, bg: "linear-gradient(180deg,#7DD3FC,#2563EB)" },
-  { I: MessageSquare, bg: "linear-gradient(180deg,#A78BFA,#6D28D9)" },
-];
+// the apps in the dock: the real ones a team keeps open
+const dock: ToolId[] = ["drive", "gmail", "calendar", "slack", "figma", "linear"];
 
 /** A MacBook Pro: Juno's own computer, with its desktop, menu bar and dock, and the work on screen. */
 export function MacBook({
   children,
-  app = "Juno's computer",
+  app = "Juno’s computer",
   menu = ["File", "Edit", "View"],
   inner = "px-2 pb-2 pt-3 md:px-12 md:pb-[96px] md:pt-7",
   className = "max-w-[1200px]",
@@ -150,15 +145,13 @@ export function MacBook({
             <div className={`relative ${inner}`}>{children}</div>
             {/* dock */}
             <div aria-hidden className="absolute bottom-3 left-1/2 hidden -translate-x-1/2 items-end gap-2 rounded-[20px] border border-white/15 bg-white/10 px-2.5 py-2 backdrop-blur-xl md:flex">
-              {dock.map(({ I, bg, dark: d }, i) => (
-                <span key={i} className="grid size-12 place-items-center rounded-[12px] shadow-[0_6px_14px_-6px_rgba(0,0,0,0.6)]" style={{ background: bg }}>
-                  <I size={22} className={d ? "text-[#4285F4]" : "text-white"} strokeWidth={1.75} />
-                </span>
+              {dock.map((id) => (
+                <BrandIcon key={id} id={id} size={48} className="!rounded-[12px]" />
               ))}
               <span className="mx-1 h-10 w-px self-center bg-white/20" />
-              <span className="relative grid size-12 place-items-center rounded-[12px] bg-[#0F1524]">
-                <MascotMark size={30} />
-                <span className="absolute -bottom-1.5 size-1 rounded-full bg-white/80" />
+              <span className="relative size-12">
+                <Image src="/home/juno-mac-icon.png" alt="" width={48} height={48} className="size-12 rounded-[12px] shadow-[0_6px_14px_-6px_rgba(0,0,0,0.6)]" />
+                <span className="absolute -bottom-1.5 left-1/2 size-1 -translate-x-1/2 rounded-full bg-white/80" />
               </span>
             </div>
           </div>
@@ -176,7 +169,7 @@ export function MacBook({
 
 export function ContentDecor() {
   return (
-    <Float className="-bottom-[70px] -left-[84px]" rotate={-3}>
+    <Float className="-bottom-[70px] -left-[42px] 2xl:-left-[84px]" rotate={-3}>
       <div className="w-[290px] overflow-hidden rounded-[14px] bg-white text-[#16181d] shadow-[0_30px_60px_-24px_rgba(0,0,0,0.9)]">
         <div className="flex h-8 items-center gap-2 border-b border-black/[0.06] bg-[#F3F4F6] px-3">
           <span className="flex gap-1">

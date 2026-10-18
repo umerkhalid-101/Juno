@@ -655,7 +655,7 @@ export const SKINS: Record<Skin, { name: string; bg: string; card: string; ink: 
   help: { name: "Help center", bg: "#F1F4FC", card: "#FFFFFF", ink: "#18233a", muted: "#5f6b85", accent: "#3346e0", line: "rgba(24,35,58,0.1)", radius: 12, a: "A little help.", b: "A lot further.", brand: "Orbit" },
   everyday: { name: "Everyday Objects", bg: "#F6F1E9", card: "#FFFDF9", ink: "#26291f", muted: "#6f6a5f", accent: "#3f4a2f", line: "rgba(38,41,31,0.12)", radius: 6, font: "mock-serif", a: "Here to help,", b: "every day.", brand: "everyday objects." },
   tempo: { name: "Tempo", bg: "#F4F6F8", card: "#FFFFFF", ink: "#0f172a", muted: "#64748b", accent: "#0f766e", line: "rgba(15,23,42,0.1)", radius: 10, a: "Answers, calmly.", b: "Right on time.", brand: "tempo" },
-  gather: { name: "Gather", bg: "#FFF3EB", card: "#FFFFFF", ink: "#2a1a12", muted: "#8a6a5a", accent: "#e8532e", line: "rgba(42,26,18,0.1)", radius: 22, a: "Stuck? No worries.", b: "We've got you.", brand: "gather" },
+  gather: { name: "Gather", bg: "#FFF3EB", card: "#FFFFFF", ink: "#2a1a12", muted: "#8a6a5a", accent: "#e8532e", line: "rgba(42,26,18,0.1)", radius: 22, a: "Stuck? No worries.", b: "We’ve got you.", brand: "gather" },
 };
 const CATS = [
   { t: "Getting started", n: 6, I: Rocket },
@@ -790,7 +790,7 @@ export function HelpCenter({ skin = "help" }: { skin?: Skin }) {
             </p>
             <p className="mt-4 max-w-[46ch] text-[14px] leading-[22px]">{ARTICLES[open].d}</p>
             <ol className="mt-3 space-y-1.5 text-[13px]" style={{ color: S.muted }}>
-              {["Open Settings from the sidebar.", "Choose what you want to change.", "Save, and you're done."].map((s, i) => (
+              {["Open Settings from the sidebar.", "Choose what you want to change.", "Save, and you’re done."].map((s, i) => (
                 <li key={s} className="flex gap-2">
                   <span className="font-medium" style={{ color: S.accent }}>
                     {i + 1}.

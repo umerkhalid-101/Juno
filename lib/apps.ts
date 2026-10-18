@@ -31,7 +31,7 @@ export const apps = {
           { t: " for " },
           { t: "customer requests", to: "list" },
           { t: ". Who asked, how often and " },
-          { t: "what we're doing about it", to: "sub" },
+          { t: "what we’re doing about it", to: "sub" },
           { t: "." },
         ],
         reply: "Every request in one place. Nobody left waiting.",
@@ -39,7 +39,7 @@ export const apps = {
         title: "Requests",
         chip: "Customer requests",
         name: "What customers are asking for",
-        sub: "Who asked, how often and what we're doing about it.",
+        sub: "Who asked, how often and what we’re doing about it.",
         stat: "Customers answered",
         rows: [
           { task: "Export to CSV", meta: "12 customers", tag: "Planned" },
@@ -99,8 +99,8 @@ export const apps = {
         reply: "Alex walks in knowing exactly where to start.",
         url: "welcome.yourcompany.com",
         title: "Welcome aboard",
-        chip: "Alex's first week",
-        name: "Hey Alex. You're one of us.",
+        chip: "Alex’s first week",
+        name: "Hey Alex. You’re one of us.",
         sub: "A great first week, all in one place.",
         stat: "Steps done",
         rows: [
@@ -141,7 +141,7 @@ export const apps = {
     },
     journal: "The Everyday Journal",
     posts: [
-      { id: "slow", tag: "Spaces", title: "A little room", italic: "to slow down.", line: "A softer light. A favorite corner. A moment that's yours." },
+      { id: "slow", tag: "Spaces", title: "A little room", italic: "to slow down.", line: "A softer light. A favorite corner. A moment that’s yours." },
       { id: "home", tag: "Everyday rituals", title: "The joy of making", italic: "yourself at home.", line: "Small rituals that turn a house into a home." }, // line [new]
     ],
     cms: {
@@ -169,8 +169,8 @@ export const apps = {
       {
         id: "feedback",
         name: "Feedback board",
-        headline: "Turn “we should” into what's next.",
-        body: "Give requests a home, let people weigh in and show customers what's moving forward.",
+        headline: "Turn “we should” into what’s next.",
+        body: "Give requests a home, let people weigh in and show customers what’s moving forward.",
       },
       {
         id: "onboarding",
@@ -204,7 +204,7 @@ export const apps = {
     muted: "Built right in.",
     sub: "The difference between another tool and one that feels like yours.",
     look: { title: "Your look. Your voice.", line: "Your brand, carried from the first screen to the last detail." },
-    work: { title: "A place for real work.", line: "Built around the company context, data and content Juno already has.", from: "Customer requests", to: "Your team's app" },
+    work: { title: "A place for real work.", line: "Built around the company context, data and content Juno already has.", from: "Customer requests", to: "Your team’s app" },
     open: { title: "An idea you can open.", line: "Preview it, refine it with Juno and publish it on a domain of your own.", url: "ideas.yourcompany.com" },
   },
 
@@ -236,14 +236,14 @@ export const apps = {
         a: "Juno already knows your brand and company, so what it builds feels like yours. The built-in CMS makes your content easy to manage.",
       },
       {
-        q: "What happens when it's ready?",
+        q: "What happens when it’s ready?",
         a: "Review the preview with Juno, then ask it to publish. You can connect a custom domain and come back to the conversation when you want to change something.",
       },
     ],
   },
 
   close: {
-    lead: "What's the app",
+    lead: "What’s the app",
     muted: "you wish you had?",
   },
 } as const;

@@ -311,11 +311,7 @@ export function FilesBody({ on }: { on: boolean }) {
 }
 
 /* 3. Automations: a job on a rhythm, Friday snaps on, and the briefing it sends back. */
-const sites = [
-  { n: "orbit.io", c: "#5b6cff" },
-  { n: "northstar.app", c: "#e5484d" },
-  { n: "fieldnote.co", c: "#2f9e6a" },
-];
+const sites = ["orbit.io", "northstar.app", "fieldnote.co"];
 export function AutomationsBody({ on }: { on: boolean }) {
   const days = ["M", "T", "W", "T", "F", "S", "S"];
   return (
@@ -354,17 +350,11 @@ export function AutomationsBody({ on }: { on: boolean }) {
           <div className="flex items-center justify-between py-2.5">
             <dt className="text-subtle">Watches</dt>
             <dd className="flex items-center gap-1.5">
-              {sites.map((s) => (
-                <span
-                  key={s.n}
-                  title={s.n}
-                  className="grid size-5 place-items-center rounded-[5px] text-[10px] font-semibold text-white"
-                  style={{ background: s.c }}
-                >
-                  {s.n[0].toUpperCase()}
-                </span>
-              ))}
-              <span className="ml-1 text-text">3 sites</span>
+              <span className="grid size-5 place-items-center rounded-[6px] bg-white/[0.06] text-muted ring-1 ring-white/[0.08]">
+                <Globe size={11} strokeWidth={1.75} aria-hidden />
+              </span>
+              <span className="text-text">{sites[0]}</span>
+              <span className="text-subtle">+{sites.length - 1}</span>
             </dd>
           </div>
           <div className="flex items-center justify-between py-2.5">
@@ -444,7 +434,7 @@ const marks = {
 function Cover() {
   const bars = [28, 40, 34, 52, 46, 64, 58, 76];
   return (
-    <div className="absolute inset-0 overflow-hidden bg-[#1F2A44]">
+    <div className="absolute inset-0 overflow-hidden bg-[linear-gradient(135deg,#1B2340,#2A2F5C)]">
       <div
         className="absolute inset-y-0 right-[6%] flex items-end gap-[3%] pb-[8%]"
         style={{ width: "40%" }}
@@ -455,13 +445,13 @@ function Cover() {
             className="flex-1 rounded-t-[3px]"
             style={{
               height: `${h}%`,
-              background: i === bars.length - 1 ? "#E9B949" : "rgba(244,238,227,0.18)",
+              background: i === bars.length - 1 ? "#A6BBFF" : "rgba(166,187,255,0.22)",
             }}
           />
         ))}
       </div>
       <div className="absolute left-[5%] top-1/2 -translate-y-1/2">
-        <span className="text-[10px] font-medium text-[#E9B949]">New</span>
+        <span className="text-[10px] font-medium text-[#A6BBFF]">New</span>
         <p className="font-[family-name:var(--font-mock-serif)] text-[clamp(18px,2.4cqw,30px)] leading-none text-[#F4EEE3]">
           Scheduled Reports
         </p>
@@ -522,7 +512,7 @@ export function ComputerBody({ on }: { on: boolean }) {
         <div className="flex h-full bg-[#FAFAFB]">
           <aside className="hidden w-[150px] shrink-0 border-r border-black/[0.06] p-4 text-[12.5px] text-[#5d6370] lg:block">
             <p className="flex items-center gap-2 font-semibold text-[#16181d]">
-              <span className="grid size-5 place-items-center rounded-[6px] bg-[#1F2A44] text-[10px] text-[#E9B949]">
+              <span className="grid size-5 place-items-center rounded-[6px] bg-[#1F2A44] text-[10px] text-[#A6BBFF]">
                 Y
               </span>
               Your Company
@@ -584,9 +574,6 @@ export function ComputerBody({ on }: { on: boolean }) {
                     {cover ? (
                       <div className="page-in absolute inset-0">
                         <Cover />
-                        <span className="absolute right-2 top-2 rounded-full bg-white/90 px-2 py-0.5 text-[10.5px] text-[#16181d]">
-                          Launch cover.png
-                        </span>
                       </div>
                     ) : (
                       <span className="flex items-center gap-2 text-[12px] text-[#8a909c]">
@@ -614,7 +601,7 @@ export function ComputerBody({ on }: { on: boolean }) {
                       <li>Choose who gets it, and when.</li>
                       <li>It lands every Monday at 9, ready to read.</li>
                     </ol>
-                    <blockquote className="border-l-2 border-[#E9B949] pl-3 text-[#16181d]">
+                    <blockquote className="border-l-2 border-[#7A8FFF] pl-3 text-[#16181d]">
                       &ldquo;Our Monday standup finally starts with the numbers.&rdquo;
                       <span className="mt-0.5 block text-[12px] text-[#8a909c]">
                         Maya Chen, Northwind

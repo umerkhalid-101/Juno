@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { AnimatePresence, motion, useInView, useReducedMotion } from "motion/react";
-import { ArrowRight, ArrowUpRight, Check, FileText, Globe, Keyboard, Mic, Play } from "lucide-react";
+import { ArrowRight, ArrowUpRight, CalendarDays, Check, FileText, Globe, Keyboard, Mic } from "lucide-react";
 import { siApple } from "simple-icons";
 import { Button } from "@/components/ui/Button";
 import { FaqConsole } from "@/components/ui/FaqConsole";
@@ -12,7 +12,7 @@ import { BROWSER_HREF, DOWNLOAD_HREF, download } from "@/lib/download";
 
 /**
  * Download Juno for Mac. The hero is the product's one trick, played out on a MacBook: you're
- * in your launch plan, three keys go down, the screen is read in one sweep of light, Quick Ask
+ * in your launch plan, three keys go down, Quick Ask
  * opens, a question types itself, and Juno answers. Press ⌃⌘J yourself and it plays again.
  */
 
@@ -92,7 +92,6 @@ const s = download.screen;
 
 function Screen({ step }: { step: number }) {
   const reduce = useReducedMotion();
-  const scanning = step === 4;
   const open = step >= 5;
   const answered = step >= 6;
   return (
@@ -109,36 +108,69 @@ function Screen({ step }: { step: number }) {
           <span className="w-[42px]" />
         </div>
         <div className="flex h-[calc(100%-36px)]">
-          <aside className="hidden w-[190px] shrink-0 border-r border-black/[0.06] bg-[#FAFAFB] p-4 text-[12.5px] md:block">
-            <p className="font-semibold">{s.app}</p>
-            {["Friday", "Launch checklist", "Announcement", "Customer email"].map((x, i) => (
-              <p key={x} className={`mt-1.5 rounded-[6px] px-2 py-1.5 ${i === 1 ? "bg-[#EEF0F3] font-medium" : "text-[#6b7080]"}`}>
+          <aside className="hidden w-[184px] shrink-0 border-r border-black/[0.06] bg-[#FAFAFB] px-3 py-4 text-[12.5px] md:block">
+            <p className="flex items-center gap-2 px-2 font-semibold">
+              <span className="grid size-5 place-items-center rounded-[6px] bg-[#16181d] text-[10px] font-bold text-white">N</span>
+              Northwind
+            </p>
+            <p className="mt-5 px-2 text-[11.5px] font-medium text-[#8a909c]">{s.app}</p>
+            {s.pages.map((x, i) => (
+              <p key={x} className={`mt-0.5 flex items-center gap-2 rounded-[6px] px-2 py-1.5 ${i === 1 ? "bg-[#EEF0F3] font-medium" : "text-[#5b606d]"}`}>
+                <FileText size={13} strokeWidth={1.75} className="shrink-0 text-[#9aa0ab]" aria-hidden />
                 {x}
               </p>
             ))}
           </aside>
-          <div className="min-w-0 flex-1 p-5 md:p-9">
-            <p className="text-[10.5px] font-semibold tracking-[0.14em] text-[#8a909c]">{s.eyebrow.toUpperCase()}</p>
-            <p className="mt-2 text-[30px] font-semibold leading-none tracking-[-0.04em] md:text-[46px]">{s.title}</p>
-            <p className="mt-3 text-[14px] text-[#4a4f5c] md:text-[16px]">{s.sub}</p>
-            <ul className="mt-5 max-w-[420px] space-y-2 md:mt-7">
+          <div className="min-w-0 flex-1 px-4 py-4 md:px-9 md:py-8">
+            <p className="text-[12px] text-[#8a909c]">
+              {s.app} <span className="mx-1 text-[#c6cad4]">/</span> {s.label}
+            </p>
+            <p className="mt-2 text-[24px] font-semibold leading-none tracking-[-0.035em] md:mt-3 md:text-[38px]">{s.title}</p>
+            <p className="mt-2.5 hidden text-[15px] leading-[1.45] text-[#5b606d] md:block">{s.sub}</p>
+            <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-[12.5px] text-[#5b606d] md:mt-5">
+              <span className="hidden items-center gap-1.5 rounded-full bg-[#F1F2F5] px-2.5 py-1 sm:flex">
+                <CalendarDays size={13} strokeWidth={1.75} aria-hidden />
+                Launch {s.due}
+              </span>
+              <span className="flex items-center gap-2">
+                <span className="h-1.5 w-20 overflow-hidden rounded-full bg-[#ECEEF2]">
+                  <span className="block h-full w-3/4 rounded-full bg-[#2f9e6a]" />
+                </span>
+                3 of 4 done
+              </span>
+            </div>
+            <ul className="mt-4 overflow-hidden rounded-[12px] ring-1 ring-black/[0.07] md:mt-6">
               {s.checklist.map((c, i) => {
                 const last = i === s.checklist.length - 1;
                 return (
                   <li
-                    key={c}
-                    className={`flex items-center gap-3 rounded-[10px] px-3.5 py-2.5 text-[14px] ring-1 transition-[box-shadow,background-color] duration-500 ${
-                      last && answered ? "bg-[#EEF2FF] ring-[#5b74ff]/60 shadow-[0_0_0_4px_rgba(91,116,255,0.12)]" : "bg-white ring-black/[0.07]"
-                    }`}
+                    key={c.task}
+                    className={`flex items-center gap-2.5 px-3 py-2 text-[13px] md:gap-3 md:px-3.5 md:text-[13.5px] transition-[background-color,box-shadow] duration-500 md:py-3 ${
+                      i ? "border-t border-black/[0.06]" : ""
+                    } ${last && answered ? "bg-[#EEF2FF] shadow-[inset_3px_0_0_#5b74ff]" : "bg-white"}`}
                   >
                     {last ? (
-                      <span className="size-[18px] rounded-full border-2 border-[#c6cad4]" />
+                      <span className="size-[18px] shrink-0 rounded-full border-2 border-[#c6cad4]" />
                     ) : (
-                      <span className="grid size-[18px] place-items-center rounded-full bg-[#2f9e6a] text-white">
+                      <span className="grid size-[18px] shrink-0 place-items-center rounded-full bg-[#2f9e6a] text-white">
                         <Check size={11} strokeWidth={3.5} aria-hidden />
                       </span>
                     )}
-                    <span className={last ? "font-medium" : "text-[#4a4f5c]"}>{c}</span>
+                    <span className={`min-w-0 flex-1 truncate ${last ? "font-medium" : "text-[#5b606d]"}`}>{c.task}</span>
+                    <span
+                      className="grid size-6 shrink-0 place-items-center rounded-full text-[10px] font-semibold text-white"
+                      style={{ background: c.tint }}
+                    >
+                      {c.owner}
+                    </span>
+                    <span className="hidden w-9 shrink-0 text-[12.5px] text-[#8a909c] sm:block">{c.due}</span>
+                    <span
+                      className={`w-[52px] shrink-0 rounded-full py-0.5 text-center text-[11.5px] font-medium ${
+                        last ? "bg-[#EEF2FF] text-[#3b4fd8]" : "bg-[#E6F5EE] text-[#22784F]"
+                      }`}
+                    >
+                      {c.status}
+                    </span>
                   </li>
                 );
               })}
@@ -147,26 +179,10 @@ function Screen({ step }: { step: number }) {
         </div>
       </div>
 
-      {/* the screen, read in one sweep of light */}
-      <AnimatePresence>
-        {scanning && !reduce && (
-          <motion.span
-            key="scan"
-            aria-hidden
-            className="pointer-events-none absolute inset-x-0 h-28"
-            style={{ background: "linear-gradient(180deg, transparent, rgba(122,143,255,0.18) 70%, rgba(166,187,255,0.9) 98%, transparent)" }}
-            initial={{ top: "-30%" }}
-            animate={{ top: "105%" }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.85, ease: [0.45, 0, 0.25, 1] }}
-          />
-        )}
-      </AnimatePresence>
       <span
         aria-hidden
-        className="pointer-events-none absolute inset-0 rounded-[12px] transition-[box-shadow,background-color] duration-300"
+        className="pointer-events-none absolute inset-0 rounded-[12px] transition-[background-color] duration-300"
         style={{
-          boxShadow: scanning ? "inset 0 0 0 2px rgba(166,187,255,0.75), inset 0 0 60px rgba(122,143,255,0.25)" : "inset 0 0 0 0 transparent",
           background: open ? "rgba(5,7,12,0.32)" : "transparent",
         }}
       />
@@ -231,8 +247,8 @@ function Screen({ step }: { step: number }) {
 
 /* ------------------------------------------------------------------ hero */
 
-// idle, ⌃, ⌘, J, the sweep, Quick Ask opens and types, Juno answers
-const durations = [1900, 360, 360, 460, 900, 1800, 3800];
+// idle, ⌃, ⌘, J, a beat, Quick Ask opens and types, Juno answers
+const durations = [1900, 360, 360, 460, 250, 1800, 3800];
 
 export function DlHero() {
   const reduce = useReducedMotion();
@@ -260,6 +276,28 @@ export function DlHero() {
 
   const shown = reduce ? 6 : step;
   const h = download.hero;
+
+  // the shortcut keys press themselves, one after another, every 5 seconds (while on screen)
+  const keysRef = useRef<HTMLDivElement>(null);
+  const keysInView = useInView(keysRef, { amount: 0.5 });
+  const [keys, setKeys] = useState(0);
+  useEffect(() => {
+    if (reduce || !keysInView) return;
+    let ts: number[] = [];
+    const press = () => {
+      ts.forEach(window.clearTimeout);
+      ts = [1, 2, 3].map((n) => window.setTimeout(() => setKeys(n), (n - 1) * 160));
+      ts.push(window.setTimeout(() => setKeys(0), 1100));
+    };
+    const first = window.setTimeout(press, 600);
+    const iv = window.setInterval(press, 5000);
+    return () => {
+      window.clearTimeout(first);
+      window.clearInterval(iv);
+      ts.forEach(window.clearTimeout);
+      setKeys(0);
+    };
+  }, [reduce, keysInView]);
 
   return (
     <section aria-labelledby="dl-title" className="relative overflow-x-clip pt-[140px] md:pt-[168px]">
@@ -322,26 +360,15 @@ export function DlHero() {
 
       {/* the shortcut, on real keys */}
       <div className="container-page relative mt-16 flex flex-col items-center text-center md:mt-20">
-        <div className="flex items-end gap-3 md:gap-4" aria-hidden>
+        <div ref={keysRef} className="flex items-end gap-3 md:gap-4" aria-hidden>
           {download.shortcut.keys.map((k, i) => (
-            <Keycap key={k} k={k} down={shown >= i + 1 && shown <= 4} />
+            <Keycap key={k} k={k} down={!reduce && keys > i} />
           ))}
         </div>
-        <h2 className="t-display-l mt-12 text-balance">
+        <h2 className="t-display-l mt-12 w-full max-w-[900px] text-balance">
           {download.shortcut.title} <span className="accent-text block">{download.shortcut.muted}</span>
         </h2>
         <p className="mx-auto mt-5 max-w-[46ch] text-pretty text-[17px] leading-[27px] text-muted">{download.shortcut.sub}</p>
-        <button
-          type="button"
-          onClick={() => setStep(1)}
-          className="mt-8 inline-flex h-11 items-center gap-2 rounded-full border border-white/[0.12] bg-white/[0.03] px-5 text-[14px] font-medium text-text transition-colors hover:bg-white/[0.07]"
-        >
-          <Play size={13} className="fill-current" aria-hidden />
-          {download.shortcut.try}
-          <span className="ml-1 hidden sm:inline">
-            <MiniKeys />
-          </span>
-        </button>
         <span className="sr-only">Press Control, Command and J to open Quick Ask.</span>
       </div>
     </section>

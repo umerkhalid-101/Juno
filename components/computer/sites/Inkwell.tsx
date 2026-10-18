@@ -460,7 +460,7 @@ export const publish: Scenario = {
   tab: "Publish a blog post",
   duration: T.ask + 3.1,
   askAt: T.ask,
-  approval: "The post is live. Email it to Orbit's 4,212 subscribers too?",
+  approval: "The post is live. Email it to Orbit’s 4,212 subscribers too?",
   log: [
     { at: T.session, done: T.ready, text: "Opened the blog in Inkwell" },
     {

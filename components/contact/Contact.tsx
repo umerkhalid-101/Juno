@@ -9,7 +9,7 @@ import { CTA_HREF, CTA_LABEL } from "@/lib/site";
 import { PRIVACY_HREF, contact } from "@/lib/contact";
 
 /**
- * "Let's talk." The words and the two quick routes on the left; on the right, a message to the
+ * "Let’s talk." The words and the two quick routes on the left; on the right, a message to the
  * Juno team, written in a lit compose window: who it's to, what it's about, who you are, and
  * what's on your mind. Send, and the window turns into the sent message.
  */

@@ -193,7 +193,7 @@ function Open() {
     window.setTimeout(() => setS(2), 40 * URL.length + 250);
     window.setTimeout(() => setS(3), 40 * URL.length + 750);
   };
-  const touch = useIdle(ref, 2500, go);
+  const touch = useIdle(ref, 3000, go);
   const reset = () => {
     touch();
     setS(0);

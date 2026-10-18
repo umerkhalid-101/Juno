@@ -98,39 +98,41 @@ function Apps({ n }: { n: number }) {
     { i: "E", t: "Help article", ok: true },
   ];
   return (
-    <div className="grid gap-5 bg-[#E7E9CB] px-6 py-5 text-[#1F3324] sm:grid-cols-[1fr_1.1fr]">
-      <div className="flex flex-col">
-        <p className="text-[17px] font-semibold tracking-[-0.02em]">Launch room</p>
-        <p className="mt-auto pt-3 text-[32px] sm:pt-6 font-semibold leading-[32px] tracking-[-0.045em]">
-          Launch day.
-          <br />
-          No loose ends.
-        </p>
-        <span className="mt-4 inline-flex w-fit items-center gap-2 rounded-[10px] bg-[#1F3324]/[0.07] px-2.5 py-1.5">
-          <motion.span key={approved ? "0" : "1"} initial={{ y: 8, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ duration: 0.3, ease: calm }} className="text-[18px] font-semibold leading-none">
-            {approved ? 0 : 1}
-          </motion.span>
-          <span className="text-[10.5px] leading-none text-[#1F3324]/70">{approved ? "approvals to go" : "approval to go"}</span>
-        </span>
-      </div>
-      <div>
-        <p className="text-[10px] font-medium tracking-[0.14em] text-[#1F3324]/60 sm:text-right">SCHEDULED REPORTS</p>
-        <div className="mt-3 space-y-2">
-          {rows.map((r) => (
-            <div key={r.t} className="flex h-11 items-center gap-2.5 rounded-[10px] bg-white px-3 text-[13px] shadow-[0_1px_0_rgba(31,51,36,0.06)] ring-1 ring-[#1F3324]/[0.08]">
-              <span className="grid size-6 place-items-center rounded-full bg-[#E7E9CB] text-[10px] font-semibold">{r.i}</span>
-              {r.t}
-              <span className="ml-auto">
-                {r.ok ? (
-                  <motion.span key="ok" initial={{ scale: 0.6, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ duration: 0.25, ease: calm }} className="block">
-                    <Check size={15} strokeWidth={2.25} className="text-[#2F6B45]" aria-hidden />
-                  </motion.span>
-                ) : (
-                  <span className="text-[11px] text-[#A0612A]">In review</span>
-                )}
-              </span>
-            </div>
-          ))}
+    <div className="@container bg-[#E7E9CB]">
+      <div className="grid gap-5 px-6 py-5 text-[#1F3324] @md:grid-cols-[minmax(0,1fr)_minmax(0,1.25fr)]">
+        <div className="flex flex-col">
+          <p className="text-[17px] font-semibold tracking-[-0.02em]">Launch room</p>
+          <p className="mt-auto text-balance pt-3 text-[32px] font-semibold leading-[32px] tracking-[-0.045em] @md:pt-6">
+            Launch day.
+            <br />
+            No loose ends.
+          </p>
+          <span className="mt-4 inline-flex w-fit items-center gap-2 rounded-[10px] bg-[#1F3324]/[0.07] px-2.5 py-1.5">
+            <motion.span key={approved ? "0" : "1"} initial={{ y: 8, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ duration: 0.3, ease: calm }} className="text-[18px] font-semibold leading-none">
+              {approved ? 0 : 1}
+            </motion.span>
+            <span className="whitespace-nowrap text-[10.5px] leading-none text-[#1F3324]/70">{approved ? "approvals to go" : "approval to go"}</span>
+          </span>
+        </div>
+        <div>
+          <p className="text-[12px] text-[#1F3324]/60 @md:text-right">Before Friday</p>
+          <div className="mt-3 space-y-2">
+            {rows.map((r) => (
+              <div key={r.t} className="flex h-11 items-center gap-2.5 whitespace-nowrap rounded-[10px] bg-white px-3 text-[13px] shadow-[0_1px_0_rgba(31,51,36,0.06)] ring-1 ring-[#1F3324]/[0.08]">
+                <span className="grid size-6 shrink-0 place-items-center rounded-full bg-[#E7E9CB] text-[10px] font-semibold">{r.i}</span>
+                <span className="min-w-0 truncate">{r.t}</span>
+                <span className="ml-auto shrink-0">
+                  {r.ok ? (
+                    <motion.span key="ok" initial={{ scale: 0.6, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ duration: 0.25, ease: calm }} className="block">
+                      <Check size={15} strokeWidth={2.25} className="text-[#2F6B45]" aria-hidden />
+                    </motion.span>
+                  ) : (
+                    <span className="text-[11px] text-[#A0612A]">In review</span>
+                  )}
+                </span>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </div>
@@ -300,7 +302,7 @@ const spots: Spot[] = [
   { id: "knowledge", title: "Company knowledge", href: "#knowledge", icon: <BookOpen size={18} strokeWidth={1.75} />, ask: "What should we prioritize next?", x: 82, y: 63, w: 357, rx: 4, ry: 8, rz: -2.5, depth: 1.2 },
   { id: "apps", title: "Apps, sites & dashboards", href: "#apps", icon: <AppWindow size={18} strokeWidth={1.75} />, ask: "Build a launch dashboard for the team.", x: 425, y: 38, w: 565, rx: 5, ry: 0, rz: 0, depth: 0.7 },
   { id: "images", title: "Images & video", href: "#brand", icon: <ImageIcon size={18} strokeWidth={1.75} />, ask: "Make it look and sound like us.", x: 945, y: 63, w: 357, rx: 4, ry: -8, rz: 2, depth: 1.1 },
-  { id: "tasks", title: "Tasks, taken care of", href: "#tools", icon: <ListChecks size={18} strokeWidth={1.75} />, ask: "Let's get this launched.", x: 82, y: 356, w: 428, rx: -3, ry: 8, rz: -2, depth: 1 },
+  { id: "tasks", title: "Tasks, taken care of", href: "#tools", icon: <ListChecks size={18} strokeWidth={1.75} />, ask: "Let’s get this launched.", x: 82, y: 356, w: 428, rx: -3, ry: 8, rz: -2, depth: 1 },
   { id: "jobs", title: "Jobs", href: "#jobs", icon: <Repeat size={18} strokeWidth={1.75} />, ask: "Brief me every Friday at 9 AM.", x: 488, y: 495, w: 424, rx: -5, ry: 0, rz: 0, depth: 0.8 },
   { id: "computer", title: "A computer of its own", href: "#computer", icon: <Globe size={18} strokeWidth={1.75} />, ask: "Add this article to our CMS as a draft.", x: 891, y: 356, w: 428, rx: -3, ry: -8, rz: 2, depth: 1.3 },
 ];

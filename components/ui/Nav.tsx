@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState, type ComponentType, type ReactNode } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import {
   AppWindow,
@@ -12,7 +12,6 @@ import {
   Check,
   ChevronDown,
   Command,
-  Download,
   Library,
   Menu,
   Monitor,
@@ -136,10 +135,10 @@ const items: Item[] = [
   { icon: Library, title: "Content & CMS", line: "Create, organize, publish.", href: "/product#content", hue: "195,182,255", Preview: () => <ContentPreview /> },
   { icon: Plug, title: "Connected tools", line: "Move work across your stack.", href: "/product#tools", hue: "143,200,255", Preview: () => <ToolsPreview /> },
   { icon: CalendarClock, title: "Automations", line: "Set it once. Leave it to Juno.", href: "/jobs", hue: "122,143,255", Preview: ({ n }) => <JobsPreview n={n} /> },
-  { icon: Command, title: "Juno for Mac", line: "One shortcut. Right there.", href: "/features#quick-ask", hue: "166,187,255", Preview: () => <MacPreview /> },
+  { icon: Command, title: "Juno for Mac", line: "One shortcut. Right there.", href: "/download", hue: "166,187,255", Preview: () => <MacPreview /> },
 ];
 
-function ProductMenu({ onPick }: { onPick: () => void }) {
+function ProductMenu({ onPick }: { onPick: (e: React.MouseEvent, href: string) => void }) {
   const reduce = useReducedMotion();
   const [a, setA] = useState(0);
   const [n, setN] = useState(reduce ? 3 : 0);
@@ -168,7 +167,7 @@ function ProductMenu({ onPick }: { onPick: () => void }) {
               >
                 <a
                   href={m.href}
-                  onClick={onPick}
+                  onClick={(e) => onPick(e, m.href)}
                   onPointerEnter={() => setA(i)}
                   onFocus={() => setA(i)}
                   className="relative flex h-[50px] items-center gap-3.5 pl-4 pr-2 outline-none focus-visible:ring-2 focus-visible:ring-[#009CFF]"
@@ -200,11 +199,8 @@ function ProductMenu({ onPick }: { onPick: () => void }) {
           })}
         </ul>
         <div className="mt-auto flex items-center gap-6 border-t border-white/[0.07] pl-4 pt-5 text-[14px]">
-          <Link href="/product" onClick={onPick} className="inline-flex items-center gap-1.5 font-medium text-[#A6BBFF] transition-colors hover:text-text">
+          <Link href="/product" onClick={(e) => onPick(e, "/product")} className="inline-flex items-center gap-1.5 font-medium text-[#A6BBFF] transition-colors hover:text-text">
             Explore the product <ArrowRight size={14} aria-hidden />
-          </Link>
-          <Link href="/download" onClick={onPick} className="inline-flex items-center gap-1.5 text-muted transition-colors hover:text-text">
-            <Download size={14} aria-hidden /> Download for Mac
           </Link>
         </div>
       </div>
@@ -212,7 +208,7 @@ function ProductMenu({ onPick }: { onPick: () => void }) {
       {/* the preview */}
       <a
         href={it.href}
-        onClick={onPick}
+        onClick={(e) => onPick(e, it.href)}
         tabIndex={-1}
         className="group/pv relative flex min-h-[460px] overflow-hidden rounded-[24px] border border-white/[0.07] outline-none"
         style={{
@@ -281,7 +277,7 @@ function BarLink({
   current: boolean;
   children: ReactNode;
 } & React.AnchorHTMLAttributes<HTMLAnchorElement> & React.ButtonHTMLAttributes<HTMLButtonElement>) {
-  const cls = `relative flex h-11 items-center gap-1 rounded-full px-[18px] text-[15px] font-medium outline-none transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-[#009CFF] ${
+  const cls = `relative flex h-11 items-center gap-1 rounded-full px-3.5 xl:px-[18px] text-[15px] font-medium outline-none transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-[#009CFF] ${
     lit || current ? "text-text" : "text-text/55 hover:text-text"
   }`;
   const inner = (
@@ -318,6 +314,93 @@ export function Nav() {
   const isActive = (href: string) => !href.includes("#") && path.startsWith(href);
   const closeTimer = useRef(0);
   const openTimer = useRef(0);
+  const router = useRouter();
+
+  /**
+   * Menu links to a section: land on the page at its hero first, then glide down to the section,
+   * rather than jumping straight there. Same page: just glide.
+   */
+  const glide = useCallback((id: string) => {
+    const el = document.getElementById(id);
+    if (!el) return () => {};
+    const target = () => Math.max(0, el.getBoundingClientRect().top + window.scrollY - 96);
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      window.scrollTo({ top: target() });
+      return () => {};
+    }
+    // an eased glide that re-aims every frame, so content loading in on the way down can't knock it off
+    const from = window.scrollY;
+    const dur = Math.min(1600, Math.max(800, Math.abs(target() - from) * 0.45));
+    const ease = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
+    let raf = 0;
+    const t0 = performance.now();
+    const stop = () => {
+      cancelAnimationFrame(raf);
+      window.removeEventListener("wheel", stop);
+      window.removeEventListener("touchstart", stop);
+      window.removeEventListener("keydown", stop);
+    };
+    // the reader takes over the moment they scroll themselves
+    window.addEventListener("wheel", stop, { passive: true });
+    window.addEventListener("touchstart", stop, { passive: true });
+    window.addEventListener("keydown", stop);
+    const step = (now: number) => {
+      const p = Math.min(1, (now - t0) / dur);
+      window.scrollTo({ top: from + (target() - from) * ease(p), behavior: "instant" });
+      if (p < 1) raf = requestAnimationFrame(step);
+      else stop();
+    };
+    raf = requestAnimationFrame(step);
+    return stop;
+  }, []);
+  const follow = useCallback(
+    (e: React.MouseEvent, href: string) => {
+      setMega(false);
+      setOpen(false);
+      const [to, id] = href.split("#");
+      if (e.metaKey || e.ctrlKey || e.shiftKey || e.button === 1) return;
+      e.preventDefault();
+      if (to === path) {
+        if (id) glide(id);
+        else window.scrollTo({ top: 0, behavior: "smooth" });
+        return;
+      }
+      if (id) sessionStorage.setItem("juno:glide", id);
+      router.push(to, { scroll: true });
+    },
+    [path, router, glide],
+  );
+  // arriving from a menu link: wait for the hero to load (fonts and its images), let it be seen
+  // for a beat, then glide to the section
+  useEffect(() => {
+    const id = sessionStorage.getItem("juno:glide");
+    if (!id) return;
+    window.scrollTo({ top: 0, behavior: "instant" });
+    let gone = false;
+    let t = 0;
+    let stop = () => {};
+    const heroImgs = [...document.querySelectorAll("main img")].filter(
+      (img) => img.getBoundingClientRect().top < window.innerHeight,
+    ) as HTMLImageElement[];
+    const loaded = Promise.all([
+      document.fonts.ready,
+      ...heroImgs.map((img) => (img.complete ? Promise.resolve() : img.decode().catch(() => {}))),
+    ]);
+    const cap = new Promise((r) => window.setTimeout(r, 2500));
+    Promise.race([loaded, cap]).then(() => {
+      if (gone) return;
+      t = window.setTimeout(() => {
+        // cleared only once the glide starts, so a re-run effect (dev strict mode) still finds it
+        sessionStorage.removeItem("juno:glide");
+        stop = glide(id);
+      }, 700);
+    });
+    return () => {
+      gone = true;
+      window.clearTimeout(t);
+      stop();
+    };
+  }, [path, glide]);
 
   useEffect(() => {
     const on = () => setScrolled(window.scrollY > 24);
@@ -355,6 +438,31 @@ export function Nav() {
     [],
   );
 
+  // belt and braces: while the sheet is open, close it as soon as the cursor is anywhere outside the
+  // nav (or leaves the window), even if a pointerleave was missed on a fast move
+  const headerRef = useRef<HTMLElement>(null);
+  useEffect(() => {
+    if (!mega) return;
+    const onMove = (e: PointerEvent) => {
+      if (e.pointerType !== "mouse") return;
+      const inside = headerRef.current?.contains(e.target as Node);
+      if (!inside) hideMega();
+      else window.clearTimeout(closeTimer.current);
+    };
+    const onOut = (e: MouseEvent) => {
+      if (!e.relatedTarget) hideMega();
+    };
+    const onBlur = () => setMega(false);
+    document.addEventListener("pointermove", onMove);
+    document.addEventListener("mouseout", onOut);
+    window.addEventListener("blur", onBlur);
+    return () => {
+      document.removeEventListener("pointermove", onMove);
+      document.removeEventListener("mouseout", onOut);
+      window.removeEventListener("blur", onBlur);
+    };
+  }, [mega, hideMega]);
+
   const current = nav.find((l) => isActive(l.href))?.label ?? null;
   const lit = mega ? "Product" : (hover ?? current);
   const solid = scrolled || mega || open;
@@ -366,7 +474,7 @@ export function Nav() {
         {mega && (
           <motion.div
             aria-hidden
-            className="fixed inset-0 z-40 hidden bg-[#03050A]/55 backdrop-blur-md md:block"
+            className="fixed inset-0 z-40 hidden bg-[#03050A]/55 backdrop-blur-md lg:block"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -376,7 +484,7 @@ export function Nav() {
         )}
       </AnimatePresence>
 
-      <header className="fixed inset-x-0 top-0 z-50" onPointerLeave={hideMega}>
+      <header ref={headerRef} className="fixed inset-x-0 top-0 z-50" onPointerLeave={hideMega}>
         <a
           href="#main"
           className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-sm focus:bg-text focus:px-3 focus:py-2 focus:text-bg"
@@ -393,7 +501,7 @@ export function Nav() {
               <JunoLogo height={22} className="text-text" />
             </a>
 
-            <nav aria-label="Primary" className="absolute left-1/2 hidden -translate-x-1/2 md:block">
+            <nav aria-label="Primary" className="ml-8 hidden lg:block xl:absolute xl:left-1/2 xl:ml-0 xl:-translate-x-1/2">
               <ul className="flex items-center" onPointerLeave={() => setHover(null)}>
                 {nav.map((l) =>
                   l.label === "Product" ? (
@@ -401,12 +509,16 @@ export function Nav() {
                       <BarLink
                         lit={lit === l.label}
                         current={current === l.label}
+                        href={l.href}
+                        aria-current={current === l.label ? "page" : undefined}
                         aria-expanded={mega}
                         aria-controls="product-menu"
-                        aria-haspopup="true"
                         onPointerEnter={() => setHover(l.label)}
-                        onFocus={() => setHover(l.label)}
-                        onClick={() => setMega((m) => !m)}
+                        onFocus={() => {
+                          setHover(l.label);
+                          showMega();
+                        }}
+                        onClick={(e) => follow(e, l.href)}
                       >
                         {l.label}
                         <ChevronDown size={14} strokeWidth={2.25} className={`opacity-70 transition-transform duration-300 ${mega ? "rotate-180" : ""}`} aria-hidden />
@@ -434,7 +546,7 @@ export function Nav() {
             </nav>
 
             <div className="ml-auto flex items-center gap-1.5" onPointerEnter={hideMega}>
-              <a href="#signin" className="hidden h-11 items-center rounded-full px-4 text-[15px] font-medium text-text/55 transition-colors hover:text-text md:inline-flex">
+              <a href="https://www.runjuno.ai/login" className="hidden h-11 items-center rounded-full px-4 text-[15px] font-medium text-text/55 transition-colors hover:text-text lg:inline-flex">
                 Sign in
               </a>
               <Button size="sm" href={CTA_HREF} magnetic={false}>
@@ -442,7 +554,7 @@ export function Nav() {
               </Button>
               <button
                 type="button"
-                className="grid size-11 place-items-center rounded-full text-text md:hidden"
+                className="grid size-11 place-items-center rounded-full text-text lg:hidden"
                 aria-label={open ? "Close menu" : "Open menu"}
                 aria-expanded={open}
                 aria-controls="mobile-menu"
@@ -459,15 +571,14 @@ export function Nav() {
           {mega && (
             <motion.div
               id="product-menu"
-              className="absolute inset-x-0 top-[88px] hidden px-6 pt-2 md:block"
-              onPointerEnter={showMega}
+              className="pointer-events-none absolute inset-x-0 top-[88px] hidden px-6 pt-2 lg:block"
               initial={reduce ? false : { opacity: 0, y: -10, clipPath: "inset(0% 0% 100% 0% round 28px)" }}
               animate={{ opacity: 1, y: 0, clipPath: "inset(0% 0% 0% 0% round 28px)" }}
               exit={{ opacity: 0, y: -6, transition: { duration: 0.18 } }}
               transition={{ duration: 0.45, ease: calm }}
             >
-              <div className="nav-pill mx-auto max-w-[1200px] overflow-hidden rounded-[28px]">
-                <ProductMenu onPick={() => setMega(false)} />
+              <div className="nav-pill pointer-events-auto mx-auto max-w-[1200px] overflow-hidden rounded-[28px]" onPointerEnter={showMega}>
+                <ProductMenu onPick={follow} />
               </div>
             </motion.div>
           )}
@@ -482,7 +593,7 @@ export function Nav() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -8 }}
               transition={{ duration: 0.2, ease: "easeOut" }}
-              className="nav-pill mx-3 mt-2 max-h-[calc(100dvh-100px)] overflow-y-auto rounded-[28px] md:hidden"
+              className="nav-pill mx-3 mt-2 max-h-[calc(100dvh-100px)] overflow-y-auto rounded-[28px] lg:hidden"
             >
               <ul className="flex flex-col px-6 py-3">
                 {nav.map((l) =>
@@ -508,7 +619,7 @@ export function Nav() {
                           >
                             {items.map(({ icon: Icon, title, href }) => (
                               <li key={title}>
-                                <a href={href} onClick={() => setOpen(false)} className="flex min-h-11 items-center gap-3 text-[15px] text-muted">
+                                <a href={href} onClick={(e) => follow(e, href)} className="flex min-h-11 items-center gap-3 text-[15px] text-muted">
                                   <Icon size={16} strokeWidth={1.7} className="text-[#6B7789]" aria-hidden />
                                   {title}
                                 </a>
@@ -537,7 +648,7 @@ export function Nav() {
                   ),
                 )}
                 <li>
-                  <a href="#signin" onClick={() => setOpen(false)} className="flex min-h-12 items-center text-[17px] text-text">
+                  <a href="https://www.runjuno.ai/login" onClick={() => setOpen(false)} className="flex min-h-12 items-center text-[17px] text-text">
                     Sign in
                   </a>
                 </li>

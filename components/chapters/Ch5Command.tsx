@@ -7,6 +7,7 @@ import { Reveal } from "@/components/ui/Reveal";
 import { StatusChip, type Status } from "@/components/ui/StatusChip";
 import { ToolBadge, ToolLogo } from "@/components/ui/ToolLogo";
 import { MascotMark } from "@/components/mascot/Mascot";
+import { useAutoPlay } from "@/components/ui/useAutoPlay";
 import { gsap, useGSAP, ScrollTrigger, MQ } from "@/lib/gsap";
 import { approvalQueue, notifications } from "@/lib/story";
 
@@ -77,8 +78,8 @@ export function Ch5Command() {
                   47 pings handled. <span className="text-text">3 need your yes.</span>
                 </p>
                 <ul className="space-y-3" aria-label="Approval queue">
-                  {approvalQueue.map((a) => (
-                    <QueueItem key={a.id} a={a} />
+                  {approvalQueue.map((a, i) => (
+                    <QueueItem key={a.id} a={a} i={i} />
                   ))}
                 </ul>
               </div>
@@ -92,10 +93,14 @@ export function Ch5Command() {
   );
 }
 
-function QueueItem({ a }: { a: (typeof approvalQueue)[number] }) {
+function QueueItem({ a, i }: { a: (typeof approvalQueue)[number]; i: number }) {
+  const ref = useRef<HTMLLIElement>(null);
   const [status, setStatus] = useState<Status>("Needs you");
+  const approve = () => setStatus(a.tool === "linear" ? "Done" : a.id === "a1" ? "Scheduled" : "Sent");
+  // three seconds on screen and the queue clears itself, one item after another
+  useAutoPlay(ref, approve, status === "Needs you", 3000 + i * 700);
   return (
-    <li className="queue-item rounded-lg border border-line bg-surface-2 p-4">
+    <li ref={ref} className="queue-item rounded-lg border border-line bg-surface-2 p-4">
       <div className="flex items-start gap-3">
         <ToolBadge id={a.tool} size={30} />
         <div className="min-w-0 flex-1">
@@ -116,7 +121,7 @@ function QueueItem({ a }: { a: (typeof approvalQueue)[number] }) {
             </button>
             <button
               type="button"
-              onClick={() => setStatus(a.tool === "linear" ? "Done" : a.id === "a1" ? "Scheduled" : "Sent")}
+              onClick={approve}
               className="h-10 rounded-full bg-[#A6BBFF]/15 px-4 text-[13px] font-medium text-[#C9D5FF] transition-colors hover:bg-[#A6BBFF]/25"
             >
               Approve

@@ -37,7 +37,7 @@ const END = 10.4;
 
 export const sourceName = (s: Source) =>
   s === "browser"
-    ? "Juno's browser"
+    ? "Juno’s browser"
     : s === "cms"
       ? "Juno CMS"
       : s === "drive"
@@ -496,7 +496,7 @@ export function JobPanel({
                   Nothing goes out without your yes.
                 </p>
                 <div className="mx-auto mt-8 max-w-[600px] text-left">
-                  <ApprovalPrompt key={slug} question={job.action} approvedStatus="Done" approvedNote="Approved. Juno's on it." />
+                  <ApprovalPrompt key={slug} question={job.action} approvedStatus="Done" approvedNote="Approved. Juno’s on it." />
                 </div>
                 <div className="mt-8 flex flex-wrap items-center justify-center gap-2">
                   <span className="mr-1 text-[13px] text-muted">Works with</span>

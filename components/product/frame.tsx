@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, type ComponentType, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ComponentType, type ReactNode } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import {
   AppWindow,
@@ -19,6 +19,7 @@ import {
   ArrowUp,
 } from "lucide-react";
 import { BrandIcon } from "@/components/ui/BrandIcon";
+import { useAutoPlay } from "@/components/ui/useAutoPlay";
 import { MascotMark } from "@/components/mascot/Mascot";
 import { Face } from "@/components/jobs/scenes";
 import type { Src } from "@/lib/product";
@@ -71,7 +72,7 @@ export function useDemo(d: Demo, play: boolean) {
     }
     if (s >= d.steps) return;
     if (d.gate !== undefined && s >= d.gate && !approved) {
-      const t = window.setTimeout(() => setApproved(true), 4200);
+      const t = window.setTimeout(() => setApproved(true), 3000);
       return () => window.clearTimeout(t);
     }
     const t = window.setTimeout(() => setS((x) => x + 1), s === 0 ? 450 : (d.gap ?? 820));
@@ -261,10 +262,12 @@ function Thinking() {
   );
 }
 
-/** The ask, at the end of the chat: Approve is real. */
+/** The ask, at the end of the chat: Approve is real, and it approves itself after three seconds on screen. */
 export function Ask({ q, approved, onApprove, done = "Approved by you", className = "" }: { q: string; approved: boolean; onApprove: () => void; done?: string; className?: string }) {
+  const ref = useRef<HTMLDivElement>(null);
+  useAutoPlay(ref, onApprove, !approved);
   return (
-    <div className={`rounded-[14px] border border-white/[0.1] bg-[#151A22] p-3 ${className}`} role="group" aria-label="Approval">
+    <div ref={ref} className={`rounded-[14px] border border-white/[0.1] bg-[#151A22] p-3 ${className}`} role="group" aria-label="Approval">
       <AnimatePresence mode="wait" initial={false}>
         {!approved ? (
           <motion.div key="ask" exit={{ opacity: 0, y: -4, transition: { duration: 0.12, ease: snap } }}>

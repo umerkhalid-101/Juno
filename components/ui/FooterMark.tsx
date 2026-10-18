@@ -1,8 +1,9 @@
 "use client";
 
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
+import { useInView, useReducedMotion } from "motion/react";
 import { Mascot, type MascotApi } from "@/components/mascot/Mascot";
-import { gsap, useGSAP, ScrollTrigger, MQ } from "@/lib/gsap";
+import { gsap, useGSAP } from "@/lib/gsap";
 
 const word =
   "text-center text-[31vw] font-semibold leading-[0.78] tracking-[-0.075em] md:text-[25vw] xl:text-[340px]";
@@ -16,55 +17,38 @@ export function FooterMark() {
   const root = useRef<HTMLDivElement>(null);
   const mascot = useRef<MascotApi>(null);
 
+  // Rises when the footer is actually on screen (an observer, not a scroll position measured
+  // at load, so pages that grow as their demos fill in can't leave Juno half behind the letters)
+  const seen = useInView(root, { amount: 0.35 });
+  const woke = useRef(false);
+  const reduce = useReducedMotion();
   useGSAP(
     () => {
-      const el = root.current;
-      if (!el) return;
-      const mm = gsap.matchMedia();
-      mm.add(`${MQ.desktop}, ${MQ.mobile}`, () => {
-        gsap.fromTo(
-          ".fm-mascot",
-          { yPercent: 85 },
-          {
-            yPercent: 0,
-            ease: "none",
-            scrollTrigger: {
-              trigger: el,
-              start: "top bottom",
-              // fully risen by the time the footer sits at 40%, or by the very bottom of the
-              // page if it can't scroll that far, so Juno never stays half behind the letters
-              end: () =>
-                Math.min(
-                  el.getBoundingClientRect().top + window.scrollY - window.innerHeight * 0.4,
-                  ScrollTrigger.maxScroll(window) - 2,
-                ),
-              invalidateOnRefresh: true,
-              scrub: 0.8,
-            },
-          },
-        );
-        ScrollTrigger.create({
-          trigger: el,
-          start: "top 55%",
-          once: true,
-          onEnter: () => {
-            mascot.current?.setState("waking");
-            window.setTimeout(() => mascot.current?.cheer(), 700);
-            // one slow sweep of light across the letters
-            gsap.fromTo(
-              el,
-              { "--mx": "-10%" },
-              { "--mx": "110%", duration: 2.4, ease: "power2.inOut" },
-            );
-          },
-        });
-      });
-      mm.add(MQ.reduce, () => {
-        mascot.current?.setState("idle");
-      });
+      gsap.set(".fm-mascot", { yPercent: reduce ? 0 : 85 });
     },
-    { scope: root },
+    { scope: root, dependencies: [reduce] },
   );
+  useEffect(() => {
+    const el = root.current;
+    if (!el) return;
+    const m = el.querySelector(".fm-mascot");
+    if (reduce) {
+      mascot.current?.setState("idle");
+      return;
+    }
+    if (!seen) {
+      gsap.to(m, { yPercent: 85, duration: 0.6, ease: "power2.in", overwrite: "auto" });
+      return;
+    }
+    gsap.to(m, { yPercent: 0, duration: 1.1, ease: "power3.out", overwrite: "auto" });
+    if (woke.current) return;
+    woke.current = true;
+    mascot.current?.setState("waking");
+    const t = window.setTimeout(() => mascot.current?.cheer(), 700);
+    // one slow sweep of light across the letters
+    gsap.fromTo(el, { "--mx": "-10%" }, { "--mx": "110%", duration: 2.4, ease: "power2.inOut" });
+    return () => window.clearTimeout(t);
+  }, [seen, reduce]);
 
   const onMove = (e: React.PointerEvent<HTMLDivElement>) => {
     if (e.pointerType !== "mouse" || !root.current) return;

@@ -327,7 +327,7 @@ export const knowledgeDemos: Demo[] = [
     steps: 5,
     chat: [
       { from: "you", text: "What should we prioritize next?", at: 1 },
-      { from: "juno", title: "Build shared reports next.", text: "Customers ask for it in support and sales calls. It's already on your roadmap.", at: 5 },
+      { from: "juno", title: "Build shared reports next.", text: "Customers ask for it in support and sales calls. It’s already on your roadmap.", at: 5 },
     ],
     Desk: SourcesDesk,
   },
@@ -345,7 +345,7 @@ export const knowledgeDemos: Demo[] = [
     steps: 4,
     chat: [
       { from: "you", text: "Based on these files, what should we build next?", at: 1 },
-      { from: "juno", title: "Make reports easy to share.", text: "Customers want a simple link. It also supports this quarter's reporting priority.", at: 4 },
+      { from: "juno", title: "Make reports easy to share.", text: "Customers want a simple link. It also supports this quarter’s reporting priority.", at: 4 },
     ],
     Desk: FilesDesk,
   },
@@ -510,8 +510,8 @@ export const brandDemos: Demo[] = [
     gap: 1000,
     chat: [
       { from: "you", text: "Too much detail. For weekly updates, give me three bullets. Decisions first.", at: 1 },
-      { from: "juno", text: "Got it. I'll remember that.", at: 2 }, // [new]
-      { from: "you", text: "Write this week's company update.", at: 3 },
+      { from: "juno", text: "Got it. I’ll remember that.", at: 2 }, // [new]
+      { from: "you", text: "Write this week’s company update.", at: 3 },
     ],
     Desk: LearningDesk,
   },
@@ -581,7 +581,7 @@ function ResearchDesk({ s }: DeskProps) {
   return (
     <div className="relative h-full">
       <Cursor x={found ? 80 : 18 + tab * 26} y={found ? 88 : 4} show={s >= 2 && s < 6} />
-      <Browser url={found ? "Juno's notes · E-signature tools" : `${tools[tab].name.toLowerCase().replace(" ", "")}.com / features`} lock={!found}>
+      <Browser url={found ? "Juno’s notes · E-signature tools" : `${tools[tab].name.toLowerCase().replace(" ", "")}.com / features`} lock={!found}>
         <div className="flex gap-1 border-b border-black/[0.06] bg-[#FAFAFB] px-2 pt-1.5">
           {tools.map((t, i) => (
             <span
@@ -682,7 +682,7 @@ function WebsiteDesk({ s }: DeskProps) {
 
 export const computerDemos: Demo[] = [
   {
-    label: "Juno's computer",
+    label: "Juno’s computer",
     steps: 6,
     gap: 950,
     chat: [
@@ -692,17 +692,17 @@ export const computerDemos: Demo[] = [
     Desk: SheetDesk,
   },
   {
-    label: "Juno's browser",
+    label: "Juno’s browser",
     steps: 6,
     gap: 950,
     chat: [
       { from: "you", text: "Compare e-signature tools for our sales proposals.", at: 1 },
-      { from: "juno", title: "Here's the difference.", text: "Juno's take: For sales proposals, I'd try PandaDoc first.", at: 6 },
+      { from: "juno", title: "Here’s the difference.", text: "Juno’s take: For sales proposals, I’d try PandaDoc first.", at: 6 },
     ],
     Desk: ResearchDesk,
   },
   {
-    label: "Juno's browser",
+    label: "Juno’s browser",
     steps: 7,
     gap: 850,
     chat: [
@@ -734,7 +734,7 @@ function LaunchRoom({ s, from = 0, live = false, compact = false }: { s: number;
         <In s={s} at={from + 1}>
           <div className="flex flex-wrap items-end justify-between gap-2">
             <div>
-              <p className="text-[10px] font-medium uppercase tracking-[0.12em] text-[#8a909c]">Scheduled Reports</p>
+              <p className="text-[12px] text-[#8a909c]">Scheduled Reports launch</p>
               <p className={`font-semibold tracking-[-0.02em] ${compact ? "text-[17px]" : "text-[21px]"}`}>Launch day. No loose ends.</p>
             </div>
             <span className="rounded-full bg-[#EEF2FF] px-2 py-0.5 text-[11px] font-medium text-[#3b4fd8]">1 approval to go</span>
@@ -884,7 +884,7 @@ export const appsDemos: Demo[] = [
     gap: 850,
     chat: [
       { from: "you", text: "Publish the launch dashboard at launch.yourcompany.com.", at: 1 },
-      { from: "juno", text: "Let's go live.", at: 2 },
+      { from: "juno", text: "Let’s go live.", at: 2 },
       { from: "juno", text: "Live at launch.yourcompany.com.", at: 7 }, // [new]
     ],
     Desk: PublishDesk,
@@ -974,7 +974,7 @@ function DraftsDesk({ s }: DeskProps) {
 
 function FormDesk({ s }: DeskProps) {
   const name = "Alex Morgan";
-  const email = "alex@example.com";
+  const email = "alex@northwind.co";
   const typedName = s >= 2 ? name : "";
   const typedEmail = s >= 2 ? email : "";
   const sent = s >= 3;
@@ -1052,7 +1052,7 @@ export const contentDemos: Demo[] = [
     steps: 4,
     gap: 1100,
     chat: [
-      { from: "you", text: "Draft the Scheduled Reports announcement. I'll review it before it goes live.", at: 1 },
+      { from: "you", text: "Draft the Scheduled Reports announcement. I’ll review it before it goes live.", at: 1 },
       { from: "juno", text: "Ready for your review.", at: 2 },
       { from: "you", text: "Looks good. Publish it.", at: 3 },
       { from: "juno", text: "Published to your website.", at: 4 },
@@ -1198,7 +1198,7 @@ function AskAutoDesk({ s, approved, approve }: DeskProps) {
   return (
     <div className="space-y-3">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <p className="text-[15px] font-medium text-text">{mode === "ask" ? "A quick yes from you." : "Already in Juno's hands."}</p>
+        <p className="text-[15px] font-medium text-text">{mode === "ask" ? "A quick yes from you." : "Already in Juno’s hands."}</p>
         <div role="radiogroup" aria-label="Permission" className="flex rounded-full border border-white/[0.1] bg-white/[0.03] p-0.5">
           {(["ask", "auto"] as const).map((m) => (
             <button
@@ -1257,7 +1257,7 @@ function AskAutoDesk({ s, approved, approve }: DeskProps) {
           ) : (
             <motion.div key="auto" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.4, ease: calm }} className="space-y-2 rounded-[12px] border border-white/[0.1] bg-[#151A22] p-3 text-[13.5px] text-text">
               <p className="flex items-center gap-2">
-                <MascotMark size={18} /> {autoStep >= 2 ? "Posted in #team." : "I'll post it in #team."}
+                <MascotMark size={18} /> {autoStep >= 2 ? "Posted in #team." : "I’ll post it in #team."}
               </p>
               <p className="flex items-center gap-1.5 text-[12px] text-muted">
                 <BrandIcon id="slack" size={12} className="!shadow-none" /> Slack · Send messages · Permission already granted
@@ -1276,7 +1276,7 @@ export const toolsDemos: Demo[] = [
     steps: 5,
     gate: 3,
     chat: [
-      { from: "you", text: "Turn the invoice export request from yesterday's call into a Linear issue.", at: 1 },
+      { from: "you", text: "Turn the invoice export request from yesterday’s call into a Linear issue.", at: 1 },
       { from: "juno", text: "Ready for your approval.", at: 3 },
       { from: "juno", text: "Created in Linear. Call attached, too.", at: 5 },
     ],
@@ -1284,12 +1284,12 @@ export const toolsDemos: Demo[] = [
     Desk: ActionsDesk,
   },
   {
-    label: "Juno's browser",
+    label: "Juno’s browser",
     steps: 5,
     gap: 1000,
     chat: [
       { from: "you", text: "Open our billing portal and check the invoice export options.", at: 1 },
-      { from: "juno", text: "I'll take a look.", at: 2 },
+      { from: "juno", text: "I’ll take a look.", at: 2 },
       { from: "juno", title: "CSV or PDF. Filtered by date.", text: "Want me to export last month?", at: 5 },
     ],
     Desk: BillingDesk,
@@ -1427,7 +1427,7 @@ export const jobsDemos: Demo[] = [
     gap: 1000,
     chat: [
       { from: "you", text: "Watch our competitors for product and pricing changes. Brief me every Friday at 9 AM.", at: 1 },
-      { from: "juno", text: "I'm setting that up.", at: 2 },
+      { from: "juno", text: "I’m setting that up.", at: 2 },
       { from: "juno", title: "Consider it covered.", text: "A weekly briefing, right here.", at: 4 },
     ],
     Desk: InstructionsDesk,
@@ -1449,7 +1449,7 @@ export const jobsDemos: Demo[] = [
     chat: [
       { from: "juno", title: "Your competitor briefing is ready.", text: "Three changes this month, each with a source.", at: 4 }, // text [new]
     ],
-    ask: { q: "I'd start with our sales comparison. Want me to update it?", at: 5, done: "On it" },
+    ask: { q: "I’d start with our sales comparison. Want me to update it?", at: 5, done: "On it" },
     Desk: ResultsDesk,
   },
 ];

@@ -19,7 +19,7 @@ import { BrandDecor, MacBook, ContentDecor, JobsDecor, KnowledgeDecor } from "./
 type FrameOpts = { variant: Variant; nav?: NavId; chatWidth: number; height: number; rail?: boolean; thread: string; project?: string };
 
 const frames: Record<string, FrameOpts> = {
-  knowledge: { variant: "full", nav: "Knowledge", chatWidth: 320, height: 600, thread: "Next quarter's priorities", project: "Product" },
+  knowledge: { variant: "full", nav: "Knowledge", chatWidth: 320, height: 600, thread: "Next quarter’s priorities", project: "Product" },
   brand: { variant: "chat+desk", chatWidth: 290, height: 600, thread: "Scheduled Reports launch", project: "Marketing" },
   computer: { variant: "chat+desk", chatWidth: 320, height: 540, thread: "Hands-on work", project: "Operations" },
   apps: { variant: "chat+desk", chatWidth: 340, height: 620, thread: "Launch dashboard", project: "Product launch" },
@@ -117,7 +117,7 @@ function useArrows(count: number, current: number, pick: (i: number) => void, ve
 
 function Section({ c, children, className = "" }: { c: Chapter; children: ReactNode; className?: string }) {
   return (
-    <section id={c.id} aria-labelledby={`${c.id}-title`} className={`scroll-mt-24 overflow-x-clip pt-36 md:pt-56 ${className}`} data-chapter={c.id}>
+    <section id={c.id} aria-labelledby={`${c.id}-title`} className={`scroll-mt-24 overflow-x-clip pt-44 md:pt-72 ${className}`} data-chapter={c.id}>
       <div className="container-page">{children}</div>
     </section>
   );

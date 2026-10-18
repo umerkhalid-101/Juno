@@ -93,7 +93,7 @@ export const features: Feature[] = [
     group: "knows",
     tier: 1,
     line: "Company knowledge that stays useful, and up to date.",
-    problem: "The answer lives in someone's head",
+    problem: "The answer lives in someone’s head",
     proof: "Juno keeps the wiki current from calls, Slack, and docs, so nobody has to.",
   },
   {
@@ -129,7 +129,7 @@ export const features: Feature[] = [
     group: "does",
     tier: 2,
     line: "Your stack, connected to an AI that can act on it.",
-    problem: "Your tools don't talk to each other",
+    problem: "Your tools don’t talk to each other",
     proof: "Ask in one tool, get it done in another, with the context carried over.",
   },
   {
@@ -165,7 +165,7 @@ export const features: Feature[] = [
     group: "makes",
     tier: 1,
     line: "Turn “we need a tool for that” into a working app.",
-    problem: "The tool you need doesn't exist",
+    problem: "The tool you need doesn’t exist",
     proof: "Describe it. Juno builds it on your data and publishes it.",
   },
   {
@@ -202,7 +202,7 @@ export const features: Feature[] = [
     tier: 2,
     line: "The credentials Juno needs. With access you control.",
     problem: "Sharing passwords feels risky",
-    proof: "Juno uses what you approve, never sees what you don't.",
+    proof: "Juno uses what you approve, never sees what you don’t.",
   },
   {
     id: "quick-ask",
@@ -260,7 +260,7 @@ export const compare = {
 export const chapters = {
   knows: {
     title: "It knows your company.",
-    muted: "Like it's been there for years.",
+    muted: "Like it’s been there for years.",
     sub: "One customer call. Five ways it makes Juno smarter.",
     steps: [
       "Captured on the call",
@@ -301,7 +301,7 @@ export const chapters = {
 };
 
 export const interlude = {
-  line: "Halfway in. Here's what that adds up to.",
+  line: "Halfway in. Here’s what that adds up to.",
   figures: [
     { value: 16, label: "Features, one workspace" },
     { value: 4, label: "Abilities, one teammate" },

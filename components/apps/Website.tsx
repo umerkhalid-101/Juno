@@ -34,7 +34,7 @@ export function Website() {
     setFresh("home");
     window.setTimeout(() => setFresh(null), 1600);
   };
-  const touch = useIdle(cms, 6000, () => {
+  const touch = useIdle(cms, 3000, () => {
     if (reduce) return publish();
     setCursor("move");
     window.setTimeout(() => setCursor("press"), 900);

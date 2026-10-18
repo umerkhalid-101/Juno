@@ -7,7 +7,7 @@ import { PageCta } from "@/components/ui/PageCta";
 
 const title = "AI Automations for Founders & Teams | Juno";
 const description =
-  "Put recurring work on Juno's schedule. Explore AI automations for competitor research, customer follow-ups, company updates and more.";
+  "Put recurring work on Juno’s schedule. Explore AI automations for competitor research, customer follow-ups, company updates and more.";
 
 export const metadata: Metadata = {
   title,

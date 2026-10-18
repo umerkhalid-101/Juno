@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { Check } from "lucide-react";
 import { StatusChip, type Status } from "@/components/ui/StatusChip";
+import { useAutoPlay } from "@/components/ui/useAutoPlay";
 
 /** surface-2 pill: question + Approve + Edit. Approve snaps to a Sent chip. */
 export function ApprovalPrompt({
@@ -19,9 +20,17 @@ export function ApprovalPrompt({
   onApprove?: () => void;
   className?: string;
 }) {
+  const ref = useRef<HTMLDivElement>(null);
   const [done, setDone] = useState(false);
+  const approve = () => {
+    setDone(true);
+    onApprove?.();
+  };
+  // nobody has to find the button: three seconds on screen and it approves itself
+  useAutoPlay(ref, approve, !done);
   return (
     <div
+      ref={ref}
       className={`flex min-h-14 items-center justify-between gap-3 rounded-full border border-line bg-surface-2 py-2 pl-5 pr-2 ${className}`}
       role="group"
       aria-label="Approval"
@@ -43,10 +52,7 @@ export function ApprovalPrompt({
               </button>
               <button
                 type="button"
-                onClick={() => {
-                  setDone(true);
-                  onApprove?.();
-                }}
+                onClick={approve}
                 className="h-10 rounded-full bg-text px-4 text-[14px] font-semibold text-bg transition-shadow duration-200 hover:shadow-[0_0_0_4px_rgba(50,76,255,0.3)] active:scale-[0.97]"
               >
                 Approve

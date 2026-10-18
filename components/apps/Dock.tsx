@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState, type ComponentType, type KeyboardEvent } from "react";
-import { AnimatePresence, motion, useReducedMotion } from "motion/react";
+import { useCallback, useEffect, useRef, useState, type ComponentType, type KeyboardEvent } from "react";
+import { AnimatePresence, animate, motion, useInView, useReducedMotion } from "motion/react";
 import { ArrowUpRight, BatteryFull, BookOpen, Calculator, ChevronsUp, DoorOpen, FolderCheck, Send, Wifi } from "lucide-react";
 import { ChapterIntro } from "@/components/ui/ChapterIntro";
 import { MascotMark } from "@/components/mascot/Mascot";
@@ -23,7 +23,6 @@ const APPS: Record<AppId, { Glyph: ComponentType<{ size?: number; strokeWidth?: 
 };
 const IDS = d.apps.map((a) => a.id);
 const TILE = 58;
-const GAP = 10;
 
 /** A clock for the menu bar, set on the client so the server and browser agree. */
 function useClock() {
@@ -48,6 +47,77 @@ export function Dock() {
   const [hover, setHover] = useState<number | null>(null);
   const btns = useRef<(HTMLButtonElement | null)[]>([]);
   const clock = useClock();
+  // like a reel: the apps sit side by side and every 3 seconds the screen scrolls across to the
+  // next one (back to the first after the last). Hovering the desktop or scrolling away pauses it;
+  // a trackpad swipe or the dock moves it too.
+  const screen = useRef<HTMLDivElement>(null);
+  const reel = useRef<HTMLDivElement>(null);
+  const glide = useRef<ReturnType<typeof animate> | null>(null);
+  const moving = useRef(false);
+  const inView = useInView(screen, { amount: 0.4 });
+  const [held, setHeld] = useState(false);
+  useEffect(() => {
+    if (reduce || held || !inView) return;
+    const t = window.setTimeout(() => setOpen((o) => IDS[(IDS.indexOf(o) + 1) % IDS.length]), 3000);
+    return () => window.clearTimeout(t);
+  }, [open, reduce, held, inView]);
+  const slideTo = useCallback(
+    (i: number, instant = false) => {
+      const el = reel.current;
+      if (!el) return;
+      glide.current?.stop();
+      const to = i * el.clientWidth;
+      if (instant || reduce) {
+        el.scrollLeft = to;
+        return;
+      }
+      moving.current = true;
+      glide.current = animate(el.scrollLeft, to, {
+        duration: 0.85,
+        ease: [0.65, 0, 0.35, 1],
+        onUpdate: (v) => {
+          el.scrollLeft = v;
+        },
+        onComplete: () => {
+          moving.current = false;
+        },
+      });
+    },
+    [reduce],
+  );
+  useEffect(() => {
+    const i = IDS.indexOf(open);
+    slideTo(i);
+    // on a phone the dock scrolls too: keep the open app's icon in view
+    const b = btns.current[i];
+    const bar = b?.parentElement;
+    if (b && bar && bar.scrollWidth > bar.clientWidth) {
+      bar.scrollTo({ left: b.offsetLeft - (bar.clientWidth - b.offsetWidth) / 2, behavior: reduce ? "auto" : "smooth" });
+    }
+  }, [open, slideTo, reduce]);
+  const openRef = useRef(open);
+  useEffect(() => {
+    openRef.current = open;
+  }, [open]);
+  // keep the open app lined up when the window resizes
+  useEffect(() => {
+    const fit = () => slideTo(IDS.indexOf(openRef.current), true);
+    window.addEventListener("resize", fit);
+    return () => window.removeEventListener("resize", fit);
+  }, [slideTo]);
+  // a swipe across the reel settles on the nearest app
+  const settle = useRef(0);
+  const onReelScroll = () => {
+    if (moving.current) return;
+    window.clearTimeout(settle.current);
+    settle.current = window.setTimeout(() => {
+      const el = reel.current;
+      if (!el) return;
+      const i = Math.round(el.scrollLeft / el.clientWidth);
+      if (IDS[i] === openRef.current) slideTo(i);
+      else setOpen(IDS[i]);
+    }, 140);
+  };
   const idx = IDS.indexOf(open);
   const app = d.apps[idx];
   const tint = APPS[open].tint;
@@ -61,132 +131,136 @@ export function Dock() {
     btns.current[(Math.max(at, 0) + step + IDS.length) % IDS.length]?.focus();
   };
 
-  // the window grows out of its icon and shrinks back into it
-  const iconX = (i: number) => (i - (IDS.length - 1) / 2) * (TILE + GAP);
-  const genie = (i: number) => (reduce ? { opacity: 0 } : { opacity: 0, scale: 0.1, x: iconX(i), y: 300 });
-
   return (
     <Section id="app-ideas" labelledBy="dock-title">
       <ChapterIntro id="dock-title" lead={d.lead} muted={d.muted} sub={d.sub} />
 
-      {/* the screen */}
-      <div className="mx-auto mt-14 max-w-[1240px] rounded-[30px] border border-white/[0.08] bg-[#0A0C11] p-2 shadow-[0_50px_140px_-30px_rgba(0,0,0,0.9)] md:mt-20 md:rounded-[36px] md:p-2.5">
-        <div className="relative h-[700px] overflow-hidden rounded-[24px] bg-[#05070B] md:h-[780px] md:rounded-[28px]" style={{ ["--tint" as string]: tint }}>
-          {/* wallpaper: dark, with the open app's light falling across it */}
-          <div aria-hidden className="apps-wall absolute inset-0" />
-
-          {/* menu bar */}
-          <div className="relative z-20 flex h-9 items-center gap-5 px-4 text-[12.5px] text-text/85 md:h-10 md:px-6">
-            <MascotMark size={15} />
-            <span className="font-semibold text-text">{app.name}</span>
-            {["File", "Edit", "View", "Share", "Help"].map((m) => (
-              <span key={m} className="hidden text-text/70 md:inline">
-                {m}
-              </span>
-            ))}
-            <span className="ml-auto hidden items-center gap-1.5 text-text/70 lg:flex">
-              <span className="size-1.5 rounded-full bg-[#3DD68C]" />
-              Built by Juno
-            </span>
-            <Wifi size={14} className="hidden text-text/70 sm:block" aria-hidden />
-            <BatteryFull size={16} className="hidden text-text/70 sm:block" aria-hidden />
-            <span className="min-w-[110px] text-right tabular-nums text-text/85 max-sm:ml-auto max-sm:min-w-0">{clock}</span>
-          </div>
-
-          {/* the open app */}
-          <div className="absolute inset-x-3 bottom-[118px] top-[52px] z-10 mx-auto max-w-[920px] md:inset-x-10 md:bottom-[132px] md:top-[76px]">
-            <AnimatePresence mode="popLayout" initial={false}>
-              {IDS.map((id, i) => {
-                if (id !== open) return null;
-                const { App, url, chrome } = APPS[id];
-                return (
-                  <motion.div
-                    key={id}
-                    className="absolute inset-0 origin-bottom"
-                    initial={genie(i)}
-                    animate={{ opacity: 1, scale: 1, x: 0, y: 0 }}
-                    exit={genie(i)}
-                    transition={{ duration: reduce ? 0 : 0.45, ease: base }}
-                  >
-                    <Window url={url} chrome={chrome} className="h-full">
-                      <App />
-                    </Window>
-                  </motion.div>
-                );
-              })}
-            </AnimatePresence>
-          </div>
-
-          {/* the dock, with the label of the app you're on (or pointing at) above it */}
-          <div className="absolute inset-x-0 bottom-5 z-20 flex flex-col items-center px-3 md:bottom-6">
-            <AnimatePresence mode="wait" initial={false}>
-              <motion.span
-                key={label}
-                initial={{ opacity: 0, y: 4 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, transition: { duration: 0.08 } }}
-                transition={{ duration: 0.15 }}
-                className="mb-3 whitespace-nowrap rounded-[8px] border border-white/[0.12] bg-[#151A22] px-3 py-1 text-[13px] text-text"
-              >
-                {d.apps[label].name}
-              </motion.span>
-            </AnimatePresence>
+      <div className="mt-14 md:mt-20">
+        <div>
+          {/* the screen */}
+          <div
+            ref={screen}
+            onPointerEnter={(e) => e.pointerType === "mouse" && setHeld(true)}
+            onPointerLeave={() => setHeld(false)}
+            onFocusCapture={() => setHeld(true)}
+            onBlurCapture={() => setHeld(false)}
+            className="mx-auto max-w-[1240px] rounded-[30px] border border-white/[0.08] bg-[#0A0C11] p-2 shadow-[0_50px_140px_-30px_rgba(0,0,0,0.9)] md:rounded-[36px] md:p-2.5"
+          >
             <div
-              role="toolbar"
-              aria-label="App ideas"
-              onKeyDown={onKey}
-              onPointerLeave={() => setHover(null)}
-              className="flex max-w-full items-end gap-2.5 overflow-x-auto rounded-[24px] border border-white/[0.1] bg-[#0D1016]/90 p-2.5 shadow-[0_20px_50px_-15px_rgba(0,0,0,0.9)] lg:overflow-visible"
+              className="relative h-[700px] overflow-hidden rounded-[24px] bg-[#05070B] md:h-[780px] md:rounded-[28px]"
+              style={{ ["--tint" as string]: tint }}
             >
-              {d.apps.map((a, i) => {
-                const { Glyph } = APPS[a.id];
-                const on = a.id === open;
-                const dist = hover === null ? 9 : Math.abs(hover - i);
-                const scale = reduce ? 1 : dist === 0 ? 1.18 : dist === 1 ? 1.06 : 1;
-                return (
-                  <motion.button
-                    key={a.id}
-                    ref={(el) => {
-                      btns.current[i] = el;
-                    }}
-                    type="button"
-                    aria-label={a.name}
-                    aria-pressed={on}
-                    tabIndex={on ? 0 : -1}
-                    onPointerEnter={(e) => e.pointerType === "mouse" && setHover(i)}
-                    onFocus={() => setHover(i)}
-                    onBlur={() => setHover(null)}
-                    onClick={() => setOpen(a.id)}
-                    animate={{ scale, y: on ? -4 : 0 }}
-                    transition={{ duration: 0.2, ease: "easeOut" }}
-                    className={`grid shrink-0 origin-bottom place-items-center rounded-[16px] ring-1 transition-[background,color,box-shadow] duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#009CFF] ${
-                      on
-                        ? "bg-[linear-gradient(180deg,#3A404C,#1C2028)] text-white shadow-[0_10px_24px_-8px_rgba(0,0,0,0.8),inset_0_1px_0_rgba(255,255,255,0.18)] ring-white/20"
-                        : "bg-[linear-gradient(180deg,#1A1E26,#12151B)] text-muted ring-white/[0.07] hover:text-text"
-                    }`}
-                    style={{ width: TILE, height: TILE }}
+              {/* wallpaper: dark, with the open app's light falling across it */}
+              <div aria-hidden className="apps-wall absolute inset-0" />
+
+              {/* menu bar */}
+              <div className="relative z-20 flex h-9 items-center gap-5 px-4 text-[12.5px] text-text/85 md:h-10 md:px-6">
+                <MascotMark size={15} />
+                <span className="font-semibold text-text">{app.name}</span>
+                {["File", "Edit", "View", "Share", "Help"].map((m) => (
+                  <span key={m} className="hidden text-text/70 md:inline">
+                    {m}
+                  </span>
+                ))}
+                <span className="ml-auto hidden items-center gap-1.5 text-text/70 lg:flex">
+                  <span className="size-1.5 rounded-full bg-[#3DD68C]" />
+                  Built by Juno
+                </span>
+                <Wifi size={14} className="hidden text-text/70 sm:block" aria-hidden />
+                <BatteryFull size={16} className="hidden text-text/70 sm:block" aria-hidden />
+                <span className="min-w-[110px] text-right tabular-nums text-text/85 max-sm:ml-auto max-sm:min-w-0">{clock}</span>
+              </div>
+
+              {/* the apps, side by side on a reel that scrolls across */}
+              <div
+                ref={reel}
+                onScroll={onReelScroll}
+                className="absolute [scrollbar-width:none] [&::-webkit-scrollbar]:hidden inset-x-0 bottom-[118px] top-[52px] z-10 flex overflow-x-auto overscroll-x-contain md:bottom-[132px] md:top-[76px]"
+              >
+                {IDS.map((id) => {
+                  const { App, url, chrome } = APPS[id];
+                  return (
+                    <div key={id} className="h-full w-full shrink-0 px-3 md:px-10" aria-hidden={id !== open} inert={id !== open}>
+                      <Window url={url} chrome={chrome} className="mx-auto h-full max-w-[920px]">
+                        <App />
+                      </Window>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* the dock, with the label of the app you're on (or pointing at) above it */}
+              <div className="absolute inset-x-0 bottom-5 z-20 flex flex-col items-center px-3 md:bottom-6">
+                <AnimatePresence mode="wait" initial={false}>
+                  <motion.span
+                    key={label}
+                    initial={{ opacity: 0, y: 4 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, transition: { duration: 0.08 } }}
+                    transition={{ duration: 0.15 }}
+                    className="mb-3 whitespace-nowrap rounded-[8px] border border-white/[0.12] bg-[#151A22] px-3 py-1 text-[13px] text-text"
                   >
-                    <Glyph size={22} strokeWidth={1.6} />
-                  </motion.button>
-                );
-              })}
+                    {d.apps[label].name}
+                  </motion.span>
+                </AnimatePresence>
+                <div
+                  role="toolbar"
+                  aria-label="App ideas"
+                  onKeyDown={onKey}
+                  onPointerLeave={() => setHover(null)}
+                  className="flex max-w-full items-end gap-2.5 overflow-x-auto rounded-[24px] border border-white/[0.1] bg-[#0D1016]/90 p-2.5 shadow-[0_20px_50px_-15px_rgba(0,0,0,0.9)] lg:overflow-visible"
+                >
+                  {d.apps.map((a, i) => {
+                    const { Glyph } = APPS[a.id];
+                    const on = a.id === open;
+                    const dist = hover === null ? 9 : Math.abs(hover - i);
+                    const scale = reduce ? 1 : dist === 0 ? 1.18 : dist === 1 ? 1.06 : 1;
+                    return (
+                      <motion.button
+                        key={a.id}
+                        ref={(el) => {
+                          btns.current[i] = el;
+                        }}
+                        type="button"
+                        aria-label={a.name}
+                        aria-pressed={on}
+                        tabIndex={on ? 0 : -1}
+                        onPointerEnter={(e) => e.pointerType === "mouse" && setHover(i)}
+                        onFocus={() => setHover(i)}
+                        onBlur={() => setHover(null)}
+                        onClick={() => setOpen(a.id)}
+                        animate={{ scale, y: on ? -4 : 0 }}
+                        transition={{ duration: 0.2, ease: "easeOut" }}
+                        className={`grid shrink-0 origin-bottom place-items-center rounded-[16px] ring-1 transition-[background,color,box-shadow] duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#009CFF] ${
+                          on
+                            ? "bg-[linear-gradient(180deg,#3A404C,#1C2028)] text-white shadow-[0_10px_24px_-8px_rgba(0,0,0,0.8),inset_0_1px_0_rgba(255,255,255,0.18)] ring-white/20"
+                            : "bg-[linear-gradient(180deg,#1A1E26,#12151B)] text-muted ring-white/[0.07] hover:text-text"
+                        }`}
+                        style={{ width: TILE, height: TILE }}
+                      >
+                        <Glyph size={22} strokeWidth={1.6} />
+                      </motion.button>
+                    );
+                  })}
+                </div>
+              </div>
             </div>
           </div>
-        </div>
-      </div>
 
-      {/* the open idea, in words */}
-      <div className="mx-auto mt-10 max-w-[620px] text-center" aria-live="polite">
-        <AnimatePresence mode="wait" initial={false}>
-          <motion.div key={open} initial={reduce ? false : { opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, transition: { duration: 0.12 } }} transition={{ duration: 0.4, ease: base }}>
-            <h3 className="text-[24px] font-medium leading-[30px] tracking-[-0.025em] text-text md:text-[28px] md:leading-[34px]">{app.headline}</h3>
-            <p className="mx-auto mt-3 max-w-[48ch] text-[16px] leading-[26px] text-muted">{app.body}</p>
-            <a href={CTA_HREF} className="mt-5 inline-flex items-center gap-1.5 text-[15px] font-medium text-[#A6BBFF] transition-colors hover:text-text">
-              {d.try}
-              <ArrowUpRight size={15} aria-hidden />
-            </a>
-          </motion.div>
-        </AnimatePresence>
+          {/* the open idea, in words */}
+          <div className="mx-auto mt-10 max-w-[620px] text-center" aria-live="polite">
+            <AnimatePresence mode="wait" initial={false}>
+              <motion.div key={open} initial={reduce ? false : { opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, transition: { duration: 0.12 } }} transition={{ duration: 0.4, ease: base }}>
+                <h3 className="text-[24px] font-medium leading-[30px] tracking-[-0.025em] text-text md:text-[28px] md:leading-[34px]">{app.headline}</h3>
+                <p className="mx-auto mt-3 max-w-[48ch] text-[16px] leading-[26px] text-muted">{app.body}</p>
+                <a href={CTA_HREF} className="mt-5 inline-flex items-center gap-1.5 text-[15px] font-medium text-[#A6BBFF] transition-colors hover:text-text">
+                  {d.try}
+                  <ArrowUpRight size={15} aria-hidden />
+                </a>
+              </motion.div>
+            </AnimatePresence>
+          </div>
+        </div>
       </div>
       {/* the other ideas, for search and screen readers */}
       <div className="sr-only">

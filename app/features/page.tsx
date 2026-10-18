@@ -10,7 +10,7 @@ import { FxCta } from "@/components/features/FxCta";
 
 const title = "AI Features: Computer, Browser, Apps & More | Juno";
 const description =
-  "Explore Juno's computer and browser, app builder, company wiki, vault, meeting recorder, built-in CMS and more. See what each feature can do.";
+  "Explore Juno’s computer and browser, app builder, company wiki, vault, meeting recorder, built-in CMS and more. See what each feature can do.";
 
 export const metadata: Metadata = {
   title,

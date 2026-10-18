@@ -8,7 +8,7 @@ export const BROWSER_HREF = "https://www.runjuno.ai/login";
 
 export const download = {
   meta: {
-    title: "Download Juno for Mac | Your AI Chief of Staff",
+    title: "Download Juno for Mac | Juno",
     description:
       "Download Juno for Mac. Use Quick Ask to get help with what’s on your screen, ask by voice and keep your company’s work moving without switching apps.",
   },
@@ -24,10 +24,16 @@ export const download = {
   screen: {
     app: "Launch plan",
     label: "Launch checklist",
-    eyebrow: "Scheduled reports",
     title: "Ready for Friday.",
-    sub: "One last thing before we launch.",
-    checklist: ["Website ready", "Help center ready", "Customer email"],
+    sub: "Northwind 2.0 goes live Friday at 9am. One thing left.",
+    due: "Fri, Oct 24",
+    pages: ["Overview", "Launch checklist", "Announcement", "Customer email"],
+    checklist: [
+      { task: "Website updated", owner: "MK", tint: "#6C7CFF", due: "Mon", status: "Done" },
+      { task: "Help center articles", owner: "AR", tint: "#E0875A", due: "Tue", status: "Done" },
+      { task: "Pricing page live", owner: "JS", tint: "#3BA57A", due: "Wed", status: "Done" },
+      { task: "Customer email", owner: "LT", tint: "#B46CD8", due: "Thu", status: "Draft" },
+    ],
     quick: "Right here. Ready to help.",
     attach: "Product launch",
     placeholder: "Ask about your screen…",

@@ -114,6 +114,13 @@ export function AppsHero() {
   };
   const settled = 0.1 + PARTS.length * GAP + 0.5;
 
+  // once the dashboard has settled, Juno drafts the check-in three seconds later (no click needed)
+  useEffect(() => {
+    if (!built || drafted || reduce || !visible) return;
+    const t = window.setTimeout(() => setDrafted(true), (settled + 3) * 1000);
+    return () => window.clearTimeout(t);
+  }, [built, drafted, reduce, visible, settled]);
+
   // on a loop: once built, hold for 10 seconds, then build it again (paused on hover or off screen)
   useEffect(() => {
     if (!built || reduce || !visible || hover) return;

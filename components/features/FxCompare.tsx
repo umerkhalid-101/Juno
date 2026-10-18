@@ -1,11 +1,12 @@
 "use client";
 
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { ArrowUp, ListTodo, MessageSquare, RotateCcw } from "lucide-react";
 import { BrandIcon } from "@/components/ui/BrandIcon";
 import { MascotMark } from "@/components/mascot/Mascot";
 import { ApprovalPrompt } from "@/components/demo/ApprovalPrompt";
+import { useAutoPlay } from "@/components/ui/useAutoPlay";
 import { Face } from "@/components/jobs/scenes";
 import { compare } from "@/lib/features";
 import { SectionHead, usePlayOnce, useTyped } from "./kit";
@@ -68,7 +69,11 @@ export function FxCompare() {
   const [ref, on] = usePlayOnce<HTMLDivElement>(0.4);
   const [run, setRun] = useState(0);
   const [step, setStep] = useState(0);
-  const [tab, setTab] = useState<"bot" | "juno">("juno");
+  const [tab, setTab] = useState<"bot" | "juno">("bot");
+  const [picked, setPicked] = useState(false);
+  const tabs = useRef<HTMLDivElement>(null);
+  // phones: the chatbot first, then three seconds later Juno (unless they've picked a side)
+  useAutoPlay(tabs, () => setTab("juno"), tab === "bot" && !picked);
 
   const prompt = useTyped(compare.prompt, on, 38, 200);
   // the chatbot streams once the prompt is sent; replays restart it
@@ -122,14 +127,17 @@ export function FxCompare() {
           </div>
 
           {/* phones: one at a time */}
-          <div className="mt-8 flex justify-center md:hidden" role="tablist" aria-label="Compare">
+          <div ref={tabs} className="mt-8 flex justify-center md:hidden" role="tablist" aria-label="Compare">
             <div className="flex rounded-full border border-line bg-surface p-1">
               {(["bot", "juno"] as const).map((k) => (
                 <button
                   key={k}
                   role="tab"
                   aria-selected={tab === k}
-                  onClick={() => setTab(k)}
+                  onClick={() => {
+                    setPicked(true);
+                    setTab(k);
+                  }}
                   className={`h-10 rounded-full px-5 text-[14px] font-medium transition-colors ${
                     tab === k ? "bg-white/[0.08] text-text" : "text-muted"
                   }`}

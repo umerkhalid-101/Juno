@@ -232,8 +232,8 @@ export const workDemo = {
     subject: "Scheduled Reports ships Thursday",
     greeting: "Hi Priya,",
     body: [
-      "You asked us about scheduled exports a few weeks ago, so you're the first to hear: Scheduled Reports ships this Thursday.",
-      "Pick any Orbit dashboard, choose a time, and it lands in your team's inbox as a PDF or CSV. No more Monday screenshots.",
+      "You asked us about scheduled exports a few weeks ago, so you’re the first to hear: Scheduled Reports ships this Thursday.",
+      "Pick any Orbit dashboard, choose a time, and it lands in your team’s inbox as a PDF or CSV. No more Monday screenshots.",
       "Thanks for pushing us on this one.",
     ],
     signoff: "Maya",
@@ -312,7 +312,7 @@ export const faqs: { q: string; a: string; placeholder?: string }[] = [
   },
   {
     q: "Does it act without asking?",
-    a: "No. In Ask mode Juno checks with you before sending, posting, or changing anything. You can switch tools to Auto when you're ready.",
+    a: "No. In Ask mode Juno checks with you before sending, posting, or changing anything. You can switch tools to Auto when you’re ready.",
   },
   {
     q: "Which tools does it work with?",
@@ -324,13 +324,11 @@ export const faqs: { q: string; a: string; placeholder?: string }[] = [
   },
   {
     q: "Is our data secure?",
-    a: "Security details are on the way. This answer is a placeholder until the security page is ready.",
-    placeholder: "security answer",
+    a: "Juno only reaches the tools you connect, works within the permissions you give it, and asks before it changes anything. Ask the team for the full security overview.",
   },
   {
     q: "How much does it cost?",
-    a: "Pricing details are on the way. This answer is a placeholder until pricing is published.",
-    placeholder: "pricing answer",
+    a: "Juno is in early access. Request access and we’ll walk you through the plan that fits your team.",
   },
 ];
 
