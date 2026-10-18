@@ -96,7 +96,7 @@ function Build({ step }: { step: number }) {
   return (
     <div
       ref={stage}
-      className="relative overflow-hidden rounded-[28px] border border-white/[0.08] bg-[#0B0E14] lg:min-h-[640px]"
+      className="relative overflow-hidden rounded-[28px] border border-white/[0.08] bg-[#0B0E14]"
     >
       {/* the stage's world, in Juno's own colours */}
       <div
@@ -151,7 +151,19 @@ function Build({ step }: { step: number }) {
           <div className="min-w-0 flex-1">
             <p className="text-[12px] text-subtle">Juno</p>
             {step === 0 ? (
-              <Dots />
+              <>
+                <Dots />
+                <div className="mt-2.5 flex gap-1" aria-hidden>
+                  {WEEK.map((d, k) => (
+                    <span
+                      key={k}
+                      className="grid size-9 place-items-center rounded-lg border border-dashed border-white/[0.12] font-mono text-[12px] text-white/25"
+                    >
+                      {d}
+                    </span>
+                  ))}
+                </div>
+              </>
             ) : (
               <motion.div
                 initial={{ opacity: 0, y: 8 }}
@@ -176,6 +188,30 @@ function Build({ step }: { step: number }) {
                   ))}
                 </div>
               </motion.div>
+            )}
+
+            {step < 2 && (
+              <div
+                className="mt-5 rounded-[18px] border border-dashed border-white/[0.12] p-3.5"
+                aria-hidden
+              >
+                <p className="text-[13px] text-subtle">Friday&apos;s updates land here</p>
+                <div className="mt-3 space-y-2">
+                  {[0, 1, 2].map((k) => (
+                    <div
+                      key={k}
+                      className="flex items-center gap-3 rounded-xl bg-white/[0.03] px-3 py-2.5"
+                    >
+                      <span className="size-[30px] rounded-full bg-white/[0.06]" />
+                      <span className="flex-1 space-y-1.5">
+                        <span className="block h-2 w-24 rounded bg-white/[0.08]" />
+                        <span className="block h-1.5 w-36 rounded bg-white/[0.05]" />
+                      </span>
+                      <span className="h-6 w-24 rounded-md bg-white/[0.05]" />
+                    </div>
+                  ))}
+                </div>
+              </div>
             )}
 
             <AnimatePresence>
