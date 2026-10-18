@@ -1,7 +1,8 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { Apple, ArrowUpRight } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
+import { siApple } from "simple-icons";
 import { Mascot, type MascotApi } from "@/components/mascot/Mascot";
 import { Button } from "@/components/ui/Button";
 import { HeroOrbit } from "@/components/demo/HeroOrbit";
@@ -127,7 +128,7 @@ export function Ch0Promise() {
 
         <h1
           id="hero-title"
-          className="mt-4 max-w-[16ch] text-[48px] font-medium leading-[50px] tracking-[-0.04em] text-balance md:max-w-none md:text-[72px] md:leading-[72px] lg:text-[88px] lg:leading-[88px]"
+          className="mt-10 max-w-[16ch] text-[40px] font-medium leading-[44px] tracking-[-0.04em] text-balance md:mt-14 md:max-w-none md:text-[58px] md:leading-[62px] lg:text-[68px] lg:leading-[72px]"
         >
           <span className="block">
             {line1.map((w, i) => (
@@ -146,7 +147,7 @@ export function Ch0Promise() {
             ))}
           </span>
         </h1>
-        <p className="intro-hide intro-sub t-body-l mt-6 max-w-[46ch] text-pretty text-muted md:mt-7">
+        <p className="intro-hide intro-sub t-body-l mt-6 max-w-[46ch] text-pretty text-muted">
           Juno keeps up with your company and puts that knowledge to work across your apps.
         </p>
         <div className="intro-hide intro-cta mt-8 flex flex-wrap items-center justify-center gap-3 md:mt-10">
@@ -161,8 +162,12 @@ export function Ch0Promise() {
           <Button
             size="xl"
             variant="secondary"
-            href="#download"
-            icon={<Apple size={18} strokeWidth={1.5} aria-hidden />}
+            href="/download"
+            icon={
+              <svg viewBox="0 0 24 24" width={17} height={17} fill="currentColor" aria-hidden className="-mt-0.5">
+                <path d={siApple.path} />
+              </svg>
+            }
           >
             Download for Mac
           </Button>

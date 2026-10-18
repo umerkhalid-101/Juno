@@ -6,6 +6,7 @@ import { Check, Globe, Search } from "lucide-react";
 import { ToolLogo } from "@/components/ui/ToolLogo";
 import { DotField, type DotMode } from "./DotField";
 import type { ToolId } from "@/lib/story";
+import { IMG } from "@/lib/images";
 
 /** People, as real portraits (Unsplash, free licence). Names match the rest of the site. */
 const people = {
@@ -39,10 +40,6 @@ export function Face({
     </span>
   );
 }
-
-/** Real photography for the ad creatives (Unsplash, free licence). */
-const photo = (id: string) =>
-  `https://images.unsplash.com/photo-${id}?auto=format&fit=crop&w=600&q=75`;
 
 /**
  * The catalog card scenes, after Stripe: each job gets its own colour world, a main product
@@ -225,7 +222,7 @@ function FeedAd({
         </span>
       </div>
       <div className="relative h-[128px] bg-[#1b1d24]">
-        <Image src={photo(img)} alt="" fill sizes="240px" className="object-cover" />
+        <Image src={img} alt="" fill sizes="240px" className="object-cover" />
         <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,0)_40%,rgba(0,0,0,0.62))]" />
         <p
           className={`absolute inset-x-3 bottom-2.5 font-semibold leading-[1.05] tracking-[-0.03em] text-white ${strong ? "text-[19px]" : "text-[15px] opacity-90"}`}
@@ -263,7 +260,7 @@ function Ads() {
     <>
       {/* the tired creative, set back */}
       <FeedAd
-        img="1575318634028-6a0cfcb60c59"
+        img={IMG.adDeskPlain}
         headline="Reporting, simplified."
         cpl="$84 / lead"
         verdict={<Chip tone="warn">Needs a refresh</Chip>}
@@ -272,7 +269,7 @@ function Ads() {
       />
       {/* the winner, in front */}
       <FeedAd
-        img="1542330952-bffc55e812b2"
+        img={IMG.adDeskWarm}
         headline={
           <>
             Your Monday.

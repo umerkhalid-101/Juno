@@ -30,6 +30,7 @@ import { Reveal } from "@/components/ui/Reveal";
 import { ToolLogo } from "@/components/ui/ToolLogo";
 import { Mascot, type MascotApi } from "@/components/mascot/Mascot";
 import { type ToolId } from "@/lib/story";
+import { IMG } from "@/lib/images";
 
 /**
  * "What's on your plate?"
@@ -40,7 +41,6 @@ import { type ToolId } from "@/lib/story";
 const ease = [0.2, 0.8, 0.2, 1] as const;
 const calm = [0.16, 1, 0.3, 1] as const;
 const DWELL = 7000; // ms a finished answer stays before the next task
-const photo = (id: string, w = 900) => `https://images.unsplash.com/photo-${id}?auto=format&fit=crop&w=${w}&q=75`;
 
 /* ------------------------------------------------------------ small parts */
 
@@ -252,7 +252,7 @@ const LaunchKit = () => (
       </motion.div>
 
       {/* X post */}
-      <motion.div className="absolute right-0 top-7 w-[228px]" initial={{ opacity: 0, x: -120, rotate: 0 }} animate={{ opacity: 1, x: 0, rotate: 5 }} transition={{ duration: 0.7, delay: 0.55, ease: calm }}>
+      <motion.div className="absolute right-0 top-7 w-[228px]" initial={{ opacity: 0, x: -120, rotate: 0 }} animate={{ opacity: 1, x: 0, rotate: 3 }} transition={{ duration: 0.7, delay: 0.55, ease: calm }}>
         <div className="rounded-[14px] bg-white p-3 text-[#0f1419] shadow-[0_30px_60px_-28px_rgba(0,0,0,0.9)] ring-1 ring-black/[0.08]">
           <div className="flex gap-2">
             <OrbitMark s={30} />
@@ -441,9 +441,9 @@ const CloseLoop = () => (
 
 /** 4. Build us a website: a real storefront for the spring collection. */
 const products = [
-  { n: "Stone vase", p: "$48", img: "1674390521253-79caf82d0ceb" },
-  { n: "Shelf set", p: "$64", img: "1597696929736-6d13bed8e6a8" },
-  { n: "Field vase", p: "$52", img: "1613424777445-f93a2a48e285" },
+  { n: "Stone vase", p: "$48", img: IMG.vaseStone },
+  { n: "Sand vase", p: "$36", img: IMG.vaseSand },
+  { n: "Dome lamp", p: "$84", img: IMG.lampDome },
 ];
 const Website = () => (
   <Rise d={0}>
@@ -466,17 +466,17 @@ const Website = () => (
           <span className="rounded-full bg-[#14161f] px-2 py-0.5 text-[10.5px] text-white">Bag 0</span>
         </span>
       </div>
-      <div className="relative mx-3 h-[118px] overflow-hidden rounded-xl bg-[#EDE6DC] sm:h-[124px]">
-        <Image src={photo("1638303322325-ff70d6224a22", 1000)} alt="" fill sizes="(max-width: 640px) 100vw, 600px" className="object-cover" />
-        <div className="absolute inset-0 bg-gradient-to-r from-[#F7F2EA] via-[#F7F2EA]/80 to-transparent" />
-        <div className="absolute inset-y-0 left-0 flex flex-col justify-center px-4">
+      <div className="relative mx-3 overflow-hidden rounded-xl bg-[#EDE6DC]">
+        <Image src={IMG.ceramicsHero} alt="" fill sizes="(max-width: 640px) 100vw, 600px" className="object-cover object-[70%_55%]" />
+        <div className="absolute inset-0 bg-gradient-to-r from-[#F7F4EF] from-25% via-[#F7F4EF]/70 via-45% to-transparent to-75%" />
+        <div className="relative flex flex-col items-start px-4 py-3">
           <p className="font-mono text-[9.5px] uppercase tracking-[0.16em] text-[#a2541f]">The Spring Edit</p>
-          <p className="mock-serif mt-1 text-[26px] leading-[0.98] tracking-[-0.02em] sm:text-[30px]">
+          <p className="mock-serif mt-0.5 text-[24px] leading-[0.98] tracking-[-0.02em] sm:text-[27px]">
             Everyday,
             <br />
             beautiful.
           </p>
-          <span className="mt-2.5 inline-flex w-fit items-center gap-1 rounded-full bg-[#14161f] px-3 py-1 text-[11px] font-medium text-white">
+          <span className="mt-2 inline-flex w-fit items-center gap-1 rounded-full bg-[#14161f] px-3 py-1 text-[11px] font-medium text-white">
             Explore the collection
             <ArrowRight size={11} aria-hidden />
           </span>
@@ -487,8 +487,8 @@ const Website = () => (
         <div className="mt-1.5 grid grid-cols-3 gap-2">
           {products.map((pr, i) => (
             <Rise key={pr.n} d={0.2 + i * 0.08} className="rounded-lg bg-white p-1.5 ring-1 ring-black/[0.05]">
-              <div className="relative h-[46px] overflow-hidden rounded-md bg-[#EDE6DC] sm:h-[44px]">
-                <Image src={photo(pr.img, 300)} alt="" fill sizes="160px" className="object-cover" />
+              <div className="relative h-[42px] overflow-hidden rounded-md bg-[#EDE6DC] sm:h-[36px]">
+                <Image src={pr.img} alt="" fill sizes="160px" className="object-cover" />
               </div>
               <p className="mt-1 flex justify-between px-0.5 text-[10.5px]">
                 <span className="truncate font-medium">{pr.n}</span>
@@ -503,25 +503,28 @@ const Website = () => (
 );
 
 /** 5. Make something worth sharing: the visual, already in a LinkedIn post and an X post. */
-const SpringVisual = ({ h }: { h: string }) => (
-  <div className={`relative overflow-hidden rounded-lg bg-[#E9DCCB] ${h}`}>
-    <Image src={photo("1613424777445-f93a2a48e285")} alt="" fill sizes="(max-width: 640px) 100vw, 360px" className="object-cover" />
-    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
-    <p className="absolute left-3 top-2.5 text-[10.5px] font-semibold text-white/95">Everyday Objects®</p>
-    <div className="absolute bottom-3 left-3 text-white">
-      <p className="mock-serif text-[22px] leading-[1]">
-        A brighter
-        <br />
-        everyday.
-      </p>
-      <p className="mt-1 font-mono text-[9px] uppercase tracking-[0.16em] text-white/80">The Spring Edit</p>
+const SpringVisual = ({ h, compact = false }: { h: string; compact?: boolean }) => (
+  <div className={`relative overflow-hidden rounded-lg bg-[#EFE6D8] ${h}`}>
+    <Image src={IMG.springEdit} alt="" fill sizes="(max-width: 640px) 100vw, 360px" className="object-cover object-[50%_62%]" />
+    {/* the sunlit wall on the left carries the type */}
+    <div className="absolute inset-0 bg-gradient-to-r from-[#F4ECDF]/85 via-[#F4ECDF]/40 via-45% to-transparent to-70%" />
+    <div className={`absolute inset-y-0 left-0 flex flex-col justify-between text-[#2a2118] ${compact ? "p-2.5" : "p-3.5"}`}>
+      <p className={`font-semibold tracking-[-0.01em] ${compact ? "text-[9.5px]" : "text-[11px]"}`}>Everyday Objects®</p>
+      <div>
+        <p className={`mock-serif leading-[0.98] tracking-[-0.01em] ${compact ? "text-[20px]" : "text-[27px]"}`}>
+          A brighter
+          <br />
+          everyday.
+        </p>
+        {!compact && <p className="mt-1.5 text-[10px] font-medium tracking-[0.02em] text-[#8a5a2b]">The Spring Edit</p>}
+      </div>
     </div>
   </div>
 );
 const Social = () => (
   <div className="relative mx-auto sm:h-[300px] sm:max-w-[560px]">
     {/* X post, fanned behind */}
-    <motion.div className="absolute right-0 top-8 w-[210px] max-sm:hidden" initial={{ opacity: 0, x: -100, rotate: 0 }} animate={{ opacity: 1, x: 0, rotate: 5 }} transition={{ duration: 0.7, delay: 0.5, ease: calm }}>
+    <motion.div className="absolute right-0 top-8 w-[210px] max-sm:hidden" initial={{ opacity: 0, x: -100, rotate: 0 }} animate={{ opacity: 1, x: 0, rotate: 3 }} transition={{ duration: 0.7, delay: 0.5, ease: calm }}>
       <Paper className="p-3">
         <div className="flex items-center gap-2 text-[11px]">
           <span className="grid size-6 place-items-center rounded-full bg-[#14161f] text-[9px] font-bold text-white">EO</span>
@@ -532,7 +535,7 @@ const Social = () => (
         </div>
         <p className="mt-1.5 text-[11.5px] leading-[15px]">Spring is in. Meet the new edit.</p>
         <div className="mt-2">
-          <SpringVisual h="h-[110px]" />
+          <SpringVisual h="h-[110px]" compact />
         </div>
         <p className="mt-2 flex justify-between font-mono text-[9.5px] text-[#7a7f8c]">
           <span>18</span>
@@ -1022,7 +1025,6 @@ export function ChAsk() {
                         style={{ transformOrigin: "50% 0%" }}
                       >
                         {task.work}
-                        <span aria-hidden className="ask-shine pointer-events-none absolute inset-0 overflow-hidden rounded-[18px]" />
                       </motion.div>
                     </div>
 

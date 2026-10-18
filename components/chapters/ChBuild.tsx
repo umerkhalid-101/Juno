@@ -28,22 +28,22 @@ import {
 import { ChapterIntro } from "@/components/ui/ChapterIntro";
 import { Reveal } from "@/components/ui/Reveal";
 import { gsap, useGSAP, MQ } from "@/lib/gsap";
+import { IMG } from "@/lib/images";
 
 /**
  * "Imagine it. Make it an app."
  * Five apps Juno built, each a different brand, each actually usable on the page.
- * Photos: Unsplash (free license), served from images.unsplash.com.
+ * Photos: Unsplash (free license), served from /public/img via lib/images.
  */
 
 const ease = [0.2, 0.8, 0.2, 1] as const;
-const photo = (id: string) => `https://images.unsplash.com/photo-${id}?auto=format&fit=crop&q=80`;
 const P = {
-  ceramicsHero: photo("1638303322325-ff70d6224a22"),
-  ceramicsShelf: photo("1597696929736-6d13bed8e6a8"),
-  vaseAmber: photo("1674390521253-79caf82d0ceb"),
-  vaseField: photo("1613424777445-f93a2a48e285"),
-  coffeeBag: photo("1695245503558-5cdb37f49092"),
-  coffeeBeans: photo("1459755486867-b55449bb39ff"),
+  ceramicsHero: IMG.ceramicsHero,
+  ceramicsShelf: IMG.springEdit,
+  vaseAmber: IMG.vaseSand,
+  vaseField: IMG.vaseStone,
+  coffeeBag: IMG.coffeeBag,
+  coffeeBeans: IMG.coffeeLatte,
 };
 
 /** A block of the app that assembles in as Juno builds. */
@@ -76,8 +76,8 @@ function Hearth() {
   const [added, setAdded] = useState<string | null>(null);
   const products = [
     { name: "The shelf set", note: "Five pieces", price: "$180", img: P.ceramicsShelf },
-    { name: "Amber vase", note: "Glazed stoneware", price: "$64", img: P.vaseAmber },
-    { name: "Field vase", note: "Raw clay", price: "$72", img: P.vaseField },
+    { name: "Sand vase", note: "Raw clay", price: "$64", img: P.vaseAmber },
+    { name: "Stone vase", note: "Matte white", price: "$72", img: P.vaseField },
   ];
   return (
     <div className="flex h-full flex-col bg-[#F6F1E9] text-[#2d2a24]">
@@ -120,7 +120,7 @@ function Hearth() {
         <Blk className="relative min-h-[118px] overflow-hidden sm:min-h-[220px]">
           <Image
             src={P.ceramicsHero}
-            alt="Two white ceramic vases with red berries"
+            alt="A terracotta arch vase in warm sunlight"
             fill
             sizes="(min-width: 768px) 480px, 100vw"
             className="object-cover"
@@ -263,7 +263,7 @@ function NightShift() {
           <span className="relative size-10 overflow-hidden rounded-lg">
             <Image
               src={P.coffeeBeans}
-              alt="Coffee beans and a cup"
+              alt="A latte with leaf art"
               fill
               sizes="40px"
               className="object-cover"

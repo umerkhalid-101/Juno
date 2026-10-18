@@ -1,17 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { AnimatePresence, motion, useReducedMotion } from "motion/react";
-import { ArrowUp, ArrowUpRight } from "lucide-react";
+import { ArrowUp } from "lucide-react";
 import { siApple } from "simple-icons";
-import { MascotMark } from "@/components/mascot/Mascot";
-import { CTA_HREF, CTA_LABEL } from "@/lib/site";
 import { FooterMark } from "./FooterMark";
-
-/** What you get back while Juno runs the work. */
-const beats = ["You run the company.", "You close the round.", "You ship the launch.", "You take the weekend."];
 
 const columns: { title: string; links: { label: string; href: string }[] }[] = [
   {
@@ -40,19 +34,11 @@ const columns: { title: string; links: { label: string; href: string }[] }[] = [
 ];
 
 /**
- * The close of every page: the promise and the two ways in, then Juno for Mac, the pages and the
- * way back up, all under a diagonal sweep of Juno's light; then the wordmark Juno peeks over.
+ * The close of every page: Juno for Mac, the pages and the way back up, under a diagonal sweep of
+ * Juno's light; then the wordmark Juno peeks over.
  */
 export function Footer() {
-  const reduce = useReducedMotion();
   const path = usePathname();
-  const [i, setI] = useState(0);
-  useEffect(() => {
-    if (reduce) return;
-    const id = window.setInterval(() => setI((n) => (n + 1) % beats.length), 3200);
-    return () => window.clearInterval(id);
-  }, [reduce]);
-  const beat = beats[i];
 
   return (
     <footer className="relative overflow-hidden">
@@ -66,68 +52,33 @@ export function Footer() {
         }}
       />
 
-      {/* the promise, and the two ways in */}
-      <div className="container-page relative flex flex-col items-center pt-20 text-center md:pt-28">
-        <p className="text-[36px] font-semibold leading-[1.02] tracking-[-0.045em] text-text sm:text-[56px] md:text-[80px]">
-          Juno runs the work.
-          <span className="relative block h-[1.1em] overflow-hidden">
-            <AnimatePresence mode="popLayout" initial={false}>
-              <motion.span key={i} className="block whitespace-nowrap text-[#B4C2FF]">
-                {beat.split(" ").map((w, k, all) => (
-                  <motion.span
-                    key={k}
-                    className="inline-block"
-                    initial={{ y: "110%", opacity: 0, filter: "blur(10px)" }}
-                    animate={{ y: "0%", opacity: 1, filter: "blur(0px)" }}
-                    exit={{ y: "-110%", opacity: 0, filter: "blur(10px)", transition: { duration: 0.4, delay: k * 0.03, ease: [0.4, 0, 1, 1] } }}
-                    transition={{ duration: 0.7, delay: 0.15 + k * 0.07, ease: [0.16, 1, 0.3, 1] }}
-                  >
-                    {w}
-                    {k < all.length - 1 ? " " : ""}
-                  </motion.span>
-                ))}
-              </motion.span>
-            </AnimatePresence>
-          </span>
-        </p>
-        <p className="mt-6 max-w-[40ch] text-pretty text-[18px] leading-[28px] text-muted md:text-[20px] md:leading-[30px]">
-          Your AI chief of staff, from company knowledge to the work that runs every week.
-        </p>
-        <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-          <a
-            href="/download"
-            className="inline-flex h-12 items-center gap-2.5 rounded-[14px] bg-[#D9DCE6] px-5 text-[15px] font-semibold text-[#0B0E13] transition-[background-color,box-shadow] duration-200 hover:bg-white hover:shadow-[0_0_0_4px_rgba(122,143,255,0.25)]"
-          >
-            <svg viewBox="0 0 24 24" width={17} height={17} fill="currentColor" aria-hidden>
-              <path d={siApple.path} />
-            </svg>
-            Download for Mac
-          </a>
-          <a
-            href={CTA_HREF}
-            className="inline-flex h-12 items-center gap-2 rounded-[14px] bg-[#D9DCE6] px-5 text-[15px] font-semibold text-[#0B0E13] transition-[background-color,box-shadow] duration-200 hover:bg-white hover:shadow-[0_0_0_4px_rgba(122,143,255,0.25)]"
-          >
-            {CTA_LABEL}
-            <ArrowUpRight size={16} strokeWidth={2.25} aria-hidden />
-          </a>
-        </div>
-      </div>
-
       {/* Juno for Mac, the pages, and the way back up */}
-      <div className="container-page relative mt-16 grid gap-10 md:mt-20 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,2fr)_auto] lg:gap-10">
-        <Link href="/download" className="group flex items-center gap-5 self-start">
-          <span className="relative grid size-[112px] shrink-0 place-items-center rounded-[28px] border border-white/[0.1] bg-[linear-gradient(180deg,#141A28,#0D111A)] shadow-[0_30px_60px_-30px_rgba(0,0,0,0.9),inset_0_1px_0_rgba(255,255,255,0.07)] transition-colors group-hover:border-white/[0.2]">
-            <span aria-hidden className="cta-breathe absolute inset-4 rounded-full" style={{ background: "radial-gradient(closest-side, rgba(110,140,255,0.45), transparent)" }} />
-            <MascotMark size={52} className="relative" />
-          </span>
-          <span>
+      <div className="container-page relative grid gap-10 pt-20 md:pt-24 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,2fr)_auto] lg:gap-10">
+        <div className="self-start">
+          <Link href="/download" className="group flex items-center gap-5">
+            <Image
+              src="/home/juno-mac-icon.png"
+              alt=""
+              width={108}
+              height={108}
+              className="size-[108px] shrink-0 rounded-[26px] shadow-[0_24px_50px_-24px_rgba(50,76,255,0.55),0_0_0_1px_rgba(255,255,255,0.08)] transition-transform duration-300 group-hover:-translate-y-0.5"
+            />
             <span className="block text-[16px] font-medium leading-6 text-text">
               Keep Juno close.
               <br />
               One shortcut on your Mac.
             </span>
-          </span>
-        </Link>
+          </Link>
+          <Link
+            href="/download"
+            className="mt-6 inline-flex h-12 items-center gap-2.5 rounded-[14px] bg-[#D9DCE6] px-5 text-[15px] font-semibold text-[#0B0E13] transition-[background-color,box-shadow] duration-200 hover:bg-white hover:shadow-[0_0_0_4px_rgba(122,143,255,0.25)]"
+          >
+            <svg viewBox="0 0 24 24" width={17} height={17} fill="currentColor" aria-hidden>
+              <path d={siApple.path} />
+            </svg>
+            Download for Mac
+          </Link>
+        </div>
 
         <nav aria-label="Footer" className="grid grid-cols-2 gap-x-8 gap-y-10 sm:grid-cols-3">
           {columns.map((c) => (

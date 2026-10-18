@@ -8,6 +8,7 @@ import { Face } from "@/components/jobs/scenes";
 import { feature, outcomes, tint, together, type FeatureId } from "@/lib/features";
 import { FeatureIcon, SectionHead } from "./kit";
 import { goToFeature } from "./goTo";
+import { IMG } from "@/lib/images";
 
 /**
  * With Juno, you can finally: six outcomes, each made of features working together. One column
@@ -17,8 +18,6 @@ import { goToFeature } from "./goTo";
 const base = [0.2, 0.8, 0.2, 1] as const;
 const snap = [0.3, 0, 0, 1] as const;
 
-const photo = (id: string, w = 200) =>
-  `https://images.unsplash.com/photo-${id}?auto=format&fit=crop&w=${w}&q=70`;
 
 /** A small, real piece of the result: what you'd actually see when it's done. */
 function Pill({
@@ -65,7 +64,7 @@ const results: { text: string; receipt: ReactNode }[][] = [
         <span className="flex items-center gap-2">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src={photo("1638303322325-ff70d6224a22")}
+            src={IMG.ceramicsHero}
             alt=""
             className="h-6 w-9 rounded-[5px] object-cover ring-1 ring-white/10"
           />

@@ -21,19 +21,18 @@ import {
 import { BrandIcon } from "@/components/ui/BrandIcon";
 import { MascotMark } from "@/components/mascot/Mascot";
 import { Face } from "@/components/jobs/scenes";
+import { IMG } from "@/lib/images";
 
 /**
  * Chapter 3's artifacts: real things Juno made, shown the way you'd see them. Each plays its
  * moment once when its card arrives (`on`), then rests finished.
  */
 
-const photo = (id: string, w = 900) =>
-  `https://images.unsplash.com/photo-${id}?auto=format&fit=crop&w=${w}&q=80`;
 const P = {
-  ceramics: photo("1638303322325-ff70d6224a22", 1000),
-  shelf: photo("1597696929736-6d13bed8e6a8", 500),
-  amber: photo("1674390521253-79caf82d0ceb", 500),
-  field: photo("1613424777445-f93a2a48e285", 700),
+  ceramics: IMG.ceramicsHero,
+  shelf: IMG.vaseStone,
+  amber: IMG.lampDome,
+  field: IMG.vaseSand,
 };
 const T =
   "transition-[opacity,transform] duration-500 [transition-timing-function:var(--ease-base)]";
@@ -215,8 +214,8 @@ const products = [
     src: P.shelf,
     dots: ["#E8E1D4", "#3B3631"],
   },
-  { n: "Bud vase pair", m: "Speckled clay", p: "$36", src: P.field, dots: ["#D9CBB4", "#9C7F5E"] },
-  { n: "Pitcher, tall", m: "Matte white", p: "$64", src: P.ceramics, dots: ["#F1EEE8"] },
+  { n: "Sand vase", m: "Raw clay", p: "$36", src: P.field, dots: ["#C9A27A", "#9C7F5E"] },
+  { n: "Dome lamp", m: "Opal glass", p: "$84", src: P.amber, dots: ["#F1EEE8"] },
 ];
 
 export function SiteArtifact({ on }: { on: boolean }) {
@@ -254,7 +253,7 @@ export function SiteArtifact({ on }: { on: boolean }) {
               <span>Spring</span>
               <span className="hidden sm:inline">Journal</span>
             </span>
-            <span className="font-[family-name:var(--font-instrument)] text-[19px] leading-none text-[#1d1b17]">
+            <span className="font-[family-name:var(--font-mock-serif)] text-[19px] leading-none text-[#1d1b17]">
               everyday objects
             </span>
             <span className="flex items-center justify-end gap-3">
@@ -281,7 +280,7 @@ export function SiteArtifact({ on }: { on: boolean }) {
             <span className="text-[9.5px] font-medium tracking-[0.16em] text-[#EBD9B8]">
               SPRING COLLECTION
             </span>
-            <p className="mt-1.5 font-[family-name:var(--font-instrument)] text-[32px] leading-[0.95]">
+            <p className="mt-1.5 font-[family-name:var(--font-mock-serif)] text-[32px] leading-[0.95]">
               Made for
               <br />
               everyday.
@@ -300,7 +299,7 @@ export function SiteArtifact({ on }: { on: boolean }) {
         {/* the collection */}
         <div {...blk(2)} className={`${blk(2).className} px-3 pt-3`}>
           <div className="flex items-baseline justify-between px-0.5">
-            <p className="font-[family-name:var(--font-instrument)] text-[17px]">New this season</p>
+            <p className="font-[family-name:var(--font-mock-serif)] text-[17px]">New this season</p>
             <span className="text-[10.5px] text-[#6d685e] underline underline-offset-2">
               Shop all
             </span>
@@ -491,10 +490,10 @@ export function MediaArtifact({ on }: { on: boolean }) {
             />
           ))}
           <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,0.2),transparent_35%,rgba(0,0,0,0.5))]" />
-          <span className="absolute left-3 top-3 font-[family-name:var(--font-instrument)] text-[13px] text-white">
+          <span className="absolute left-3 top-3 font-[family-name:var(--font-mock-serif)] text-[13px] text-white">
             everyday objects
           </span>
-          <p className="absolute bottom-4 left-3 font-[family-name:var(--font-instrument)] text-[30px] leading-[0.95] text-white">
+          <p className="absolute bottom-4 left-3 font-[family-name:var(--font-mock-serif)] text-[30px] leading-[0.95] text-white">
             Find your
             <br />
             focus.

@@ -462,7 +462,7 @@ function Cover() {
       </div>
       <div className="absolute left-[5%] top-1/2 -translate-y-1/2">
         <span className="text-[10px] font-medium text-[#E9B949]">New</span>
-        <p className="font-[family-name:var(--font-instrument)] text-[clamp(18px,2.4cqw,30px)] leading-none text-[#F4EEE3]">
+        <p className="font-[family-name:var(--font-mock-serif)] text-[clamp(18px,2.4cqw,30px)] leading-none text-[#F4EEE3]">
           Scheduled Reports
         </p>
       </div>

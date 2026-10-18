@@ -1,11 +1,10 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useRef } from "react";
 import { NotificationCard } from "@/components/demo/NotificationCard";
-import { RollingNumber } from "@/components/ui/RollingNumber";
 import { gsap } from "@/lib/gsap";
 import { usePinnedStory } from "@/lib/usePinnedStory";
-import { notifications, type CardStatus } from "@/lib/story";
+import { notifications } from "@/lib/story";
 import { BrandIcon } from "@/components/ui/BrandIcon";
 
 const N = notifications.length;
@@ -23,23 +22,10 @@ const mobileIndex = notifications.map((n, i) => (n.mobile ? notifications.slice(
 export function Ch1Chaos() {
   const root = useRef<HTMLElement>(null);
   const stage = useRef<HTMLDivElement>(null);
-  // Single source of truth: how many cards have landed, and which cards this screen shows.
-  // Final state by default (no JS, reduced motion).
-  const [landed, setLanded] = useState(N);
-  const [mobile, setMobile] = useState(false);
-
-  const shown = notifications.filter((n) => !mobile || n.mobile);
-  const cards: { id: string; status: CardStatus | "incoming" }[] = shown.map((n, i) => ({
-    id: n.id,
-    status: i < landed ? "waiting" : "incoming",
-  }));
-  const waitingCount = cards.filter((c) => c.status === "waiting").length;
-
   usePinnedStory(
     root,
     stage,
     ({ isMobile }) => {
-      setMobile(isMobile);
       const q = gsap.utils.selector(root);
       const all = q(".stack-card") as HTMLElement[];
       const list = all.filter((c) => !isMobile || c.dataset.mobile === "true");
@@ -49,20 +35,13 @@ export function Ch1Chaos() {
       const anchor = isMobile ? 32 : 56;
       const lift = isMobile ? 18 : 26;
       const lay = (d: number) => ({ ...layer(d), y: -d * lift });
-      const proxy = { v: 0 };
-      let last = -1;
-      const sync = () => {
-        const v = Math.round(proxy.v);
-        if (v !== last) setLanded((last = v));
-      };
       const tl = gsap.timeline({ defaults: { ease: "power2.out", duration: 0.8 } });
 
       tl.set(list, { y: 90, scale: 1, opacity: 0, x: 0, rotate: 0 }, 0)
         .set(veils, { opacity: 0 }, 0)
         .set(chips, { opacity: 0, scale: 0.8, x: 0, y: 0 }, 0)
         // the icon row sits just above the pile and rises as the pile grows
-        .set(row, { top: "auto", bottom: () => anchor + (list[0]?.offsetHeight ?? 220) + 18, y: 0 }, 0)
-        .set(proxy, { v: 0, onComplete: sync }, 0);
+        .set(row, { top: "auto", bottom: () => anchor + (list[0]?.offsetHeight ?? 220) + 18, y: 0 }, 0);
 
       list.forEach((card, k) => {
         const at = 0.2 + k * 0.7;
@@ -92,7 +71,6 @@ export function Ch1Chaos() {
             at + 0.06,
           );
         }
-        tl.to(proxy, { v: k + 1, duration: 0.3, onUpdate: sync }, at + 0.2);
       });
 
       tl.to({}, { duration: 0.4 });
@@ -105,8 +83,8 @@ export function Ch1Chaos() {
     <section ref={root} id="chaos" aria-labelledby="ch1-title" className="chapter">
       <div ref={stage} className="relative">
         <div className="container-page">
-          <div className="grid items-center gap-12 md:grid-cols-12 md:gap-8">
-            <div className="relative md:col-span-6">
+          <div className="grid items-center gap-12 md:grid-cols-12 md:items-end md:gap-8">
+            <div className="relative md:col-span-6 md:pb-10">
               <h2
                 id="ch1-title"
                 className="text-[40px] font-medium leading-[44px] tracking-[-0.035em] text-balance md:text-[56px] md:leading-[60px] lg:text-[64px] lg:leading-[66px]"
@@ -115,13 +93,6 @@ export function Ch1Chaos() {
               </h2>
               <p className="mt-6 max-w-[40ch] text-[17px] leading-[27px] text-muted">
                 Launches slip, deals go quiet, investors wait. The real work gets whatever time is left.
-              </p>
-
-              {/* counter: computed from card state */}
-              <p className="mt-8 flex items-baseline gap-1.5 text-[17px] leading-[27px] text-muted">
-                <RollingNumber value={waitingCount} className="text-[17px] font-medium text-text" />
-                <span aria-hidden>{waitingCount === 1 ? "thing" : "things"} waiting on you</span>
-                <span className="sr-only">{mobile ? NM : N} things waiting on you</span>
               </p>
             </div>
 

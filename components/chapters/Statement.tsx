@@ -84,13 +84,20 @@ export function Statement() {
 
         // render the starting state now: a fresh timeline already sits at 0, so progress(0) alone would not apply the sets
         tl.progress(0.001, true).progress(0, true).pause();
-        // plays when it comes into view; resets only once it is fully off screen below,
-        // so scrolling back up never makes it vanish in front of you
+        // plays as soon as it peeks into view, faster when you are scrolling fast; once you are
+        // past it, it snaps to the finished state so it is never caught half-drawn.
+        // Resets only once it is fully off screen below, so scrolling back up never makes it vanish.
         const play = ScrollTrigger.create({
           trigger: q(".st-stage")[0],
-          start: "top 65%",
-          onEnter: () => {
-            if (tl.progress() === 0) tl.play(0);
+          start: "top 85%",
+          end: "bottom top",
+          onEnter: (self) => {
+            if (tl.progress() > 0) return;
+            const v = Math.abs(self.getVelocity());
+            tl.timeScale(v > 2500 ? 2.6 : v > 1200 ? 1.7 : 1.2).play(0);
+          },
+          onLeave: () => {
+            if (tl.progress() < 1) tl.progress(1);
           },
         });
         const reset = ScrollTrigger.create({

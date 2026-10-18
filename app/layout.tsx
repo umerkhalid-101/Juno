@@ -2,7 +2,7 @@ import type { Metadata, Viewport } from "next";
 import Script from "next/script";
 import { GeistSans } from "geist/font/sans";
 import { GeistMono } from "geist/font/mono";
-import { Instrument_Serif } from "next/font/google";
+import { Fraunces } from "next/font/google";
 import { Nav } from "@/components/ui/Nav";
 import { Footer } from "@/components/ui/Footer";
 import { ScrollSetup } from "@/components/ui/ScrollSetup";
@@ -10,7 +10,7 @@ import "./globals.css";
 import { Ambient } from "@/components/ui/Ambient";
 
 // Used only inside the app mockups Juno builds (brand typography), not for site headings.
-const serif = Instrument_Serif({ subsets: ["latin"], weight: "400", style: ["normal", "italic"], variable: "--font-instrument", display: "swap" });
+const serif = Fraunces({ subsets: ["latin"], style: ["normal", "italic"], axes: ["opsz"], variable: "--font-mock-serif", display: "swap" });
 
 export const metadata: Metadata = {
   // Share images resolve against the live Vercel domain until the site moves to runjuno.ai.

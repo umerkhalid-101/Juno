@@ -283,7 +283,7 @@ function Thumb({ kind, on, i }: { kind: "email" | "post" | "page"; on: boolean; 
               style={d}
             />
             <span
-              className={`mx-2 mt-2 block text-[9px] leading-[10px] ${t} ${on ? "font-[family-name:var(--font-instrument)] text-[13px] leading-[13px] text-[#1F2A44]" : "text-muted"}`}
+              className={`mx-2 mt-2 block text-[9px] leading-[10px] ${t} ${on ? "font-[family-name:var(--font-mock-serif)] text-[13px] leading-[13px] text-[#1F2A44]" : "text-muted"}`}
               style={d}
             >
               Good news.
@@ -308,7 +308,7 @@ function Thumb({ kind, on, i }: { kind: "email" | "post" | "page"; on: boolean; 
               style={d}
             />
             <span
-              className={`mt-1 block text-[11px] leading-[12px] ${t} ${on ? "font-[family-name:var(--font-instrument)] text-[#F4EEE3]" : "text-muted"}`}
+              className={`mt-1 block text-[11px] leading-[12px] ${t} ${on ? "font-[family-name:var(--font-mock-serif)] text-[#F4EEE3]" : "text-muted"}`}
               style={d}
             >
               Mondays, handled.
@@ -322,7 +322,7 @@ function Thumb({ kind, on, i }: { kind: "email" | "post" | "page"; on: boolean; 
               style={d}
             />
             <span
-              className={`mt-2 block text-[11px] leading-[12px] ${t} ${on ? "font-[family-name:var(--font-instrument)] text-[#1F2A44]" : "text-muted"}`}
+              className={`mt-2 block text-[11px] leading-[12px] ${t} ${on ? "font-[family-name:var(--font-mock-serif)] text-[#1F2A44]" : "text-muted"}`}
               style={d}
             >
               Reports, on repeat.
@@ -374,7 +374,7 @@ export function BrandVisual({ on }: { on: boolean }) {
             <Label>Type</Label>
             <div className="mt-2 space-y-1.5">
               <p className="flex items-baseline gap-2.5">
-                <span className="font-[family-name:var(--font-instrument)] text-[28px] leading-none text-text">
+                <span className="font-[family-name:var(--font-mock-serif)] text-[28px] leading-none text-text">
                   Aa
                 </span>
                 <span className="text-[11.5px] text-muted">Serif · Headlines</span>

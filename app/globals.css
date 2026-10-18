@@ -539,9 +539,10 @@
 
 /* Brand serif for the apps Juno builds */
 .mock-serif {
-  font-family: var(--font-instrument), ui-serif, Georgia, serif;
-  font-weight: 400;
-  letter-spacing: -0.01em;
+  font-family: var(--font-mock-serif), ui-serif, Georgia, serif;
+  font-weight: 420;
+  font-optical-sizing: auto;
+  letter-spacing: -0.025em;
 }
 
 /* calculator sliders inside the built app */
@@ -1029,7 +1030,7 @@
   }
 }
 
-/* Ask: scan while Juno works, shine as the result lands */
+/* Ask: scan while Juno works */
 @keyframes ask-scan {
   from {
     transform: translateY(-160px);
@@ -1042,30 +1043,8 @@
   background: linear-gradient(180deg, transparent, rgba(122, 143, 255, 0.08) 60%, rgba(166, 187, 255, 0.18) 98%, transparent);
   animation: ask-scan 1.6s cubic-bezier(0.45, 0, 0.55, 1) infinite;
 }
-@keyframes ask-shine {
-  0% {
-    transform: translateX(-120%) skewX(-14deg);
-    opacity: 0;
-  }
-  15% {
-    opacity: 1;
-  }
-  100% {
-    transform: translateX(160%) skewX(-14deg);
-    opacity: 0;
-  }
-}
-.ask-shine::after {
-  content: "";
-  position: absolute;
-  inset: 0 auto 0 0;
-  width: 45%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.45), transparent);
-  animation: ask-shine 1.1s cubic-bezier(0.2, 0.8, 0.2, 1) 0.9s both;
-}
 @media (prefers-reduced-motion: reduce) {
-  .ask-scan,
-  .ask-shine::after {
+  .ask-scan {
     animation: none;
     opacity: 0;
   }

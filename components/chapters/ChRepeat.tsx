@@ -8,6 +8,7 @@ import { Reveal } from "@/components/ui/Reveal";
 import { MascotMark } from "@/components/mascot/Mascot";
 import { ToolLogo } from "@/components/ui/ToolLogo";
 import type { ToolId } from "@/lib/story";
+import { IMG } from "@/lib/images";
 
 /**
  * "Set it once. Leave it to Juno."
@@ -17,7 +18,7 @@ import type { ToolId } from "@/lib/story";
  */
 
 const INK = "#14161f";
-const BEANS = "https://images.unsplash.com/photo-1459755486867-b55449bb39ff?auto=format&fit=crop&q=80";
+const BEANS = IMG.coffeeLatte;
 
 type Lane = {
   id: string;
@@ -135,7 +136,7 @@ function Report({ lane, w, date }: { lane: number; w: number; date: string }) {
     return (
       <div className="flex h-full overflow-hidden rounded-[20px] bg-white" style={{ color: INK }}>
         <div className="relative w-[38%] shrink-0">
-          <Image src={BEANS} alt="Coffee and beans on a table" fill sizes="220px" className="object-cover" />
+          <Image src={BEANS} alt="A latte with leaf art" fill sizes="220px" className="object-cover" />
         </div>
         <div className="p-5">
           <p className="text-[11px] uppercase tracking-[0.14em] text-[#7a7f8c]">Blog draft · {date}</p>
