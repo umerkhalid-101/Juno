@@ -755,7 +755,7 @@ function Growth() {
 function Competitors() {
   return (
     <>
-      <Browser url="rivalreports.example/pricing" style={S({ left: 28, top: 26, width: 380 })}>
+      <Browser url="rivalreports.com/pricing" style={S({ left: 28, top: 26, width: 380 })}>
         <div className="grid grid-cols-2 gap-2 p-3">
           {["Team", "Business"].map((p) => (
             <div key={p} className="rounded-lg bg-[#F7F7F5] p-3">

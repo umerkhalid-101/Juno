@@ -25,7 +25,7 @@ const OrbitIcon = ({ s = 40 }: { s?: number }) => (
   </svg>
 );
 
-const URL = "console.appharbor.example/apps";
+const URL = "console.appharbor.com/apps";
 const NOTES = "Scheduled Reports, faster sync, and 12 fixes.";
 const T = {
   url: 0.3,
@@ -274,7 +274,7 @@ export const appstore: Scenario = {
       { title: "Orbit · AppHarbor", icon: <Harbor />, active: true },
       { title: "Changelog · 2.4.0", icon: <span className="block size-3.5 rounded-[3px] bg-[#16181d]" />, active: false },
     ],
-    url: t < T.load ? typed(URL, t, T.url) : t >= T.newVer ? "console.appharbor.example/apps/orbit/versions/new" : t >= T.app + 0.1 ? "console.appharbor.example/apps/orbit" : URL,
+    url: t < T.load ? typed(URL, t, T.url) : t >= T.newVer ? "console.appharbor.com/apps/orbit/versions/new" : t >= T.app + 0.1 ? "console.appharbor.com/apps/orbit" : URL,
     typing: t < T.load,
     loading: t >= T.load && t < T.ready,
     session: t >= T.session,

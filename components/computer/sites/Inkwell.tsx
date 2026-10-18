@@ -22,7 +22,7 @@ const Ink = ({ s = 14 }: { s?: number }) => (
   </svg>
 );
 
-const URL = "cms.inkwell.example";
+const URL = "cms.inkwell.com";
 const TITLE = "Monday, handled: meet Scheduled Reports";
 const BODY =
   "Every Monday at 9, Orbit now sends your team its weekly report on its own. No exports, no copy and paste, no chasing numbers before standup.\nPick the metrics once and choose who gets it. Orbit takes it from there, every week.";
@@ -509,8 +509,8 @@ export const publish: Scenario = {
         : t >= T.live
           ? "orbit.blog/scheduled-reports"
           : t >= T.editor
-            ? "cms.inkwell.example/orbit/editor/post/new"
-            : "cms.inkwell.example/orbit/posts",
+            ? "cms.inkwell.com/orbit/editor/post/new"
+            : "cms.inkwell.com/orbit/posts",
     typing: t < T.load,
     loading: (t >= T.load && t < T.ready) || (t >= T.live && t < T.liveReady),
     session: t >= T.session && t < T.live,

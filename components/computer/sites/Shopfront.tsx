@@ -11,7 +11,7 @@ const Bag = ({ s = 14 }: { s?: number }) => (
   </svg>
 );
 
-const URL = "admin.shopfront.example/products";
+const URL = "admin.shopfront.com/products";
 const T = {
   url: 0.3,
   load: typingEnd(URL, 0.3) + 0.05,
@@ -244,7 +244,7 @@ export const prices: Scenario = {
       { title: "Products · Shopfront", icon: <Bag />, active: true },
       { title: "Autumn prices, Q4", icon: <span className="block size-3.5 rounded-[3px] bg-[#D97706]" />, active: false },
     ],
-    url: t < T.load ? typed(URL, t, T.url) : t >= T.pick ? "admin.shopfront.example/products?collection=autumn" : URL,
+    url: t < T.load ? typed(URL, t, T.url) : t >= T.pick ? "admin.shopfront.com/products?collection=autumn" : URL,
     typing: t < T.load,
     loading: t >= T.load && t < T.ready,
     session: t >= T.session,

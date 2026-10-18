@@ -19,7 +19,7 @@ const GridMark = ({ s = 14 }: { s?: number }) => (
 
 /* --------------------------------------------------------------- timing */
 
-const URL = "billing.cloudhost.example/invoices";
+const URL = "billing.cloudhost.com/invoices";
 const T = {
   url: 0.3,
   load: typingEnd(URL, 0.3) + 0.05,
@@ -338,13 +338,13 @@ export const reconcile: Scenario = {
   chrome: (t) => {
     const sheet = t >= T.toSheet && t < T.toCloud;
     const dls = ["INV-1041.pdf", "INV-1043.pdf", "INV-1052.pdf"].filter((_, i) => t >= T.dl[i]);
-    const page = t >= T.disputes ? "billing.cloudhost.example/disputes/new" : URL;
+    const page = t >= T.disputes ? "billing.cloudhost.com/disputes/new" : URL;
     return {
       tabs: [
         { title: "Invoices · CloudHost", icon: <CloudMark />, active: !sheet },
         { title: "October charges", icon: <GridMark />, active: sheet },
       ],
-      url: sheet ? "gridline.example/s/october-charges" : t < T.load ? typed(URL, t, T.url) : page,
+      url: sheet ? "gridline.com/s/october-charges" : t < T.load ? typed(URL, t, T.url) : page,
       typing: t < T.load,
       loading: t >= T.load && t < T.ready,
       session: t >= T.session,
