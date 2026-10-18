@@ -24,6 +24,12 @@ import { JobScene, worlds } from "./scenes";
 
 const WEEK = ["M", "T", "W", "T", "F"];
 const BEATS = ["Ask", "Rhythm", "Juno works", "Your call"] as const;
+const CAPTIONS = [
+  "You hand it over",
+  "Juno sets the rhythm",
+  "Juno is on it",
+  "Ready for your call",
+];
 // seconds into the story where each beat starts, and when it is complete
 const AT = [0, 2.4, 4.4, 7.2];
 const END = 10.4;
@@ -78,33 +84,40 @@ function StoryPlayer({ job }: { job: Job }) {
       onPointerEnter={(e) => e.pointerType === "mouse" && setHold(true)}
       onPointerLeave={() => setHold(false)}
     >
-      {/* four beats */}
-      <div className="flex items-center gap-2">
-        {BEATS.map((b, k) => {
-          const fill = Math.max(0, Math.min(1, (t - AT[k]) / ((AT[k + 1] ?? END) - AT[k])));
-          return (
-            <div key={b} className="min-w-0 flex-1">
-              <span className="block h-[3px] overflow-hidden rounded-full bg-white/10">
-                <span
-                  className="block h-full origin-left rounded-full bg-[#A6BBFF]"
-                  style={{ transform: `scaleX(${fill})` }}
-                />
-              </span>
-              <span
-                className={`t-eyebrow mt-2 block truncate !text-[10px] ${k <= beat ? "text-text" : "text-subtle"}`}
-              >
-                {b}
-              </span>
-            </div>
-          );
-        })}
+      {/* where the handoff is, said plainly, with four small steps */}
+      <div className="flex items-center gap-3 rounded-full bg-white/[0.04] py-1.5 pl-1.5 pr-2 ring-1 ring-white/[0.06]">
+        <span className="grid size-8 shrink-0 place-items-center rounded-full bg-[#0B0E14] ring-1 ring-white/10">
+          <MascotMark size={20} />
+        </span>
+        <span className="relative h-5 min-w-0 flex-1 overflow-hidden">
+          <AnimatePresence mode="popLayout" initial={false}>
+            <motion.span
+              key={beat}
+              initial={{ y: 14, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: -14, opacity: 0 }}
+              transition={{ duration: 0.35, ease: [0.2, 0.8, 0.2, 1] }}
+              className="absolute inset-0 truncate text-[13.5px] leading-5 text-text"
+            >
+              {CAPTIONS[Math.max(0, beat)]}
+            </motion.span>
+          </AnimatePresence>
+        </span>
+        <span className="flex shrink-0 items-center gap-1.5" aria-hidden>
+          {BEATS.map((b, k) => (
+            <span
+              key={b}
+              className={`h-1.5 rounded-full transition-all duration-300 ${k === beat ? "w-5 bg-[#A6BBFF]" : k < beat ? "w-1.5 bg-white/45" : "w-1.5 bg-white/15"}`}
+            />
+          ))}
+        </span>
         <button
           type="button"
           onClick={() => setT(0)}
           aria-label="Replay"
-          className={`-mr-2 grid size-11 shrink-0 place-items-center rounded-full text-muted transition-opacity hover:text-text ${done ? "opacity-100" : "pointer-events-none opacity-0"}`}
+          className={`grid size-8 shrink-0 place-items-center rounded-full text-muted transition-opacity hover:text-text ${done ? "opacity-100" : "pointer-events-none w-0 opacity-0"}`}
         >
-          <RotateCcw size={15} aria-hidden />
+          <RotateCcw size={14} aria-hidden />
         </button>
       </div>
 

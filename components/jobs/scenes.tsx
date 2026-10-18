@@ -1,11 +1,44 @@
 "use client";
 
-import type { CSSProperties, ReactNode } from "react";
+import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import Image from "next/image";
 import { Check, Globe, Search } from "lucide-react";
 import { ToolLogo } from "@/components/ui/ToolLogo";
 import { DotField, type DotMode } from "./DotField";
 import type { ToolId } from "@/lib/story";
+
+/** People, as real portraits (Unsplash, free licence). Names match the rest of the site. */
+const people = {
+  maya: "1494790108377-be9c29b29330",
+  dana: "1659481993364-4512775ed911",
+  priya: "1609436132311-e4b0c9370469",
+  sam: "1500648767791-00dcc994a43e",
+  leo: "1507003211169-0a1dd7228f2d",
+};
+function Face({
+  who,
+  size = 22,
+  className = "",
+}: {
+  who: keyof typeof people;
+  size?: number;
+  className?: string;
+}) {
+  return (
+    <span
+      className={`relative inline-block shrink-0 overflow-hidden rounded-full bg-[#e5e7eb] ring-2 ring-white ${className}`}
+      style={{ width: size, height: size }}
+    >
+      <Image
+        src={`https://images.unsplash.com/photo-${people[who]}?auto=format&fit=crop&crop=faces&w=${size * 3}&h=${size * 3}&q=75`}
+        alt=""
+        fill
+        sizes={`${size}px`}
+        className="object-cover"
+      />
+    </span>
+  );
+}
 
 /** Real photography for the ad creatives (Unsplash, free licence). */
 const photo = (id: string) =>
@@ -53,9 +86,6 @@ const card =
   "absolute rounded-[16px] bg-white text-[13px] shadow-[0_30px_60px_-24px_rgba(0,0,0,0.75),0_0_0_1px_rgba(0,0,0,0.04)]";
 const S = (o: CSSProperties) => o;
 
-const Dot = ({ c }: { c: string }) => (
-  <span className="size-1.5 shrink-0 rounded-full" style={{ background: c }} />
-);
 const Chip = ({
   tone,
   children,
@@ -140,7 +170,7 @@ function Prospects() {
       </div>
       <div className={`${card} scene-rise p-4`} style={S({ left: 250, top: 230, width: 330 })}>
         <div className="flex items-center gap-2 text-[11.5px]" style={{ color: MUTED }}>
-          <Logo id="gmail" size={13} />
+          <Face who="dana" />
           To Dana at Orbit Studio
           <Chip tone="blue" className="scene-pop ml-auto">
             New lead
@@ -160,62 +190,103 @@ function Prospects() {
   );
 }
 
+/** A feed ad, the way it actually runs (brand, "Sponsored", the creative, a call to action),
+ *  with Juno's read of it underneath: cost per lead and a verdict. */
+function FeedAd({
+  img,
+  headline,
+  style,
+  className = "",
+  strong = false,
+  cpl,
+  verdict,
+}: {
+  img: string;
+  headline: ReactNode;
+  style: CSSProperties;
+  className?: string;
+  strong?: boolean;
+  cpl: string;
+  verdict: ReactNode;
+}) {
+  return (
+    <div className={`${card} overflow-hidden ${className}`} style={style}>
+      <div className="flex items-center gap-2 px-2.5 py-2">
+        <span className="grid size-6 place-items-center rounded-full bg-[#3346e0]">
+          <span className="size-2.5 rounded-full border-[2px] border-white" />
+        </span>
+        <span className="leading-none">
+          <span className="block text-[11.5px] font-semibold" style={{ color: INK }}>
+            Orbit
+          </span>
+          <span className="mt-0.5 block text-[9.5px]" style={{ color: MUTED }}>
+            Sponsored
+          </span>
+        </span>
+      </div>
+      <div className="relative h-[128px] bg-[#1b1d24]">
+        <Image src={photo(img)} alt="" fill sizes="240px" className="object-cover" />
+        <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,0)_40%,rgba(0,0,0,0.62))]" />
+        <p
+          className={`absolute inset-x-3 bottom-2.5 font-semibold leading-[1.05] tracking-[-0.03em] text-white ${strong ? "text-[19px]" : "text-[15px] opacity-90"}`}
+        >
+          {headline}
+        </p>
+      </div>
+      <div className="flex items-center justify-between bg-[#F0F2F5] px-3 py-1.5">
+        <span className="text-[10.5px] font-semibold" style={{ color: INK }}>
+          orbit.app
+        </span>
+        <span
+          className="rounded-md bg-[#E4E6EB] px-2 py-0.5 text-[10.5px] font-semibold"
+          style={{ color: INK }}
+        >
+          Learn more
+        </span>
+      </div>
+      {/* Juno's read */}
+      <div className="flex items-center justify-between gap-2 border-t border-black/[0.06] px-3 py-2">
+        <span
+          className="whitespace-nowrap font-mono text-[11px] tabular-nums"
+          style={{ color: INK }}
+        >
+          {cpl}
+        </span>
+        {verdict}
+      </div>
+    </div>
+  );
+}
+
 function Ads() {
   return (
     <>
-      <div className={`${card} overflow-hidden`} style={S({ left: 28, top: 30, width: 196 })}>
-        <div className="relative h-[92px] bg-[#e5e7eb]">
-          <Image
-            src={photo("1575318634028-6a0cfcb60c59")}
-            alt=""
-            fill
-            sizes="200px"
-            className="object-cover"
-          />
-        </div>
-        <div className="p-3">
-          <p
-            className="text-[14px] font-semibold leading-[17px] tracking-[-0.02em]"
-            style={{ color: INK }}
-          >
-            Reporting, simplified.
-          </p>
-          <p className="mt-1 font-mono text-[11px]" style={{ color: MUTED }}>
-            $84 per lead
-          </p>
-          <Chip tone="warn" className="mt-2">
-            Needs a refresh
-          </Chip>
-        </div>
-      </div>
-      <div
-        className={`${card} scene-win overflow-hidden`}
-        style={S({ left: 238, top: 14, width: 210 })}
-      >
-        <div className="relative h-[100px] overflow-hidden bg-[#e7e0d8]">
-          <Image
-            src={photo("1542330952-bffc55e812b2")}
-            alt=""
-            fill
-            sizes="220px"
-            className="object-cover"
-          />
-        </div>
-        <div className="p-3">
-          <p
-            className="text-[14px] font-semibold leading-[17px] tracking-[-0.02em]"
-            style={{ color: INK }}
-          >
-            Your Monday. Already handled.
-          </p>
-          <div className="mt-1 flex items-center justify-between">
-            <p className="font-mono text-[11px]" style={{ color: MUTED }}>
-              $21 per lead
-            </p>
-            <svg viewBox="0 0 60 20" className="h-5 w-[60px]" aria-hidden>
+      {/* the tired creative, set back */}
+      <FeedAd
+        img="1575318634028-6a0cfcb60c59"
+        headline="Reporting, simplified."
+        cpl="$84 / lead"
+        verdict={<Chip tone="warn">Needs a refresh</Chip>}
+        style={S({ left: 20, top: 30, width: 210 })}
+        className="opacity-90"
+      />
+      {/* the winner, in front */}
+      <FeedAd
+        img="1542330952-bffc55e812b2"
+        headline={
+          <>
+            Your Monday.
+            <br />
+            Already handled.
+          </>
+        }
+        cpl="$21 / lead"
+        verdict={
+          <span className="flex items-center gap-1.5">
+            <svg viewBox="0 0 48 16" className="h-4 w-10" aria-hidden>
               <path
                 className="scene-draw"
-                d="M1 17 L12 14 L22 15 L33 9 L44 8 L59 2"
+                d="M1 14 L10 11 L18 12 L27 7 L36 6 L47 2"
                 fill="none"
                 stroke="#16a34a"
                 strokeWidth="2"
@@ -223,19 +294,13 @@ function Ads() {
                 pathLength={1}
               />
             </svg>
-          </div>
-          <Chip tone="ok" className="mt-2">
-            Winner
-          </Chip>
-        </div>
-      </div>
-      <div
-        className={`${card} scene-rise flex items-center gap-2 px-3 py-2.5`}
-        style={S({ left: 120, top: 262 })}
-      >
-        <Dot c="#a855f7" />
-        <span style={{ color: INK }}>New creative. Ready to test.</span>
-      </div>
+            <Chip tone="ok">Winner</Chip>
+          </span>
+        }
+        style={S({ left: 246, top: 14, width: 224 })}
+        className="scene-win"
+        strong
+      />
     </>
   );
 }
@@ -266,8 +331,8 @@ function Renewal() {
       </div>
       <div className={`${card} scene-rise p-3.5`} style={S({ left: 120, top: 150, width: 270 })}>
         <div className="flex items-center gap-2 text-[11.5px]" style={{ color: MUTED }}>
-          <Logo id="intercom" size={13} />
-          Northwind support thread
+          <Face who="priya" />
+          Priya at Northwind · via Intercom
         </div>
         <p
           className="mt-2 rounded-2xl rounded-tl-md bg-[#F1F3F6] px-3 py-2 text-[12.5px]"
@@ -293,7 +358,8 @@ function Onboarding() {
     <>
       <div className={`${card} p-4`} style={S({ left: 28, top: 26, width: 300 })}>
         <div className="flex items-center justify-between">
-          <span className="font-medium" style={{ color: INK }}>
+          <span className="flex items-center gap-2 font-medium" style={{ color: INK }}>
+            <Face who="maya" />
             Maya&apos;s team setup
           </span>
           <span className="font-mono text-[11px]" style={{ color: MUTED }}>
@@ -342,7 +408,7 @@ function Shipped() {
     <>
       <div className={`${card} p-5`} style={S({ left: 36, top: 60, width: 420 })}>
         <div className="flex items-center gap-2 text-[12px]" style={{ color: MUTED }}>
-          <Logo id="gmail" size={13} />
+          <Face who="maya" />
           To Maya · Asked for this last month
         </div>
         <p
@@ -373,12 +439,8 @@ function Shipped() {
         style={S({ left: 300, top: 300 })}
       >
         <span className="flex -space-x-1.5">
-          {["#3346e0", "#16a34a", "#f97316"].map((c, k) => (
-            <span
-              key={k}
-              className="size-5 rounded-full ring-2 ring-white"
-              style={{ background: c }}
-            />
+          {(["maya", "leo", "priya"] as const).map((p) => (
+            <Face key={p} who={p} size={22} />
           ))}
         </span>
         <span className="text-[12px]" style={{ color: INK }}>
@@ -832,16 +894,32 @@ const scenes: Record<string, () => ReactNode> = {
 /** The colour world plus the layered scene. Fills its parent; the card crops it. */
 export type SceneFit = "big" | "wide" | "landscape" | "tall" | "small";
 
-// how the 600 × 420 scene sits in each card shape
-const fits: Record<SceneFit, { scale: string; left: string; top: number }> = {
-  big: { scale: "scale-[1.08] md:scale-[1.14]", left: "0px", top: 150 },
-  wide: { scale: "scale-[1] md:scale-[1.08]", left: "max(0px, calc(50% - 330px))", top: 96 },
-  landscape: { scale: "md:scale-[0.92]", left: "0px", top: 92 },
-  tall: { scale: "scale-[0.95]", left: "0px", top: 130 },
-  small: { scale: "md:scale-[0.9]", left: "0px", top: 92 },
+/** How much room each scene's content needs (right and bottom edge of its furthest panel). */
+const extent: Record<string, [number, number]> = {
+  "find-our-next-customers": [585, 372],
+  "turn-search-into-signups": [535, 344],
+  "make-every-ad-dollar-count": [475, 326],
+  "catch-customers-before-they-leave": [395, 305],
+  "get-new-customers-to-their-first-win": [435, 300],
+  "close-the-loop-with-customers": [470, 345],
+  "keep-every-promise-moving": [515, 396],
+  "keep-our-launches-on-track": [735, 255],
+  "walk-into-every-call-prepared": [525, 410],
+  "show-me-whats-driving-growth": [690, 230],
+  "keep-us-ahead-of-competitors": [705, 215],
+  "keep-investors-in-the-loop": [500, 415],
 };
 
-/** The colour world plus the layered scene. Fills its parent; the card crops it. */
+// the most each card shape scales its scene, and where the scene starts below the title
+const fits: Record<SceneFit, { max: number; top: number }> = {
+  big: { max: 1.14, top: 140 },
+  wide: { max: 1.08, top: 104 },
+  landscape: { max: 1, top: 96 },
+  tall: { max: 1, top: 126 },
+  small: { max: 0.95, top: 96 },
+};
+
+/** The colour world plus the layered scene, scaled and centred to sit fully inside its card. */
 export function JobScene({
   slug,
   play = true,
@@ -856,8 +934,39 @@ export function JobScene({
   const w = worlds[slug];
   const Scene = scenes[slug];
   const f = fits[fit];
+  const [ex, ey] = extent[slug] ?? [600, 420];
+  const root = useRef<HTMLDivElement>(null);
+  const [box, setBox] = useState<{ w: number; h: number } | null>(null);
+
+  useEffect(() => {
+    const el = root.current;
+    if (!el) return;
+    const measure = () => setBox({ w: el.clientWidth, h: el.clientHeight });
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+
+  // fit the width fully; let tall scenes run a little past the bottom edge, like Stripe's
+  const scale = box
+    ? Math.max(
+        0.5,
+        Math.min(
+          f.max,
+          (box.w - 40) / ex,
+          Math.max(0.6, (box.h - f.top + (fit === "small" || fit === "landscape" ? 6 : 36)) / ey),
+        ),
+      )
+    : Math.min(f.max, 0.9);
+  const left = box ? Math.max(12, (box.w - ex * scale) / 2) : 12;
+
   return (
-    <div data-play={play ? "true" : "false"} className="scene absolute inset-0 overflow-hidden">
+    <div
+      ref={root}
+      data-play={play ? "true" : "false"}
+      className="scene absolute inset-0 overflow-hidden"
+    >
       {/* the colour world: a sweep that deepens toward the bottom, like Stripe's */}
       <div
         aria-hidden
@@ -881,8 +990,15 @@ export function JobScene({
       {/* the product leans in a touch when you hover the card */}
       <div className="absolute inset-0 transition-transform duration-700 [transition-timing-function:cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.025]">
         <div
-          className={`absolute origin-top-left ${f.scale}`}
-          style={{ left: f.left, top: f.top, width: 600, height: 420 }}
+          className="absolute origin-top-left"
+          style={{
+            left,
+            top: f.top,
+            width: ex,
+            height: ey,
+            transform: `scale(${scale})`,
+            opacity: box ? 1 : 0,
+          }}
         >
           {Scene && <Scene />}
         </div>
