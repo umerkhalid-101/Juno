@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useEffect, useRef, type ReactNode } from "react";
 import { useReducedMotion } from "motion/react";
 import { BrandIcon } from "@/components/ui/BrandIcon";
 import { type ToolId } from "@/lib/story";
@@ -17,6 +17,8 @@ export const heroTasks: { tool: ToolId; text: string }[] = [
 
 const TAU = Math.PI * 2;
 const COUNT = heroTasks.length;
+/** How many tasks ride the orbit on phones. */
+const MOBILE_COUNT = 5;
 /** Parallax travel per chip, px (4 to 12). */
 const depthPx = [9, 5, 12, 7, 11, 4];
 /** Juno's radius, px: the beam leaves from the edge of the orb. */
@@ -44,20 +46,18 @@ export function HeroOrbit({
   const spark = useRef<SVGCircleElement>(null);
   const comet = useRef<SVGCircleElement>(null);
   const cometA = useRef(-Math.PI / 2);
+  /** Phones: five chips share one rotation, evenly spaced. */
+  const mobileRot = useRef(0.9);
   const state = useRef(heroTasks.map((_, i) => ({ a: 0.9 + (i * TAU) / COUNT, done: false })));
   const speed = useRef(1);
   const target = useRef(1);
   const pointer = useRef({ x: 0, y: 0, tx: 0, ty: 0 });
   const startedRef = useRef(started);
   const cbs = useRef({ onFocusPill, onDone });
-  // which task each chip shows; on phones three chips revolve and take turns through all six
-  const [shown, setShown] = useState(() => heroTasks.map((_, i) => i));
-  const shownRef = useRef(shown);
 
   useEffect(() => {
     startedRef.current = started;
     cbs.current = { onFocusPill, onDone };
-    shownRef.current = shown;
   });
 
   useEffect(() => {
@@ -98,28 +98,26 @@ export function HeroOrbit({
       const r = mobile ? { rx: w * 0.32, ry: h * 0.4 } : { rx: Math.min(430, w * 0.38), ry: h * 0.38 };
       const cx = w / 2;
       const cy = h / 2;
+      if (mobile && startedRef.current && !reduce) mobileRot.current = (mobileRot.current + dt * speed.current * 0.2) % TAU;
       let best = { work: 0, x: 0, y: 0, top: 0 };
-      // grown past phone size: every chip goes back to its own task
-      if (!mobile && shownRef.current.some((v, j) => v !== j)) {
-        const own = heroTasks.map((_, j) => j);
-        shownRef.current = own;
-        setShown(own);
-      }
       state.current.forEach((s, i) => {
         const node = pillEls.current[i];
         if (!node) return;
         // every chip keeps its place on the orbit, even while hidden, so they never bunch up
-        if (startedRef.current && !reduce) s.a = (s.a + dt * speed.current * (mobile ? 0.2 : 0.13)) % TAU;
-        // phones: three chips revolve as small icons (so they never collide) and open out at the front
-        if (mobile && i % 2 !== 0) {
-          node.style.opacity = "0";
-          return;
+        if (startedRef.current && !reduce && !mobile) s.a = (s.a + dt * speed.current * 0.13) % TAU;
+        // phones: five revolve as small icons, evenly spaced, and only the one at the very front opens
+        if (mobile) {
+          if (i >= MOBILE_COUNT) {
+            node.style.opacity = "0";
+            return;
+          }
+          s.a = (mobileRot.current + (i * TAU) / MOBILE_COUNT) % TAU;
         }
         const depth = Math.sin(s.a); // 1 = front, -1 = back
         const k = (depth + 1) / 2;
         if (mobile) {
           // the chip opens as it comes round to the front and closes as it leaves, frame by frame
-          const t = Math.min(1, Math.max(0, (depth - 0.55) / 0.35));
+          const t = Math.min(1, Math.max(0, (depth - 0.86) / 0.14));
           const e = t * t * (3 - 2 * t);
           const row = node.firstElementChild as HTMLElement | null;
           const label = node.querySelector<HTMLElement>("[data-label]");
@@ -132,24 +130,6 @@ export function HeroOrbit({
             stat.style.opacity = String(e);
             row.style.gap = `${e * 12}px`;
             row.style.paddingRight = `${8 + e * 4}px`;
-          }
-          // right behind Juno, faded out, a chip becomes the next task nobody else is showing
-          if (startedRef.current && !reduce && depth < -0.93) {
-            if (!node.dataset.swapped) {
-              node.dataset.swapped = "true";
-              s.done = false;
-              node.dataset.done = "false";
-              const cur = shownRef.current;
-              const used = new Set(cur.filter((_, j) => j % 2 === 0));
-              let next = (cur[i] + 1) % COUNT;
-              while (used.has(next)) next = (next + 1) % COUNT;
-              const copy = [...cur];
-              copy[i] = next;
-              shownRef.current = copy;
-              setShown(copy);
-            }
-          } else if (node.dataset.swapped && depth > -0.6) {
-            delete node.dataset.swapped;
           }
         } else if (node.dataset.opened !== "full") {
           // desktop: chips are always fully open
@@ -166,7 +146,7 @@ export function HeroOrbit({
         if (!s.done && depth > 0.97) {
           s.done = true;
           node.dataset.done = "true";
-          if (startedRef.current && !reduce) cbs.current.onDone?.(heroTasks[shownRef.current[i]].text);
+          if (startedRef.current && !reduce) cbs.current.onDone?.(heroTasks[i].text);
         } else if (s.done && depth < -0.6) {
           s.done = false;
           node.dataset.done = "false";
@@ -176,8 +156,7 @@ export function HeroOrbit({
         node.style.setProperty("--work", String(wk));
         if (wk > best.work) best = { work: wk, x, y, top: y - node.offsetHeight / 2 };
         node.style.transform = `translate3d(${x}px, ${y}px, 0) translate(-50%, -50%) scale(${(0.78 + k * 0.22) * (mobile ? 0.86 : 1)})`;
-        // phones fade a chip right out at the very back, where it changes task
-        const op = mobile ? (k < 0.12 ? (k / 0.12) * 0.45 : 0.45 + ((k - 0.12) / 0.88) * 0.55) : 0.16 + k * 0.84;
+        const op = mobile ? 0.28 + k * 0.72 : 0.16 + k * 0.84;
         node.style.opacity = startedRef.current ? String(op) : "0";
         node.style.zIndex = depth > 0 ? "30" : "5";
         node.style.filter = depth < -0.1 ? `blur(${(-depth - 0.1) * 2.2}px)` : "none";
@@ -276,11 +255,10 @@ export function HeroOrbit({
       <div className="absolute left-1/2 top-1/2 z-20 -translate-x-1/2 -translate-y-1/2">{children}</div>
 
       {/* tasks in orbit */}
-      {shown.map((ti, i) => {
-        const t = heroTasks[ti];
+      {heroTasks.map((t, i) => {
         return (
         <div
-          key={i}
+          key={t.text}
           ref={(el) => {
             pillEls.current[i] = el;
           }}
