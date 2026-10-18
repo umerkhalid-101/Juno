@@ -23,8 +23,10 @@ export function DotField({
 }) {
   const ref = useRef<HTMLCanvasElement>(null);
   const playing = useRef(play);
+  const start = useRef<() => void>(() => {});
   useEffect(() => {
     playing.current = play;
+    if (play) start.current();
   }, [play]);
 
   useEffect(() => {
@@ -36,7 +38,7 @@ export function DotField({
     let raf = 0;
     let w = 0;
     let h = 0;
-    const dpr = Math.min(2, window.devicePixelRatio || 1);
+    const dpr = Math.min(1.5, window.devicePixelRatio || 1);
     const size = () => {
       // layout size, not the on-screen box: the card morphs with transforms when it opens,
       // and measuring mid-morph would stretch every dot
@@ -52,33 +54,37 @@ export function DotField({
     ro.observe(canvas);
 
     // points on a sphere, evenly spread (Fibonacci lattice)
-    const sphere = Array.from({ length: 520 }, (_, i) => {
-      const y = 1 - (i / 519) * 2;
+    const sphere = Array.from({ length: 300 }, (_, i) => {
+      const y = 1 - (i / 299) * 2;
       const r = Math.sqrt(1 - y * y);
       const th = i * 2.399963;
-      return { x: Math.cos(th) * r, y, z: Math.sin(th) * r, hot: i % 37 === 0 };
+      return { x: Math.cos(th) * r, y, z: Math.sin(th) * r, hot: i % 23 === 0 };
     });
 
     let t = reduce ? 2 : 0;
     let last = performance.now();
-    let drawn = false;
+    let lastPaint = 0;
     const draw = (now: number) => {
-      const dt = Math.min(0.05, (now - last) / 1000);
-      last = now;
-      // off screen: keep the last frame, skip the work
-      if (drawn && (!playing.current || reduce)) {
+      raf = 0;
+      // 30 frames a second is plenty for a backdrop
+      if (now - lastPaint < 32) {
         raf = requestAnimationFrame(draw);
         return;
       }
-      drawn = true;
+      lastPaint = now;
+      const dt = Math.min(0.08, (now - last) / 1000);
+      last = now;
       if (playing.current && !reduce) t += dt;
       ctx.clearRect(0, 0, w, h);
+      let colour = "";
       const dot = (x: number, y: number, s: number, a: number, c = "255,255,255") => {
         if (a <= 0.01) return;
-        ctx.fillStyle = `rgba(${c},${a})`;
-        ctx.beginPath();
-        ctx.arc(x, y, s, 0, Math.PI * 2);
-        ctx.fill();
+        if (c !== colour) {
+          colour = c;
+          ctx.fillStyle = `rgb(${c})`;
+        }
+        ctx.globalAlpha = a > 1 ? 1 : a;
+        ctx.fillRect(x - s, y - s, s * 2, s * 2);
       };
 
       if (mode === "globe") {
@@ -158,12 +164,21 @@ export function DotField({
           }
         }
       }
-      raf = requestAnimationFrame(draw);
+      ctx.globalAlpha = 1;
+      if (playing.current && !reduce) raf = requestAnimationFrame(draw);
     };
     // paint the first frame straight away so the card is never empty
+    lastPaint = -100;
     draw(performance.now());
+    start.current = () => {
+      if (!raf && !reduce) {
+        last = performance.now();
+        raf = requestAnimationFrame(draw);
+      }
+    };
     return () => {
       cancelAnimationFrame(raf);
+      start.current = () => {};
       ro.disconnect();
     };
   }, [mode, rgb, rgb2]);

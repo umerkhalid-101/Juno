@@ -365,28 +365,24 @@
   width: 90vmax;
   height: 90vmax;
   border-radius: 9999px;
-  will-change: transform, opacity;
 }
 .ambient-blue {
   left: -35vmax;
   top: -30vmax;
   background: radial-gradient(closest-side, rgba(60, 90, 255, 0.05), transparent);
   opacity: calc(1 - var(--sp) * 1.6);
-  animation: drift-a 70s ease-in-out infinite alternate;
 }
 .ambient-violet {
   right: -40vmax;
   top: -10vmax;
   background: radial-gradient(closest-side, rgba(124, 92, 255, 0.045), transparent);
   opacity: calc(1 - abs(var(--sp) - 0.5) * 2.4);
-  animation: drift-b 84s ease-in-out infinite alternate;
 }
 .ambient-teal {
   left: -20vmax;
   bottom: -45vmax;
   background: radial-gradient(closest-side, rgba(40, 160, 220, 0.04), transparent);
   opacity: calc(var(--sp) * 1.6 - 0.4);
-  animation: drift-c 96s ease-in-out infinite alternate;
 }
 /* edges sink a little, which pulls the eye to the centre */
 .ambient-vignette {
@@ -1147,11 +1143,11 @@
 }
 .scene-pop { animation: scene-pop 6s cubic-bezier(0.3, 0, 0, 1) infinite; }
 @keyframes scene-type {
-  0% { max-width: 0; }
-  45%, 90% { max-width: 240px; }
-  100% { max-width: 0; }
+  0% { clip-path: inset(0 100% 0 0); }
+  45%, 90% { clip-path: inset(0 0 0 0); }
+  100% { clip-path: inset(0 100% 0 0); }
 }
-.scene-type { animation: scene-type 6s steps(28, end) infinite; max-width: 240px; }
+.scene-type { animation: scene-type 6s steps(28, end) infinite; }
 @keyframes scene-rise-loop {
   0%, 30% { opacity: 0; transform: translateY(14px); }
   42%, 92% { opacity: 1; transform: translateY(0); }
@@ -1163,11 +1159,25 @@
 }
 .scene-rise { animation: scene-rise-in 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.25s both; }
 @keyframes scene-win {
-  0%, 30% { transform: translateY(0); box-shadow: 0 30px 60px -24px rgba(0, 0, 0, 0.75), 0 0 0 1px rgba(0, 0, 0, 0.04); }
-  45%, 90% { transform: translateY(-6px); box-shadow: 0 34px 60px -24px rgba(0, 0, 0, 0.8), 0 0 0 2px #22c55e; }
+  0%, 30% { transform: translateY(0); }
+  45%, 90% { transform: translateY(-6px); }
   100% { transform: translateY(0); }
 }
-.scene-win { animation: scene-win 6s cubic-bezier(0.2, 0.8, 0.2, 1) infinite; }
+@keyframes scene-win-ring {
+  0%, 30% { opacity: 0; }
+  45%, 90% { opacity: 1; }
+  100% { opacity: 0; }
+}
+.scene-win { position: absolute; animation: scene-win 6s cubic-bezier(0.2, 0.8, 0.2, 1) infinite; }
+.scene-win::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: 0 0 0 2px #22c55e;
+  pointer-events: none;
+  animation: scene-win-ring 6s cubic-bezier(0.2, 0.8, 0.2, 1) infinite;
+}
 @keyframes scene-draw {
   0%, 10% { stroke-dashoffset: 1; }
   55%, 92% { stroke-dashoffset: 0; }
@@ -1175,11 +1185,11 @@
 }
 .scene-draw { stroke-dasharray: 1; animation: scene-draw 6s cubic-bezier(0.2, 0.8, 0.2, 1) infinite; }
 @keyframes scene-health {
-  0%, 15% { width: 72%; }
-  50%, 90% { width: 34%; }
-  100% { width: 72%; }
+  0%, 15% { transform: scaleX(0.72); }
+  50%, 90% { transform: scaleX(0.34); }
+  100% { transform: scaleX(0.72); }
 }
-.scene-health { animation: scene-health 6s cubic-bezier(0.2, 0.8, 0.2, 1) infinite; }
+.scene-health { width: 100%; transform-origin: left; animation: scene-health 6s cubic-bezier(0.2, 0.8, 0.2, 1) infinite; }
 @keyframes scene-out {
   0%, 50% { opacity: 1; }
   56%, 94% { opacity: 0; }
@@ -1199,11 +1209,20 @@
 }
 .scene-fill { transform-origin: left; animation: scene-fill 6s cubic-bezier(0.2, 0.8, 0.2, 1) infinite; }
 @keyframes scene-ring {
-  0%, 40% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); }
-  50%, 90% { box-shadow: 0 0 0 6px rgba(245, 158, 11, 0.22); }
-  100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); }
+  0%, 40% { opacity: 0; }
+  50%, 90% { opacity: 1; }
+  100% { opacity: 0; }
 }
-.scene-ring { animation: scene-ring 6s ease-in-out infinite; }
+.scene-ring { position: relative; }
+.scene-ring::after {
+  content: "";
+  position: absolute;
+  inset: -3px;
+  border-radius: 10px;
+  box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.22);
+  pointer-events: none;
+  animation: scene-ring 6s ease-in-out infinite;
+}
 @keyframes scene-drop {
   0%, 8% { opacity: 0; transform: translateY(-14px); }
   20%, 92% { opacity: 1; transform: translateY(0); }
@@ -1258,7 +1277,19 @@
 .scene-bar { animation: scene-bar 3.2s ease-in-out infinite; }
 @media (prefers-reduced-motion: reduce) {
   .scene * { animation: none !important; }
-  .scene-type { max-width: 240px; }
+  .scene-type { clip-path: none; }
   .scene-flip-b { transform: none; }
   .scene-flip-a { opacity: 0; }
+}
+
+/* page CTA: the chips drift a few pixels, never still, never busy */
+.cta-drift {
+  animation: cta-drift 7s ease-in-out infinite alternate;
+}
+@keyframes cta-drift {
+  from { transform: translate3d(0, -4px, 0); }
+  to { transform: translate3d(0, 4px, 0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cta-drift { animation: none; }
 }

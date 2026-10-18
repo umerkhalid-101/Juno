@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import { JobsHero } from "@/components/jobs/JobsHero";
 import { Catalog } from "@/components/jobs/Catalog";
 import { HowItWorks } from "@/components/jobs/HowItWorks";
-import { JobsCta, JobsFaq } from "@/components/jobs/JobsClose";
+import { JobsFaq } from "@/components/jobs/JobsClose";
+import { PageCta } from "@/components/ui/PageCta";
 
 const title = "AI Automations for Founders & Teams | Juno";
 const description =
@@ -23,7 +24,7 @@ export default function JobsPage() {
       <Catalog />
       <HowItWorks />
       <JobsFaq />
-      <JobsCta />
+      <PageCta title="What would you get back to?" sub="If Juno had the follow-through covered." />
     </main>
   );
 }

@@ -41,7 +41,6 @@ const chips = [
   { text: "Every Fri · 9:00 AM", cls: "border-[#7A8FFF]/30 bg-[#324CFF]/12 text-[#A6BBFF]" },
   { text: "Active", cls: "border-[#3DD68C]/30 bg-[#3DD68C]/10 text-[#3DD68C]" },
 ];
-const ease = [0.2, 0.8, 0.2, 1] as const;
 
 function Dots() {
   return (
@@ -104,10 +103,10 @@ function Build({ step }: { step: number }) {
         className="pointer-events-none absolute inset-0"
         style={{
           background:
-            "linear-gradient(180deg, transparent 40%, rgba(166,187,255,0.08) 72%, rgba(182,166,240,0.18) 100%)",
+            "linear-gradient(180deg, transparent 40%, rgba(166,187,255,0.04) 72%, rgba(182,166,240,0.08) 100%)",
         }}
       />
-      <div aria-hidden className="pointer-events-none absolute inset-x-0 bottom-0 h-[45%]">
+      <div aria-hidden className="pointer-events-none absolute inset-x-0 bottom-0 h-[40%] opacity-40">
         <DotField mode="rise" rgb="166,187,255" rgb2="182,166,240" play={seen} />
       </div>
 
@@ -143,64 +142,63 @@ function Build({ step }: { step: number }) {
           </p>
         </div>
 
-        {/* Juno, in the conversation, doing the work */}
+        {/* Juno, in the conversation, doing the work. Every part is always here, so the
+            window never changes height; each step only crossfades what is shown in its place. */}
         <div className="mt-5 flex items-start gap-3">
           <span className="shrink-0">
             <Mascot size={36} state="idle" halo={false} apiRef={juno} />
           </span>
           <div className="min-w-0 flex-1">
             <p className="text-[12px] text-subtle">Juno</p>
-            {step === 0 ? (
-              <>
-                <Dots />
-                <div className="mt-2.5 flex gap-1" aria-hidden>
-                  {WEEK.map((d, k) => (
-                    <span
-                      key={k}
-                      className="grid size-9 place-items-center rounded-lg border border-dashed border-white/[0.12] font-mono text-[12px] text-white/25"
-                    >
-                      {d}
-                    </span>
-                  ))}
-                </div>
-              </>
-            ) : (
-              <motion.div
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4, ease }}
-              >
-                <p className="mt-0.5 text-[15px] text-text">
-                  Every Friday, then. I&apos;ll make each one personal.
-                </p>
-                <div className="mt-2.5 flex gap-1" aria-hidden>
-                  {WEEK.map((d, k) => (
-                    <span
-                      key={k}
-                      className={`grid size-9 place-items-center rounded-lg font-mono text-[12px] font-medium transition-colors duration-[120ms] ${
-                        k === 4
-                          ? "bg-[#A6BBFF] text-[#07111F] shadow-[0_0_0_4px_rgba(166,187,255,0.18)]"
-                          : "bg-[#1A1F2A] text-[#9AA6B8] ring-1 ring-white/10"
-                      }`}
-                    >
-                      {d}
-                    </span>
-                  ))}
-                </div>
-              </motion.div>
-            )}
 
-            {step < 2 && (
+            {/* the reply: listening, then the rhythm */}
+            <div className="mt-0.5 grid h-6 items-center">
+              <span
+                className={`[grid-area:1/1] transition-opacity duration-300 ${step === 0 ? "opacity-100" : "opacity-0"}`}
+              >
+                <Dots />
+              </span>
+              <p
+                className={`[grid-area:1/1] text-[15px] text-text transition-opacity duration-300 ${step >= 1 ? "opacity-100" : "opacity-0"}`}
+              >
+                Every Friday, then. I&apos;ll make each one personal.
+              </p>
+            </div>
+            <div className="mt-2.5 flex gap-1" aria-hidden>
+              {WEEK.map((d, k) => {
+                const on = step >= 1 && k === 4;
+                return (
+                  <span
+                    key={k}
+                    className={`grid size-9 place-items-center rounded-lg font-mono text-[12px] font-medium transition-[background-color,color,box-shadow] duration-300 ${
+                      on
+                        ? "bg-[#A6BBFF] text-[#07111F] shadow-[0_0_0_4px_rgba(166,187,255,0.18)]"
+                        : step >= 1
+                          ? "bg-[#1A1F2A] text-[#9AA6B8] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.1)]"
+                          : "text-white/25 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.12)]"
+                    }`}
+                  >
+                    {d}
+                  </span>
+                );
+              })}
+            </div>
+
+            {/* the results: the same footprint before, during and after */}
+            <div className="mt-5 grid">
+              {/* waiting, or working */}
               <div
-                className="mt-5 rounded-[18px] border border-dashed border-white/[0.12] p-3.5"
+                className={`[grid-area:1/1] transition-opacity duration-500 ${step < 2 || working ? "opacity-100" : "pointer-events-none opacity-0"}`}
                 aria-hidden
               >
-                <p className="text-[13px] text-subtle">Friday&apos;s updates land here</p>
-                <div className="mt-3 space-y-2">
+                <div className="flex h-6 items-center text-[13px] text-subtle">
+                  {working ? <Dots /> : "Friday's updates land here"}
+                </div>
+                <div className="mt-3 space-y-2 rounded-[18px] border border-dashed border-white/[0.12] p-3.5">
                   {[0, 1, 2].map((k) => (
                     <div
                       key={k}
-                      className="flex items-center gap-3 rounded-xl bg-white/[0.03] px-3 py-2.5"
+                      className="flex h-[54px] items-center gap-3 rounded-xl bg-white/[0.03] px-3"
                     >
                       <span className="size-[30px] rounded-full bg-white/[0.06]" />
                       <span className="flex-1 space-y-1.5">
@@ -211,72 +209,54 @@ function Build({ step }: { step: number }) {
                     </div>
                   ))}
                 </div>
+                <div className="mt-3 h-[118px] rounded-2xl border border-dashed border-white/[0.08]" />
               </div>
-            )}
 
-            <AnimatePresence>
-              {step >= 2 && (
-                <motion.div
-                  initial={{ opacity: 0, y: 14 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 14 }}
-                  transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-                  className="mt-5"
-                >
-                  {working ? (
-                    <Dots />
-                  ) : (
-                    <>
-                      <p className="text-[15px] text-text">Friday&apos;s updates are ready.</p>
-                      <div className="mt-3 rounded-[18px] bg-[#FBFAF7] p-3.5 text-[#14161f]">
-                        <ul className="space-y-2">
-                          {updates.map((u, k) => (
-                            <motion.li
-                              key={u.to}
-                              initial={{ opacity: 0, y: 8 }}
-                              animate={{ opacity: 1, y: 0 }}
-                              transition={{ duration: 0.4, delay: 0.1 + k * 0.12, ease }}
-                              className="flex items-center gap-3 rounded-xl bg-white px-3 py-2.5 ring-1 ring-black/[0.06]"
-                            >
-                              <Face who={u.who} size={30} />
-                              <span className="min-w-0 flex-1 leading-tight">
-                                <span className="block text-[13.5px] font-medium">{u.to}</span>
-                                <span className="block text-[12px] text-[#6b7080]">{u.what}</span>
-                              </span>
-                              <span className="inline-flex h-6 items-center rounded-md bg-[#E9F7EF] px-2 font-mono text-[10px] uppercase tracking-[0.08em] text-[#1f7a4d]">
-                                Ready to send
-                              </span>
-                            </motion.li>
-                          ))}
-                        </ul>
-                      </div>
-                      <motion.div
-                        initial={{ opacity: 0, y: 8 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.8, delay: 0.5, ease: [0.16, 1, 0.3, 1] }}
-                        className="mt-3 rounded-2xl bg-[#151A22] p-3.5 ring-1 ring-white/10"
+              {/* ready */}
+              <div
+                className={`[grid-area:1/1] transition-[opacity,transform] duration-500 [transition-timing-function:cubic-bezier(0.16,1,0.3,1)] ${step === 2 && !working ? "translate-y-0 opacity-100" : "pointer-events-none translate-y-2 opacity-0"}`}
+              >
+                <p className="flex h-6 items-center text-[15px] text-text">
+                  Friday&apos;s updates are ready.
+                </p>
+                <div className="mt-3 rounded-[18px] bg-[#FBFAF7] p-3.5 text-[#14161f]">
+                  <ul className="space-y-2">
+                    {updates.map((u) => (
+                      <li
+                        key={u.to}
+                        className="flex h-[54px] items-center gap-3 rounded-xl bg-white px-3 ring-1 ring-black/[0.06]"
                       >
-                        <p className="t-eyebrow inline-flex items-center gap-1.5 !text-[10.5px] text-[#FFB547]">
-                          <span className="size-1.5 rounded-full bg-[#FFB547]" />
-                          Needs your yes
-                        </p>
-                        <p className="mt-1.5 text-[14px] text-text">
-                          Send these updates and let the account owners know?
-                        </p>
-                        <span className="mt-3 flex gap-2" aria-hidden>
-                          <span className="inline-flex h-9 flex-1 items-center justify-center rounded-full bg-[#F4F6F8] text-[13px] font-semibold text-[#07090D]">
-                            Approve
-                          </span>
-                          <span className="inline-flex h-9 items-center justify-center rounded-full px-4 text-[13px] text-muted ring-1 ring-white/10">
-                            Edit
-                          </span>
+                        <Face who={u.who} size={30} />
+                        <span className="min-w-0 flex-1 leading-tight">
+                          <span className="block text-[13.5px] font-medium">{u.to}</span>
+                          <span className="block text-[12px] text-[#6b7080]">{u.what}</span>
                         </span>
-                      </motion.div>
-                    </>
-                  )}
-                </motion.div>
-              )}
-            </AnimatePresence>
+                        <span className="inline-flex h-6 items-center rounded-md bg-[#E9F7EF] px-2 font-mono text-[10px] uppercase tracking-[0.08em] text-[#1f7a4d]">
+                          Ready to send
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                <div className="mt-3 rounded-2xl bg-[#151A22] p-3.5 ring-1 ring-white/10">
+                  <p className="t-eyebrow inline-flex items-center gap-1.5 !text-[10.5px] text-[#FFB547]">
+                    <span className="size-1.5 rounded-full bg-[#FFB547]" />
+                    Needs your yes
+                  </p>
+                  <p className="mt-1.5 text-[14px] text-text">
+                    Send these updates and let the account owners know?
+                  </p>
+                  <span className="mt-3 flex gap-2" aria-hidden>
+                    <span className="inline-flex h-9 flex-1 items-center justify-center rounded-full bg-[#F4F6F8] text-[13px] font-semibold text-[#07090D]">
+                      Approve
+                    </span>
+                    <span className="inline-flex h-9 items-center justify-center rounded-full px-4 text-[13px] text-muted ring-1 ring-white/10">
+                      Edit
+                    </span>
+                  </span>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>

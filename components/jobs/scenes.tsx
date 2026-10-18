@@ -965,7 +965,7 @@ export function JobScene({
     <div
       ref={root}
       data-play={play ? "true" : "false"}
-      className="scene absolute inset-0 overflow-hidden"
+      className="scene absolute inset-0 overflow-hidden [contain:strict]"
     >
       {/* the colour world: a sweep that deepens toward the bottom, like Stripe's */}
       <div
@@ -979,9 +979,9 @@ export function JobScene({
       {ribbon && (
         <div
           aria-hidden
-          className="absolute -left-[20%] top-[46%] h-[180px] w-[140%] -rotate-[9deg] rounded-[50%] opacity-30 blur-[56px]"
+          className="absolute -left-[20%] top-[40%] h-[260px] w-[140%] -rotate-[9deg] opacity-30"
           style={{
-            background: `linear-gradient(90deg, rgba(${w.b},0), rgba(${w.a},0.9) 35%, rgba(${w.b},0.85) 70%, rgba(${w.a},0))`,
+            background: `radial-gradient(50% 50% at 50% 50%, rgba(${w.a},0.75), rgba(${w.b},0.35) 45%, transparent 72%)`,
           }}
         />
       )}
