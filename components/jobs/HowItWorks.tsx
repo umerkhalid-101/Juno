@@ -1,9 +1,11 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { AnimatePresence, motion, useReducedMotion } from "motion/react";
+import { AnimatePresence, motion, useInView, useReducedMotion } from "motion/react";
 import { Check } from "lucide-react";
-import { MascotMark } from "@/components/mascot/Mascot";
+import { Mascot, type MascotApi } from "@/components/mascot/Mascot";
+import { DotField } from "./DotField";
+import { Face } from "./scenes";
 import { ToolLogo } from "@/components/ui/ToolLogo";
 
 /**
@@ -28,120 +30,215 @@ const steps = [
 
 const ASK = "Keep customers in the loop. Make it personal.";
 const WEEK = ["M", "T", "W", "T", "F"];
-const updates = [
-  { to: "Maya Chen", what: "Share links are live" },
-  { to: "Leo Park", what: "Bulk export is here" },
-  { to: "Priya Shah", what: "Team plans shipped" },
+const updates: { to: string; who: "maya" | "leo" | "priya"; what: string }[] = [
+  { to: "Maya Chen", who: "maya", what: "Share links are live" },
+  { to: "Leo Park", who: "leo", what: "Bulk export is here" },
+  { to: "Priya Shah", who: "priya", what: "Team plans shipped" },
 ];
 
 /** The job, as far as it has been built: `step` 0, 1 or 2. */
-function Build({ step }: { step: number }) {
+const chips = [
+  { text: "Draft", cls: "border-white/10 bg-white/[0.04] text-muted" },
+  { text: "Every Fri · 9:00 AM", cls: "border-[#7A8FFF]/30 bg-[#324CFF]/12 text-[#A6BBFF]" },
+  { text: "Active", cls: "border-[#3DD68C]/30 bg-[#3DD68C]/10 text-[#3DD68C]" },
+];
+const ease = [0.2, 0.8, 0.2, 1] as const;
+
+function Dots() {
   return (
-    <div className="relative overflow-hidden rounded-[28px] border border-white/[0.08] bg-[#0B0E14] p-5 md:p-7">
+    <span className="flex h-6 items-center gap-1" aria-label="Juno is working">
+      {[0, 1, 2].map((d) => (
+        <span
+          key={d}
+          className="think-dot size-1.5 rounded-full bg-white/60"
+          style={{ animationDelay: `${d * 0.15}s` }}
+        />
+      ))}
+    </span>
+  );
+}
+
+/** The job, as far as it has been built: `step` 0, 1 or 2. Juno is in the conversation, doing it. */
+function Build({ step }: { step: number }) {
+  const juno = useRef<MascotApi>(null);
+  const you = useRef<HTMLParagraphElement>(null);
+  const stage = useRef<HTMLDivElement>(null);
+  const seen = useInView(stage, { amount: 0.3 });
+  const [working, setWorking] = useState(false);
+
+  // Juno reacts to each step: reads your message, nods to the rhythm, works, then cheers
+  useEffect(() => {
+    const j = juno.current;
+    let t = 0;
+    let w = 0;
+    if (step === 0) {
+      j?.setState("idle");
+      j?.lookAt(you.current);
+    } else if (step === 1) {
+      j?.look(0.2, 0.2);
+      j?.nod();
+    } else {
+      w = window.setTimeout(() => setWorking(true), 0);
+      j?.setState("thinking");
+      t = window.setTimeout(() => {
+        setWorking(false);
+        j?.setState("idle");
+        j?.cheer();
+      }, 1200);
+    }
+    return () => {
+      window.clearTimeout(t);
+      window.clearTimeout(w);
+    };
+  }, [step]);
+
+  const chip = chips[step];
+
+  return (
+    <div
+      ref={stage}
+      className="relative overflow-hidden rounded-[28px] border border-white/[0.08] bg-[#0B0E14] lg:min-h-[640px]"
+    >
+      {/* the stage's world, in Juno's own colours */}
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(90%_60%_at_50%_0%,rgba(122,143,255,0.12),transparent_70%)]"
+        className="pointer-events-none absolute inset-0"
+        style={{
+          background:
+            "linear-gradient(180deg, transparent 40%, rgba(166,187,255,0.08) 72%, rgba(182,166,240,0.18) 100%)",
+        }}
       />
-      {/* 1. you */}
-      <div className="relative flex justify-end">
-        <p className="max-w-[86%] rounded-[20px] rounded-br-md bg-[#F4F6F8] px-4 py-2.5 text-[15px] leading-[22px] text-[#07090D]">
-          {ASK}
-        </p>
+      <DotField mode="rise" rgb="166,187,255" rgb2="182,166,240" play={seen} />
+
+      {/* the job itself: its name and where it stands */}
+      <div className="relative flex items-center gap-3 border-b border-white/[0.06] bg-[#0E1218]/80 px-5 py-3.5 backdrop-blur md:px-7">
+        <ToolLogo id="gmail" size={16} />
+        <span className="text-[14.5px] font-medium text-text">Customer follow-through</span>
+        <span className="relative ml-auto h-7 min-w-[148px]">
+          <AnimatePresence mode="popLayout" initial={false}>
+            <motion.span
+              key={step}
+              initial={{ opacity: 0, scale: 1.1 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.12 }}
+              className={`t-eyebrow absolute right-0 top-0 inline-flex h-7 items-center gap-1.5 whitespace-nowrap rounded-md border px-2.5 !text-[10.5px] ${chip.cls}`}
+            >
+              {step === 2 && <span className="size-1.5 rounded-full bg-current" />}
+              {chip.text}
+            </motion.span>
+          </AnimatePresence>
+        </span>
       </div>
 
-      {/* 2. rhythm */}
-      <AnimatePresence>
-        {step >= 1 && (
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 10 }}
-            transition={{ duration: 0.4, ease: [0.2, 0.8, 0.2, 1] }}
-            className="relative mt-5 flex items-start gap-3"
+      <div className="relative p-5 md:p-7">
+        {/* you */}
+        <div className="flex justify-end">
+          <p
+            ref={you}
+            className="max-w-[86%] rounded-[20px] rounded-br-md bg-[#F4F6F8] px-4 py-2.5 text-[15px] leading-[22px] text-[#07090D]"
           >
-            <MascotMark size={28} />
-            <div>
-              <p className="text-[15px] text-text">Every Friday, then.</p>
-              <div className="mt-2.5 flex flex-wrap items-center gap-2">
-                <span className="flex gap-1" aria-hidden>
+            {ASK}
+          </p>
+        </div>
+
+        {/* Juno, in the conversation, doing the work */}
+        <div className="mt-5 flex items-start gap-3">
+          <span className="shrink-0">
+            <Mascot size={36} state="idle" halo={false} apiRef={juno} />
+          </span>
+          <div className="min-w-0 flex-1">
+            <p className="text-[12px] text-subtle">Juno</p>
+            {step === 0 ? (
+              <Dots />
+            ) : (
+              <motion.div
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4, ease }}
+              >
+                <p className="mt-0.5 text-[15px] text-text">
+                  Every Friday, then. I&apos;ll make each one personal.
+                </p>
+                <div className="mt-2.5 flex gap-1" aria-hidden>
                   {WEEK.map((d, k) => (
                     <span
                       key={k}
-                      className={`t-eyebrow grid size-8 place-items-center rounded-md border !text-[10.5px] ${k === 4 ? "border-[#7A8FFF]/40 bg-[#324CFF]/15 text-[#A6BBFF]" : "border-white/[0.08] text-subtle"}`}
+                      className={`t-eyebrow grid size-8 place-items-center rounded-md border !text-[10.5px] transition-colors duration-[120ms] ${k === 4 ? "border-[#7A8FFF]/40 bg-[#324CFF]/15 text-[#A6BBFF]" : "border-white/[0.08] text-subtle"}`}
                     >
                       {d}
                     </span>
                   ))}
-                </span>
-                <span className="t-eyebrow inline-flex h-8 items-center rounded-md border border-[#7A8FFF]/25 bg-[#324CFF]/10 px-2.5 !text-[10.5px] text-[#A6BBFF]">
-                  Every Friday · 9:00 AM
-                </span>
-              </div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+                </div>
+              </motion.div>
+            )}
 
-      {/* 3. the next move */}
-      <AnimatePresence>
-        {step >= 2 && (
-          <motion.div
-            initial={{ opacity: 0, y: 14 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 14 }}
-            transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-            className="relative mt-5 pl-10"
-          >
-            <div className="rounded-[18px] bg-[#FBFAF7] p-4 text-[#14161f]">
-              <p className="flex items-center gap-2 text-[14px] font-semibold">
-                <ToolLogo id="gmail" size={15} />
-                Updates ready to send
-              </p>
-              <ul className="mt-3 space-y-2">
-                {updates.map((u, k) => (
-                  <motion.li
-                    key={u.to}
-                    initial={{ opacity: 0, y: 8 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.4, delay: 0.15 + k * 0.12, ease: [0.2, 0.8, 0.2, 1] }}
-                    className="flex items-center gap-3 rounded-xl bg-white px-3 py-2.5 ring-1 ring-black/[0.06]"
-                  >
-                    <span className="min-w-0 flex-1 leading-tight">
-                      <span className="block text-[13.5px] font-medium">{u.to}</span>
-                      <span className="block text-[12px] text-[#6b7080]">{u.what}</span>
-                    </span>
-                    <span className="inline-flex h-6 items-center rounded-md bg-[#E9F7EF] px-2 font-mono text-[10px] uppercase tracking-[0.08em] text-[#1f7a4d]">
-                      Ready to send
-                    </span>
-                  </motion.li>
-                ))}
-              </ul>
-            </div>
-            <motion.div
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.6, ease: [0.16, 1, 0.3, 1] }}
-              className="mt-3 rounded-2xl bg-[#151A22] p-3.5 ring-1 ring-white/10"
-            >
-              <p className="t-eyebrow inline-flex items-center gap-1.5 !text-[10.5px] text-[#FFB547]">
-                <span className="size-1.5 rounded-full bg-[#FFB547]" />
-                Needs your yes
-              </p>
-              <p className="mt-1.5 text-[14px] text-text">
-                Send these updates and let the account owners know?
-              </p>
-              <span className="mt-3 flex gap-2" aria-hidden>
-                <span className="inline-flex h-9 flex-1 items-center justify-center rounded-full bg-[#F4F6F8] text-[13px] font-semibold text-[#07090D]">
-                  Approve
-                </span>
-                <span className="inline-flex h-9 items-center justify-center rounded-full px-4 text-[13px] text-muted ring-1 ring-white/10">
-                  Edit
-                </span>
-              </span>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+            <AnimatePresence>
+              {step >= 2 && (
+                <motion.div
+                  initial={{ opacity: 0, y: 14 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 14 }}
+                  transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+                  className="mt-5"
+                >
+                  {working ? (
+                    <Dots />
+                  ) : (
+                    <>
+                      <p className="text-[15px] text-text">Friday&apos;s updates are ready.</p>
+                      <div className="mt-3 rounded-[18px] bg-[#FBFAF7] p-3.5 text-[#14161f]">
+                        <ul className="space-y-2">
+                          {updates.map((u, k) => (
+                            <motion.li
+                              key={u.to}
+                              initial={{ opacity: 0, y: 8 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              transition={{ duration: 0.4, delay: 0.1 + k * 0.12, ease }}
+                              className="flex items-center gap-3 rounded-xl bg-white px-3 py-2.5 ring-1 ring-black/[0.06]"
+                            >
+                              <Face who={u.who} size={30} />
+                              <span className="min-w-0 flex-1 leading-tight">
+                                <span className="block text-[13.5px] font-medium">{u.to}</span>
+                                <span className="block text-[12px] text-[#6b7080]">{u.what}</span>
+                              </span>
+                              <span className="inline-flex h-6 items-center rounded-md bg-[#E9F7EF] px-2 font-mono text-[10px] uppercase tracking-[0.08em] text-[#1f7a4d]">
+                                Ready to send
+                              </span>
+                            </motion.li>
+                          ))}
+                        </ul>
+                      </div>
+                      <motion.div
+                        initial={{ opacity: 0, y: 8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.8, delay: 0.5, ease: [0.16, 1, 0.3, 1] }}
+                        className="mt-3 rounded-2xl bg-[#151A22] p-3.5 ring-1 ring-white/10"
+                      >
+                        <p className="t-eyebrow inline-flex items-center gap-1.5 !text-[10.5px] text-[#FFB547]">
+                          <span className="size-1.5 rounded-full bg-[#FFB547]" />
+                          Needs your yes
+                        </p>
+                        <p className="mt-1.5 text-[14px] text-text">
+                          Send these updates and let the account owners know?
+                        </p>
+                        <span className="mt-3 flex gap-2" aria-hidden>
+                          <span className="inline-flex h-9 flex-1 items-center justify-center rounded-full bg-[#F4F6F8] text-[13px] font-semibold text-[#07090D]">
+                            Approve
+                          </span>
+                          <span className="inline-flex h-9 items-center justify-center rounded-full px-4 text-[13px] text-muted ring-1 ring-white/10">
+                            Edit
+                          </span>
+                        </span>
+                      </motion.div>
+                    </>
+                  )}
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
@@ -230,7 +327,7 @@ export function HowItWorks() {
 
           {/* one job, built step by step; it stays put while the steps pass */}
           <div className="hidden lg:col-span-7 lg:block">
-            <div className="sticky top-[calc(50vh-240px)]">
+            <div className="sticky top-[96px]">
               <Build step={shown} />
             </div>
           </div>

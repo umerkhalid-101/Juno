@@ -15,7 +15,7 @@ const people = {
   sam: "1500648767791-00dcc994a43e",
   leo: "1507003211169-0a1dd7228f2d",
 };
-function Face({
+export function Face({
   who,
   size = 22,
   className = "",
