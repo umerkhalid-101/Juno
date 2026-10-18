@@ -1,75 +1,103 @@
 "use client";
 
-import { useEffect, useRef, useState, type ComponentType } from "react";
+import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from "react";
 import { AnimatePresence, motion, useInView, useReducedMotion } from "motion/react";
-import { ArrowDown, CornerDownLeft } from "lucide-react";
+import { ArrowDown, ArrowRight, Check, Lock, Palette, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/Button";
-import { MascotMark } from "@/components/mascot/Mascot";
+import { BrandMark } from "@/components/ui/BrandIcon";
+import { Face } from "@/components/jobs/scenes";
 import { CTA_HREF, CTA_LABEL } from "@/lib/site";
+import type { ToolId } from "@/lib/story";
 import { apps } from "@/lib/apps";
-import { Window, calm } from "./kit";
-import { CustomerPortal, FeedbackBoard, RoiCalculator } from "./minis";
+import { base, calm } from "./kit";
 
 const h = apps.hero;
 
-/** One sentence in, one app out. [new] prompts; the apps are the same ones further down the page. */
-const IDEAS: { label: string; ask: string; url: string; chrome: string; App: ComponentType }[] = [
-  { label: "Client portal", ask: "Give our clients one place to see progress and approve work.", url: "portal.yourcompany.com", chrome: "#E4E7DA", App: CustomerPortal },
-  { label: "Ideas board", ask: "Let customers vote on what we build next.", url: "ideas.yourcompany.com", chrome: "#E2DFF2", App: FeedbackBoard },
-  { label: "Time calculator", ask: "Show prospects how much time their team would get back.", url: "roi.yourcompany.com", chrome: "#E3E6DC", App: RoiCalculator },
-];
-const DWELL = 11000;
-
 /**
- * The hero: a Juno command bar and one large window. A sentence types in, and the app it
- * describes resolves underneath, ready to use. Left alone, it moves on to the next idea.
+ * The hero: one sentence, and the client portal Juno builds from it. Each piece flies in from
+ * where it lives in your company (the CRM, the plan, the files, the team chat, the brand kit),
+ * carrying a small tag that says so, then settles. [new] copy; cast matches the site.
  */
+type Src = ToolId | "brand";
+const PIECES: { id: string; from: Src; label: string; x: number; y: number; r: number }[] = [
+  { id: "brand", from: "brand", label: "Your brand kit", x: -220, y: -90, r: -6 },
+  { id: "client", from: "hubspot", label: "From HubSpot", x: 260, y: -60, r: 5 },
+  { id: "plan", from: "notion", label: "From Notion", x: -280, y: 20, r: -4 },
+  { id: "files", from: "drive", label: "From Google Drive", x: 290, y: 70, r: 5 },
+  { id: "chat", from: "slack", label: "From Slack", x: -240, y: 120, r: -5 },
+];
+const GAP = 0.42;
+const DARK = { bg: "#0E1218", chrome: "#0B0E13", accent: "#A8D08D", soft: "rgba(168,208,141,0.13)", logo: "#2F3A2A" };
+
+const Built = createContext({ done: true, k: 1, reduce: false, tags: false });
+
+/** A piece of the portal. It flies in from its source with a tag, lands, and the tag fades. */
+function Piece({ id, children, className = "" }: { id: string; children: ReactNode; className?: string }) {
+  const { done, k, reduce, tags } = useContext(Built);
+  const i = PIECES.findIndex((p) => p.id === id);
+  const p = PIECES[i];
+  const delay = 0.1 + i * GAP;
+  return (
+    <motion.div
+      className={`relative ${className}`}
+      initial={false}
+      animate={done ? { x: 0, y: 0, rotate: 0, scale: 1, opacity: 1 } : { x: p.x * k, y: p.y * k, rotate: p.r, scale: 0.9, opacity: 0 }}
+      transition={reduce ? { duration: 0 } : done ? { duration: 0.8, ease: calm, delay, opacity: { duration: 0.3, delay } } : { duration: 0.3, ease: base }}
+      style={{ zIndex: done ? 1 : 10 }}
+    >
+      {children}
+      {/* where it came from */}
+      <AnimatePresence>
+        {tags && done && (
+          <motion.span
+            aria-hidden
+            className="pointer-events-none absolute -top-3 right-2 z-10 flex items-center gap-1.5 whitespace-nowrap rounded-full bg-[#F4F6F8] py-1 pl-1.5 pr-2.5 text-[11px] font-medium text-[#0E1218] shadow-[0_8px_20px_-8px_rgba(0,0,0,0.7)]"
+            initial={{ opacity: 0, y: 4 }}
+            animate={{ opacity: [0, 1, 1, 0], y: 0 }}
+            transition={{ duration: 2.2, delay, times: [0, 0.12, 0.75, 1] }}
+          >
+            {p.from === "brand" ? <Palette size={12} className="text-[#2F3A2A]" /> : <BrandMark id={p.from} size={12} />}
+            {p.label}
+          </motion.span>
+        )}
+      </AnimatePresence>
+    </motion.div>
+  );
+}
+
 export function AppsHero() {
   const reduce = !!useReducedMotion();
   const stage = useRef<HTMLDivElement>(null);
-  const seen = useInView(stage, { amount: 0.35 });
-  const [i, setI] = useState(0);
-  const [typed, setTyped] = useState(0);
-  const [shown, setShown] = useState(false);
-  const [touched, setTouched] = useState(false);
-  const [started, setStarted] = useState(false);
-  const idea = IDEAS[i];
-  const text = reduce ? idea.ask : idea.ask.slice(0, typed);
-  const open = reduce || shown;
+  const seen = useInView(stage, { once: true, amount: 0.35 });
+  const [built, setBuilt] = useState(false);
+  const [round, setRound] = useState(0);
+  const [approved, setApproved] = useState(false);
+  const [small, setSmall] = useState(false);
+  const done = reduce || built;
 
-  // type the sentence, then the app resolves
   useEffect(() => {
-    if (reduce || !started) return;
-    const ts: number[] = [];
-    const len = IDEAS[i].ask.length;
-    for (let c = 1; c <= len; c++) ts.push(window.setTimeout(() => setTyped(c), 250 + c * 24));
-    ts.push(window.setTimeout(() => setShown(true), 250 + len * 24 + 450));
-    return () => ts.forEach(window.clearTimeout);
-  }, [i, started, reduce]);
+    const mq = window.matchMedia("(max-width: 767px)");
+    const on = () => setSmall(mq.matches);
+    const t = window.setTimeout(on, 0);
+    mq.addEventListener("change", on);
+    return () => {
+      window.clearTimeout(t);
+      mq.removeEventListener("change", on);
+    };
+  }, []);
 
-  // start once the stage is in view
   useEffect(() => {
-    if (!seen || started) return;
-    const t = window.setTimeout(() => setStarted(true), 0);
+    if (!seen || reduce) return;
+    const t = window.setTimeout(() => setBuilt(true), round === 0 ? 400 : 450);
     return () => window.clearTimeout(t);
-  }, [seen, started]);
+  }, [seen, reduce, round]);
 
-  function go(n: number) {
-    setShown(false);
-    setTyped(0);
-    window.setTimeout(() => setI(n), reduce ? 0 : 350);
-  }
-
-  // left alone (and in view), move on to the next idea
-  useEffect(() => {
-    if (reduce || touched || !seen || !shown) return;
-    const t = window.setTimeout(() => {
-      setShown(false);
-      setTyped(0);
-      window.setTimeout(() => setI((i + 1) % IDEAS.length), 350);
-    }, DWELL);
-    return () => window.clearTimeout(t);
-  }, [reduce, touched, seen, shown, i]);
+  const again = () => {
+    setBuilt(false);
+    setApproved(false);
+    setRound((r) => r + 1);
+  };
+  const settled = 0.1 + PIECES.length * GAP + 0.6;
 
   return (
     <section aria-labelledby="apps-title" className="relative overflow-x-clip pt-[140px] md:pt-[168px]">
@@ -89,77 +117,152 @@ export function AppsHero() {
           </div>
         </header>
 
-        <div ref={stage} className="relative mx-auto mt-20 max-w-[1080px] md:mt-28">
-          {/* glow 1 of 2: a soft pool of light under the window */}
-          <div aria-hidden className="pointer-events-none absolute inset-x-[6%] bottom-[-6%] top-[18%] -z-10 opacity-45 blur-[110px]" style={{ background: "var(--glow)" }} />
+        <div ref={stage} className="relative mx-auto mt-20 max-w-[780px] md:mt-28">
+          {/* glow 1 of 2 */}
+          <motion.div
+            aria-hidden
+            className="pointer-events-none absolute inset-x-[-12%] inset-y-[-10%] -z-10 blur-[100px]"
+            style={{ background: "var(--glow)" }}
+            initial={false}
+            animate={{ opacity: done ? 0.45 : 0.15 }}
+            transition={{ duration: 1.4, ease: calm }}
+          />
 
-          {/* the command bar */}
-          <div className="relative z-20 mx-auto max-w-[680px]">
-            <div className="flex h-[64px] items-center gap-3 rounded-[20px] border border-white/[0.12] bg-[#12161E] pl-4 pr-3 shadow-[0_30px_80px_-30px_rgba(0,0,0,0.95),inset_0_1px_0_rgba(255,255,255,0.06)]">
-              <MascotMark size={26} className="shrink-0" />
-              <p className="min-w-0 flex-1 truncate text-[15px] text-text md:text-[16px]">
-                <span aria-hidden>
-                  {text || <span className="text-subtle">Describe the app you need</span>}
-                  {!reduce && !open && typed > 0 && <span className="caret ml-px inline-block h-[1.05em] w-px translate-y-[3px] bg-text" />}
+          {/* the one sentence */}
+          <p className="mb-5 text-center text-[15px] text-muted">“Build Northwind a client portal.”</p>
+
+          <Built.Provider value={{ done, k: small ? 0.3 : 1, reduce, tags: !reduce }}>
+            <div className="overflow-visible rounded-[18px] border border-white/[0.09] shadow-[0_40px_120px_rgba(0,0,0,0.55)]" style={{ background: DARK.bg }}>
+              {/* chrome */}
+              <div className="flex h-10 items-center gap-2 rounded-t-[18px] border-b border-white/[0.06] px-3.5" style={{ background: DARK.chrome }}>
+                <span className="flex gap-1.5" aria-hidden>
+                  {["#FF5F57", "#FEBC2E", "#28C840"].map((c) => (
+                    <span key={c} className="size-[10px] rounded-full" style={{ background: c }} />
+                  ))}
                 </span>
-                <span className="sr-only">{idea.ask}</span>
-              </p>
-              <span
-                aria-hidden
-                className={`flex h-9 items-center gap-1.5 rounded-[11px] px-3 text-[12.5px] transition-colors duration-200 ${
-                  open ? "bg-white/[0.06] text-muted" : typed >= idea.ask.length ? "bg-[#A6BBFF] text-[#07111F]" : "bg-white/[0.06] text-subtle"
-                }`}
-              >
-                <CornerDownLeft size={13} />
-                Build
-              </span>
-            </div>
-          </div>
+                <span className="mx-auto flex h-6 items-center gap-1.5 rounded-full bg-white/[0.05] px-3 text-[11.5px] text-muted">
+                  <Lock size={10} aria-hidden />
+                  portal.studionorth.com
+                </span>
+                <span className="w-[46px]" />
+              </div>
 
-          {/* the app it becomes */}
-          <div className="relative mt-6 h-[560px] [perspective:1800px] md:mt-8 md:h-[600px]">
-            <AnimatePresence mode="wait">
-              {open ? (
-                <motion.div
-                  key={idea.label}
-                  className="absolute inset-0 origin-top"
-                  initial={reduce ? false : { opacity: 0, rotateX: 10, y: 24, scale: 0.97, filter: "blur(14px)" }}
-                  animate={{ opacity: 1, rotateX: 0, y: 0, scale: 1, filter: "blur(0px)" }}
-                  exit={{ opacity: 0, y: -8, filter: "blur(10px)", transition: { duration: 0.3 } }}
-                  transition={{ duration: 1, ease: calm }}
-                  onPointerDown={() => setTouched(true)}
+              <div key={round} className="min-h-[392px] p-5 md:p-7">
+                <Piece id="brand" className="w-fit">
+                  <div className="flex items-center gap-2.5">
+                    <span className="grid size-8 place-items-center rounded-[9px] text-[12px] font-bold" style={{ background: DARK.logo, color: DARK.accent }}>
+                      SN
+                    </span>
+                    <span className="leading-tight">
+                      <span className="block text-[13.5px] font-semibold text-text">Studio North</span>
+                      <span className="block text-[11.5px] text-muted">Client portal</span>
+                    </span>
+                  </div>
+                </Piece>
+
+                <Piece id="client" className="mt-6">
+                  <div className="flex items-center gap-3">
+                    <Face who="dana" size={40} className="!ring-0" />
+                    <div className="min-w-0">
+                      <p className="text-[22px] font-semibold leading-[27px] tracking-[-0.025em] text-text md:text-[26px] md:leading-[30px]">Hi Dana, here&apos;s Northwind.</p>
+                      <p className="text-[13px] text-muted">Website refresh · on track for June 12</p>
+                    </div>
+                  </div>
+                </Piece>
+
+                <Piece id="plan" className="mt-6">
+                  <ol className="flex items-center gap-2 text-[12px]">
+                    {["Kickoff", "Design", "Build", "Launch"].map((s, i) => {
+                      const at = approved ? 2 : 1;
+                      return (
+                        <li key={s} className="flex flex-1 items-center gap-2 last:flex-none">
+                          <span className="flex items-center gap-1.5" style={{ color: i <= at ? "#F4F6F8" : "#6B7789" }}>
+                            <span
+                              className="grid size-[18px] place-items-center rounded-full transition-colors duration-500"
+                              style={{ background: i < at ? DARK.accent : i === at ? DARK.soft : "transparent", border: i > at ? "1px solid rgba(255,255,255,0.15)" : "none", color: DARK.bg }}
+                            >
+                              {i < at && <Check size={10} strokeWidth={3} aria-hidden />}
+                              {i === at && <span className="size-1.5 rounded-full" style={{ background: DARK.accent }} />}
+                            </span>
+                            {s}
+                          </span>
+                          {i < 3 && <span className="h-px flex-1 bg-white/10" />}
+                        </li>
+                      );
+                    })}
+                  </ol>
+                </Piece>
+
+                <Piece id="files" className="mt-6">
+                  <div className="flex items-center gap-3 rounded-[14px] p-3" style={{ background: DARK.soft }}>
+                    <span className="relative hidden h-12 w-16 shrink-0 overflow-hidden rounded-[8px] bg-[linear-gradient(135deg,#2a3324,#1d2419)] sm:block" aria-hidden>
+                      <span className="absolute left-2 top-2 h-1.5 w-8 rounded-full bg-white/40" />
+                      <span className="absolute left-2 top-5 h-4 w-11 rounded-[3px] bg-white/20" />
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-[11.5px] text-muted">Ready for your eyes</p>
+                      <p className="text-[14px] font-medium text-text">Homepage design v3</p>
+                    </div>
+                    <AnimatePresence mode="wait" initial={false}>
+                      {approved ? (
+                        <motion.span key="ok" initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.8, ease: calm }} className="flex items-center gap-1.5 text-[12.5px] font-medium" style={{ color: DARK.accent }}>
+                          <Check size={13} strokeWidth={2.5} aria-hidden />
+                          Approved
+                        </motion.span>
+                      ) : (
+                        <motion.button
+                          key="b"
+                          type="button"
+                          onClick={() => setApproved(true)}
+                          exit={{ opacity: 0, transition: { duration: 0.12 } }}
+                          className="flex h-9 shrink-0 items-center gap-1.5 rounded-full px-4 text-[12.5px] font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#009CFF]"
+                          style={{ background: DARK.accent, color: DARK.bg }}
+                        >
+                          Approve
+                          <ArrowRight size={13} aria-hidden />
+                        </motion.button>
+                      )}
+                    </AnimatePresence>
+                  </div>
+                </Piece>
+
+                <Piece id="chat" className="mt-4">
+                  <div className="flex items-start gap-2.5 rounded-[12px] border border-white/[0.06] p-3">
+                    <Face who="leo" size={26} className="!ring-0" />
+                    <div className="min-w-0 flex-1 text-[13px] leading-[18px]">
+                      <p>
+                        <span className="font-medium text-text">Leo</span> <span className="text-subtle">· Studio North · 10:12</span>
+                      </p>
+                      <p className="text-text/85">{approved ? "Thanks Dana. Starting the build today." : "v3 is ready for your review. Shout if anything feels off."}</p>
+                    </div>
+                  </div>
+                </Piece>
+              </div>
+            </div>
+          </Built.Provider>
+
+          {/* the point, in one line */}
+          <div className="mt-6 flex min-h-8 items-center justify-center text-center text-[14px]">
+            <AnimatePresence mode="wait" initial={false}>
+              {done && (
+                <motion.p
+                  key={`d${round}`}
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.8, ease: calm, delay: reduce ? 0 : settled }}
+                  className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-muted"
                 >
-                  <Window url={idea.url} chrome={idea.chrome} className="h-full">
-                    <idea.App />
-                  </Window>
-                </motion.div>
-              ) : (
-                <motion.div key="empty" className="absolute inset-0 rounded-[18px] border border-dashed border-white/[0.08]" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.3 }} aria-hidden />
+                  <span className="text-text">Built from one sentence and what your company already has.</span>
+                  {!reduce && (
+                    <button type="button" onClick={again} className="flex items-center gap-1.5 text-[13px] text-[#A6BBFF] transition-colors hover:text-text">
+                      <RotateCcw size={13} aria-hidden />
+                      See it again
+                    </button>
+                  )}
+                </motion.p>
               )}
             </AnimatePresence>
-          </div>
-
-          {/* jump between ideas */}
-          <div role="tablist" aria-label="Ideas" className="mt-6 flex justify-center gap-1">
-            {IDEAS.map((x, n) => {
-              const on = n === i;
-              return (
-                <button
-                  key={x.label}
-                  type="button"
-                  role="tab"
-                  aria-selected={on}
-                  onClick={() => {
-                    setTouched(true);
-                    if (!on) go(n);
-                  }}
-                  className={`relative h-10 px-3.5 text-[14px] transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#009CFF] ${on ? "text-text" : "text-muted hover:text-text"}`}
-                >
-                  {x.label}
-                  {on && <motion.span layoutId="hero-idea" className="absolute inset-x-0 bottom-1 mx-auto h-[2px] w-5 rounded-full bg-[#A6BBFF]" />}
-                </button>
-              );
-            })}
           </div>
         </div>
       </div>

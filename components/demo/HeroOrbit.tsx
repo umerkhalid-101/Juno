@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { useReducedMotion } from "motion/react";
 import { BrandIcon } from "@/components/ui/BrandIcon";
 import { type ToolId } from "@/lib/story";
@@ -50,10 +50,14 @@ export function HeroOrbit({
   const pointer = useRef({ x: 0, y: 0, tx: 0, ty: 0 });
   const startedRef = useRef(started);
   const cbs = useRef({ onFocusPill, onDone });
+  // which task each chip shows; on phones three chips revolve and take turns through all six
+  const [shown, setShown] = useState(() => heroTasks.map((_, i) => i));
+  const shownRef = useRef(shown);
 
   useEffect(() => {
     startedRef.current = started;
     cbs.current = { onFocusPill, onDone };
+    shownRef.current = shown;
   });
 
   useEffect(() => {
@@ -95,18 +99,47 @@ export function HeroOrbit({
       const cx = w / 2;
       const cy = h / 2;
       let best = { work: 0, x: 0, y: 0, top: 0 };
+      // grown past phone size: every chip goes back to its own task
+      if (!mobile && shownRef.current.some((v, j) => v !== j)) {
+        const own = heroTasks.map((_, j) => j);
+        shownRef.current = own;
+        setShown(own);
+      }
       state.current.forEach((s, i) => {
         const node = pillEls.current[i];
         if (!node) return;
         // every chip keeps its place on the orbit, even while hidden, so they never bunch up
         if (startedRef.current && !reduce) s.a = (s.a + dt * speed.current * 0.13) % TAU;
-        // phones show two chips on opposite sides of the orbit, so they can never collide
-        if (mobile && i % 3 !== 0) {
+        // phones: three chips revolve as small icons (so they never collide) and open out at the front
+        if (mobile && i % 2 !== 0) {
           node.style.opacity = "0";
           return;
         }
         const depth = Math.sin(s.a); // 1 = front, -1 = back
         const k = (depth + 1) / 2;
+        if (mobile) {
+          node.dataset.compact = depth > 0.62 ? "false" : "true";
+          // right behind Juno, faded out, a chip becomes the next task nobody else is showing
+          if (startedRef.current && !reduce && depth < -0.93) {
+            if (!node.dataset.swapped) {
+              node.dataset.swapped = "true";
+              s.done = false;
+              node.dataset.done = "false";
+              const cur = shownRef.current;
+              const used = new Set(cur.filter((_, j) => j % 2 === 0));
+              let next = (cur[i] + 1) % COUNT;
+              while (used.has(next)) next = (next + 1) % COUNT;
+              const copy = [...cur];
+              copy[i] = next;
+              shownRef.current = copy;
+              setShown(copy);
+            }
+          } else if (node.dataset.swapped && depth > -0.6) {
+            delete node.dataset.swapped;
+          }
+        } else if (node.dataset.compact) {
+          delete node.dataset.compact;
+        }
         // Juno works the chip as it comes round the front: it leans in, fills, then flips to Done.
         const work = s.done ? 0 : Math.max(0, (depth - 0.6) / 0.37);
         const half = node.offsetWidth / 2 + 8;
@@ -115,7 +148,7 @@ export function HeroOrbit({
         if (!s.done && depth > 0.97) {
           s.done = true;
           node.dataset.done = "true";
-          if (startedRef.current && !reduce) cbs.current.onDone?.(heroTasks[i].text);
+          if (startedRef.current && !reduce) cbs.current.onDone?.(heroTasks[shownRef.current[i]].text);
         } else if (s.done && depth < -0.6) {
           s.done = false;
           node.dataset.done = "false";
@@ -125,7 +158,9 @@ export function HeroOrbit({
         node.style.setProperty("--work", String(wk));
         if (wk > best.work) best = { work: wk, x, y, top: y - node.offsetHeight / 2 };
         node.style.transform = `translate3d(${x}px, ${y}px, 0) translate(-50%, -50%) scale(${(0.78 + k * 0.22) * (mobile ? 0.86 : 1)})`;
-        node.style.opacity = startedRef.current ? String(0.16 + k * 0.84) : "0";
+        // phones fade a chip right out at the very back, where it changes task
+        const op = mobile ? (k < 0.12 ? (k / 0.12) * 0.45 : 0.45 + ((k - 0.12) / 0.88) * 0.55) : 0.16 + k * 0.84;
+        node.style.opacity = startedRef.current ? String(op) : "0";
         node.style.zIndex = depth > 0 ? "30" : "5";
         node.style.filter = depth < -0.1 ? `blur(${(-depth - 0.1) * 2.2}px)` : "none";
       });
@@ -184,7 +219,7 @@ export function HeroOrbit({
   }, [reduce]);
 
   return (
-    <div ref={box} className="relative h-[290px] w-full max-w-[1180px] md:h-[340px]">
+    <div ref={box} className="relative h-[352px] w-full max-w-[1180px] md:h-[340px]">
       {/* the orbit in perspective: back half dim, front half lit, a comet running round */}
       <svg aria-hidden className="pointer-events-none absolute inset-0 h-full w-full overflow-visible" preserveAspectRatio="none" viewBox="0 0 100 100">
         <defs>
@@ -223,9 +258,11 @@ export function HeroOrbit({
       <div className="absolute left-1/2 top-1/2 z-20 -translate-x-1/2 -translate-y-1/2">{children}</div>
 
       {/* tasks in orbit */}
-      {heroTasks.map((t, i) => (
+      {shown.map((ti, i) => {
+        const t = heroTasks[ti];
+        return (
         <div
-          key={t.text}
+          key={i}
           ref={(el) => {
             pillEls.current[i] = el;
           }}
@@ -241,13 +278,13 @@ export function HeroOrbit({
           }}
           className="orbit-chip group absolute left-0 top-0 opacity-0 will-change-transform"
         >
-          <div className="relative flex items-center gap-3 whitespace-nowrap rounded-[18px] bg-[linear-gradient(180deg,rgba(28,34,48,0.82),rgba(14,18,24,0.82))] py-2 pl-2 pr-3 backdrop-blur-xl">
+          <div className="relative flex items-center gap-3 whitespace-nowrap rounded-[18px] bg-[linear-gradient(180deg,rgba(28,34,48,0.82),rgba(14,18,24,0.82))] py-2 pl-2 pr-3 backdrop-blur-xl transition-[gap,padding] duration-500 ease-out group-data-[compact=true]:gap-0 group-data-[compact=true]:pr-2">
             {/* light edge: brighter on top, lit blue while Juno works it */}
             <span aria-hidden className="chip-edge pointer-events-none absolute inset-0 rounded-[18px]" />
             <BrandIcon id={t.tool} size={30} />
-            <span className="text-[13.5px] font-medium tracking-[-0.01em] text-text">{t.text}</span>
+            <span className="max-w-[240px] overflow-hidden text-[13.5px] font-medium tracking-[-0.01em] text-text transition-[max-width,opacity] duration-500 ease-out group-data-[compact=true]:max-w-0 group-data-[compact=true]:opacity-0">{t.text}</span>
             {/* status: a ring that fills while Juno works, then a check (snap) */}
-            <span className="relative mr-1 grid size-[18px] shrink-0 place-items-center" aria-hidden>
+            <span className="relative mr-1 grid size-[18px] shrink-0 place-items-center transition-[width,margin,opacity] duration-500 ease-out group-data-[compact=true]:mr-0 group-data-[compact=true]:w-0 group-data-[compact=true]:opacity-0" aria-hidden>
               <svg viewBox="0 0 20 20" width="18" height="18" className="absolute inset-0 -rotate-90 transition-opacity duration-[120ms] group-data-[done=true]:opacity-0" aria-hidden>
                 <circle cx="10" cy="10" r="8" fill="none" stroke="rgba(255,255,255,0.12)" strokeWidth="1.5" />
                 <circle cx="10" cy="10" r="8" fill="none" stroke="#7A8FFF" strokeWidth="1.5" strokeLinecap="round" pathLength={1} strokeDasharray="1" style={{ strokeDashoffset: "calc(1 - var(--work, 0))" }} />
@@ -258,7 +295,9 @@ export function HeroOrbit({
             </span>
           </div>
         </div>
-      ))}
+        );
+      })}
     </div>
   );
 }
+

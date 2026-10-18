@@ -843,49 +843,44 @@ export function ChAsk() {
   const boxRef = useRef<HTMLDivElement>(null);
   const inView = useInView(boxRef, { amount: 0.35 });
   const [idx, setIdx] = useState(0);
-  const [step, setStep] = useState<Step>(2);
-  const [sent, setSent] = useState(true); // your message has been sent from the composer
-  const [typed, setTyped] = useState(0); // characters typed into the composer
+  // nothing plays until the section is in view: an empty conversation waits for you
+  const [step, setStep] = useState<Step>(0);
+  const [sent, setSent] = useState(false); // your message has been sent into the conversation
   const juno = useRef<MascotApi>(null);
   const [hold, setHold] = useState(false);
   const [armed, setArmed] = useState(false);
   const task = tasks[idx];
 
   const pick = (i: number) => {
+    setArmed(true);
     setIdx(i);
     setStep(reduce ? 2 : 0);
-    setSent(!!reduce);
-    setTyped(0);
+    setSent(true);
   };
 
   // first time in view: start the first task from the top
   useEffect(() => {
-    if (!inView || armed || reduce) return;
+    if (!inView || armed) return;
     const t = window.setTimeout(() => {
       setArmed(true);
       pick(0);
-    }, 200);
+    }, reduce ? 0 : 300);
     return () => window.clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [inView, armed, reduce]);
 
-  // request lands, then Juno works through its steps one by one, then answers
+  // your request is sent in, then Juno reads its sources, then answers
   useEffect(() => {
+    if (!armed || !sent) return;
     if (step === 0) {
-      // type into the composer, send, then Juno starts reading
-      if (!sent) {
-        const done = typed >= task.you.length;
-        const t = window.setTimeout(() => (done ? setSent(true) : setTyped((n) => n + 2)), done ? 380 : 26);
-        return () => window.clearTimeout(t);
-      }
-      const t = window.setTimeout(() => setStep(1), 650);
+      const t = window.setTimeout(() => setStep(1), 350);
       return () => window.clearTimeout(t);
     }
     if (step === 1) {
-      const t = window.setTimeout(() => setStep(2), 1300);
+      const t = window.setTimeout(() => setStep(2), 650);
       return () => window.clearTimeout(t);
     }
-  }, [step, sent, typed, idx, task.you.length]);
+  }, [step, sent, armed, idx]);
 
   // Juno nods when the work is done
   useEffect(() => {
@@ -1033,23 +1028,14 @@ export function ChAsk() {
               </motion.div>
             </AnimatePresence>
 
-            {/* the composer: your request is typed here, then sent up into the conversation */}
+            {/* the composer */}
             <div className="relative z-10 mt-4 flex items-center gap-3 rounded-2xl border border-white/[0.1] bg-[#11151E] py-2 pl-4 pr-2 shadow-[0_-10px_30px_-20px_rgba(0,0,0,0.8)]">
               <p className="min-h-6 min-w-0 flex-1 truncate text-[14.5px] leading-6 md:text-[15px]">
-                {!sent && typed > 0 ? (
-                  <span className="text-text">
-                    {task.you.slice(0, typed)}
-                    <span aria-hidden className="caret ml-0.5 inline-block h-[1.05em] w-[2px] translate-y-[3px] bg-[#A6BBFF]" />
-                  </span>
-                ) : (
-                  <span className="text-subtle">Ask Juno anything</span>
-                )}
+                <span className="text-subtle">Ask Juno anything</span>
               </p>
               <span
                 aria-hidden
-                className={`grid size-9 shrink-0 place-items-center rounded-full transition-[background-color,color,transform] duration-200 ${
-                  !sent && typed >= task.you.length ? "scale-95 bg-[#F4F6F8] text-[#07090D]" : !sent && typed > 0 ? "bg-[#F4F6F8] text-[#07090D]" : "bg-white/[0.08] text-subtle"
-                }`}
+                className="grid size-9 shrink-0 place-items-center rounded-full bg-white/[0.08] text-subtle"
               >
                 <ArrowUp size={16} strokeWidth={2} />
               </span>
