@@ -109,7 +109,7 @@ export function HeroOrbit({
         const node = pillEls.current[i];
         if (!node) return;
         // every chip keeps its place on the orbit, even while hidden, so they never bunch up
-        if (startedRef.current && !reduce) s.a = (s.a + dt * speed.current * 0.13) % TAU;
+        if (startedRef.current && !reduce) s.a = (s.a + dt * speed.current * (mobile ? 0.2 : 0.13)) % TAU;
         // phones: three chips revolve as small icons (so they never collide) and open out at the front
         if (mobile && i % 2 !== 0) {
           node.style.opacity = "0";
@@ -118,7 +118,21 @@ export function HeroOrbit({
         const depth = Math.sin(s.a); // 1 = front, -1 = back
         const k = (depth + 1) / 2;
         if (mobile) {
-          node.dataset.compact = depth > 0.62 ? "false" : "true";
+          // the chip opens as it comes round to the front and closes as it leaves, frame by frame
+          const t = Math.min(1, Math.max(0, (depth - 0.55) / 0.35));
+          const e = t * t * (3 - 2 * t);
+          const row = node.firstElementChild as HTMLElement | null;
+          const label = node.querySelector<HTMLElement>("[data-label]");
+          const stat = node.querySelector<HTMLElement>("[data-stat]");
+          if (row && label && stat) {
+            label.style.maxWidth = `${e * label.scrollWidth}px`;
+            label.style.opacity = String(e);
+            stat.style.width = `${e * 18}px`;
+            stat.style.marginRight = `${e * 4}px`;
+            stat.style.opacity = String(e);
+            row.style.gap = `${e * 12}px`;
+            row.style.paddingRight = `${8 + e * 4}px`;
+          }
           // right behind Juno, faded out, a chip becomes the next task nobody else is showing
           if (startedRef.current && !reduce && depth < -0.93) {
             if (!node.dataset.swapped) {
@@ -137,9 +151,13 @@ export function HeroOrbit({
           } else if (node.dataset.swapped && depth > -0.6) {
             delete node.dataset.swapped;
           }
-        } else if (node.dataset.compact) {
-          delete node.dataset.compact;
+        } else if (node.dataset.opened !== "full") {
+          // desktop: chips are always fully open
+          node.dataset.opened = "full";
+          node.querySelectorAll<HTMLElement>("[data-label], [data-stat]").forEach((el) => el.removeAttribute("style"));
+          (node.firstElementChild as HTMLElement | null)?.removeAttribute("style");
         }
+        if (mobile) delete node.dataset.opened;
         // Juno works the chip as it comes round the front: it leans in, fills, then flips to Done.
         const work = s.done ? 0 : Math.max(0, (depth - 0.6) / 0.37);
         const half = node.offsetWidth / 2 + 8;
@@ -278,13 +296,13 @@ export function HeroOrbit({
           }}
           className="orbit-chip group absolute left-0 top-0 opacity-0 will-change-transform"
         >
-          <div className="relative flex items-center gap-3 whitespace-nowrap rounded-[18px] bg-[linear-gradient(180deg,rgba(28,34,48,0.82),rgba(14,18,24,0.82))] py-2 pl-2 pr-3 backdrop-blur-xl transition-[gap,padding] duration-500 ease-out group-data-[compact=true]:gap-0 group-data-[compact=true]:pr-2">
+          <div className="relative flex items-center gap-3 whitespace-nowrap rounded-[18px] bg-[linear-gradient(180deg,rgba(28,34,48,0.82),rgba(14,18,24,0.82))] py-2 pl-2 pr-3 backdrop-blur-xl">
             {/* light edge: brighter on top, lit blue while Juno works it */}
             <span aria-hidden className="chip-edge pointer-events-none absolute inset-0 rounded-[18px]" />
             <BrandIcon id={t.tool} size={30} />
-            <span className="max-w-[240px] overflow-hidden text-[13.5px] font-medium tracking-[-0.01em] text-text transition-[max-width,opacity] duration-500 ease-out group-data-[compact=true]:max-w-0 group-data-[compact=true]:opacity-0">{t.text}</span>
+            <span data-label className="overflow-hidden text-[13.5px] font-medium tracking-[-0.01em] text-text">{t.text}</span>
             {/* status: a ring that fills while Juno works, then a check (snap) */}
-            <span className="relative mr-1 grid size-[18px] shrink-0 place-items-center transition-[width,margin,opacity] duration-500 ease-out group-data-[compact=true]:mr-0 group-data-[compact=true]:w-0 group-data-[compact=true]:opacity-0" aria-hidden>
+            <span data-stat className="relative mr-1 grid size-[18px] shrink-0 place-items-center" aria-hidden>
               <svg viewBox="0 0 20 20" width="18" height="18" className="absolute inset-0 -rotate-90 transition-opacity duration-[120ms] group-data-[done=true]:opacity-0" aria-hidden>
                 <circle cx="10" cy="10" r="8" fill="none" stroke="rgba(255,255,255,0.12)" strokeWidth="1.5" />
                 <circle cx="10" cy="10" r="8" fill="none" stroke="#7A8FFF" strokeWidth="1.5" strokeLinecap="round" pathLength={1} strokeDasharray="1" style={{ strokeDashoffset: "calc(1 - var(--work, 0))" }} />
