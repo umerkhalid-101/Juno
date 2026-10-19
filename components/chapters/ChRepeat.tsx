@@ -28,15 +28,17 @@ type Lane = {
   reads: ToolId[];
   sends: string;
   sendsTo: ToolId;
+  /** what the run leaves behind, shown on its pill once it's done */
+  done: string;
   days: (week: number) => number[];
 };
 
 const lanes: Lane[] = [
-  { id: "growth", icon: LineChart, name: "Growth pulse", when: "Mondays, 9:00 AM", reads: ["hubspot", "linear"], sends: "#leadership", sendsTo: "slack", days: () => [0] },
-  { id: "comp", icon: Eye, name: "Competitor watch", when: "Wednesdays, 2:00 PM", reads: ["drive", "notion"], sends: "#product", sendsTo: "slack", days: () => [2] },
-  { id: "blog", icon: BookOpen, name: "Blog post", when: "Thursdays, 10:00 AM", reads: ["notion", "figma"], sends: "Draft in Notion", sendsTo: "notion", days: () => [3] },
-  { id: "voice", icon: MessageSquareQuote, name: "Customer voice", when: "Fridays, 4:00 PM", reads: ["intercom", "gmail"], sends: "#customers", sendsTo: "slack", days: () => [4] },
-  { id: "inv", icon: Mail, name: "Investor update", when: "1st of every month", reads: ["hubspot", "drive"], sends: "Investors, by email", sendsTo: "gmail", days: (w) => (w % 4 === 0 ? [0] : []) },
+  { id: "growth", icon: LineChart, name: "Growth pulse", when: "Mondays, 9:00 AM", reads: ["hubspot", "linear"], sends: "#leadership", sendsTo: "slack", done: "Posted", days: () => [0] },
+  { id: "comp", icon: Eye, name: "Competitor watch", when: "When a rival ships", reads: ["drive", "notion"], sends: "#product", sendsTo: "slack", done: "Briefed", days: (w) => (w % 4 === 3 ? [] : w % 3 === 1 ? [1] : [2]) },
+  { id: "blog", icon: BookOpen, name: "Blog post", when: "Every other Thursday, 10:00 AM", reads: ["notion", "figma"], sends: "Draft in Notion", sendsTo: "notion", done: "Drafted", days: (w) => (w % 2 ? [] : [3]) },
+  { id: "voice", icon: MessageSquareQuote, name: "Customer voice", when: "Fridays, 4:00 PM", reads: ["intercom", "gmail"], sends: "#customers", sendsTo: "slack", done: "Shared", days: () => [4] },
+  { id: "inv", icon: Mail, name: "Investor update", when: "1st of every month", reads: ["hubspot", "drive"], sends: "Investors, by email", sendsTo: "gmail", done: "Emailed", days: (w) => (w % 4 === 0 ? [0] : []) },
 ];
 
 const WEEKS = 12;
@@ -58,7 +60,9 @@ const pick = <T,>(arr: T[], i: number) => arr[((i % arr.length) + arr.length) % 
 type Pill = { key: string; lane: number; week: number; day: number; x: number };
 const pills: Pill[] = [];
 lanes.forEach((l, li) => {
-  for (let w = 0; w < WEEKS; w++) l.days(w).forEach((d) => pills.push({ key: `${l.id}-${w}-${d}`, lane: li, week: w, day: d, x: w * WEEK_W + d * DAY_W + 6 }));
+  // each run lands at its own time of day, so deliveries come at uneven intervals
+  const jitter = (w: number) => Math.round((Math.abs(Math.sin(w * 12.9898 + li * 78.233) * 43758.5453) % 1) * 34) - 10;
+  for (let w = 0; w < WEEKS; w++) l.days(w).forEach((d) => pills.push({ key: `${l.id}-${w}-${d}`, lane: li, week: w, day: d, x: w * WEEK_W + d * DAY_W + 6 + jitter(w) }));
 });
 const TRACK = WEEKS * WEEK_W;
 
@@ -261,7 +265,8 @@ export function ChRepeat() {
       const dt = Math.min(0.05, (t - last) / 1000);
       last = t;
       if (flowing && !hold.current && !reduce && xRef.current !== null) {
-        xRef.current -= SPEED * dt;
+        // time doesn't tick evenly: the pace drifts between quiet stretches and busy ones
+        xRef.current -= SPEED * (0.7 + 0.6 * (0.5 + 0.5 * Math.sin(t / 2600) * Math.cos(t / 4100))) * dt;
         if (xRef.current <= now() - TRACK) xRef.current += TRACK;
       }
       paint(flowing);
@@ -379,7 +384,7 @@ export function ChRepeat() {
                         >
                           <Icon size={13} strokeWidth={1.75} aria-hidden />
                           <span className="flex max-w-0 items-center gap-1 overflow-hidden whitespace-nowrap opacity-0 transition-[max-width,opacity,margin] duration-500 group-data-[done=true]:ml-1.5 group-data-[done=true]:max-w-[110px] group-data-[done=true]:opacity-100">
-                            Sent
+                            {lanes[p.lane].done}
                             <Check size={12} strokeWidth={2.5} className="text-[#A6BBFF]" aria-hidden />
                           </span>
                         </span>
@@ -407,7 +412,7 @@ export function ChRepeat() {
             <div>
               <p className="mb-3 flex items-center gap-2 text-[13px] text-muted">
                 <span className="size-1.5 rounded-full bg-success" />
-                Just delivered
+                Just done
               </p>
               <div className="relative h-[200px]">
                 <AnimatePresence mode="popLayout" initial={false}>
@@ -462,7 +467,7 @@ export function ChRepeat() {
             <div className="flex gap-10">
               <span>
                 <span className="block text-[30px] font-semibold leading-none tracking-[-0.03em] tabular-nums text-text">{delivered}</span>
-                <span className="text-[13px] text-muted">reports sent</span>
+                <span className="text-[13px] text-muted">runs handled</span>
               </span>
               <span>
                 <span className="block text-[30px] font-semibold leading-none tracking-[-0.03em] tabular-nums text-text">{hours}h</span>

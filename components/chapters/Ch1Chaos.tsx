@@ -76,7 +76,9 @@ export function Ch1Chaos() {
       tl.to({}, { duration: 0.4 });
       return tl;
     },
-    { pin: false, start: "top 65%", end: "bottom 10%", mobileEnd: "bottom 25%" },
+    // the pile finishes building while the whole section is still on screen, so nothing is
+    // still moving once you have scrolled on (tall screens included)
+    { pin: false, start: "top 70%", end: "bottom 85%", mobileEnd: "bottom 80%" },
   );
 
   return (
